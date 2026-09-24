@@ -1,0 +1,7 @@
+# Proyecto generado por XcodeGen (se regenera con `xcodegen generate`)
+Brewly.xcodeproj/
+Brewly/Info.plist
+Brewly/Brewly.entitlements
+# Secretos locales
+Brewly/Config/Secrets.xcconfig
+.swiftpm/

@@ -1,0 +1,7 @@
+// Configuración compartida. Los secretos se incluyen desde Secrets.xcconfig
+// (copia Secrets.example.xcconfig → Secrets.xcconfig; no se versiona).
+#include? "Secrets.xcconfig"
+
+// En xcconfig "//" inicia un comentario: la URL se arma con una variable SLASH.
+SLASH = /
+SUPABASE_URL = $(SUPABASE_URL_SCHEME):$(SLASH)$(SLASH)$(SUPABASE_HOST)

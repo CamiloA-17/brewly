@@ -1,0 +1,20 @@
+# Configuración mínima para la CLI de Supabase (`supabase start`, `supabase db push`).
+# Los valores no listados usan los predeterminados de la CLI.
+project_id = "brewly"
+
+[api]
+schemas = ["public"]
+max_rows = 100
+
+[auth]
+site_url = "brewly://auth-callback"
+additional_redirect_urls = ["brewly://auth-callback"]
+
+[auth.external.apple]
+enabled = true
+client_id = "env(APPLE_BUNDLE_ID)"
+secret = "env(APPLE_SIGNIN_SECRET)"
+
+[functions.send-push]
+# La autenticación la hace el header x-webhook-secret del Database Webhook.
+verify_jwt = false
