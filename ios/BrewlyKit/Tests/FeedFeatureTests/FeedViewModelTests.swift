@@ -82,9 +82,15 @@ struct EmptyBeanRepository: BeanRepository {
     func delete(id: UUID) async throws {}
 }
 
+struct StubNotificationRepository: NotificationRepository {
+    func notifications(cursor: String?) async throws -> PagedResult<AppNotification> { PagedResult(items: [], nextCursor: nil) }
+    func unreadCount() async throws -> Int { 3 }
+    func markAllRead() async throws {}
+}
+
 func makeDependencies(_ posts: FakePostRepository, currentUserID: UUID = ana.id) -> FeedDependencies {
     FeedDependencies(
-        posts: posts, recipes: EmptyRecipeRepository(), beans: EmptyBeanRepository(),
+        posts: posts, notifications: StubNotificationRepository(), recipes: EmptyRecipeRepository(), beans: EmptyBeanRepository(),
         catalog: EmptyCatalogRepository(), currentUserID: currentUserID
     )
 }
@@ -114,6 +120,14 @@ struct FeedViewModelTests {
         #expect(model.paginator.state.value?.first?.isLiked == false)
         #expect(model.paginator.state.value?.first?.likeCount == 2)
         #expect(model.errorMessage != nil)
+    }
+
+    @Test("The bell shows the unread count")
+    func unread() async {
+        let model = FeedViewModel(dependencies: makeDependencies(FakePostRepository(post: Post(id: UUID(), author: leo))))
+        #expect(model.unreadCount == 0)
+        await model.refreshUnreadCount()
+        #expect(model.unreadCount == 3)
     }
 
     @Test("A new post shows at the top")

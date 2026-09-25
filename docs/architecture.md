@@ -56,7 +56,7 @@ XcodeGen (`ios/project.yml`) only contains `BrewlyApp.swift` and assets.
 ```mermaid
 flowchart TD
     subgraph Presentation
-        Features["Feature modules<br/>Auth · Beans · Recipes · Methods · Feed · Profile · People<br/>SwiftUI views + @Observable view models"]
+        Features["Feature modules<br/>Auth · Beans · Recipes · Methods · Feed · Profile · People · Notifications<br/>SwiftUI views + @Observable view models"]
         DS["BrewlyDesignSystem<br/>theme · components · localization"]
     end
     Domain["BrewlyDomain<br/>entities · repository protocols · use cases"]
@@ -113,7 +113,7 @@ flowchart LR
 ```
 
 - One folder per feature (`Features/Auth`, `Users`, `Catalog`, `Beans`, `Recipes`, `People`,
-  `Media`, `Posts`).
+  `Media`, `Posts`, `Notifications`).
 - **SQL-first.** The schema is owned by the migrations in `database/`; Fluent is used only for
   configuration and connection pooling (no Fluent models or migrations). Repositories write
   explicit SQL so PostgreSQL features (generated columns, composite keys, the
@@ -164,8 +164,9 @@ sequenceDiagram
 1. **Now: architecture and skeleton.** Schema, shared package, API for auth, catalogs, beans and
    recipes, and the iOS app with navigation and bean/recipe screens.
 2. **Social:** profiles of other users, follow, saving and remixing (forking) recipes, feed
-   (followed users + explore), posts with photos, likes and comments *(done)*; in-app
-   notifications (next), push notifications with APNs.
+   (followed users + explore), posts with photos, likes, comments and in-app notifications
+   *(done)*. Next: push notifications with APNs (a `device_tokens` table and a sender called
+   from `NotificationWriter`, which already runs for every notification).
 3. **Trust and safety:** report and block in the UI (App Store Guideline 1.2), moderation queue.
 4. **More:** Sign in with Apple, search (`pg_trgm`), guided brew timer that plays recipe steps,
    offline cache, more languages.

@@ -318,6 +318,13 @@ struct PostgresPostRepository: PostRepository {
                 SELECT id, \(bind: userID) FROM target
                 ON CONFLICT DO NOTHING
                 RETURNING post_id
+            ),
+            notified AS (
+                INSERT INTO notifications (recipient_id, actor_id, kind, post_id)
+                SELECT p.author_id, \(bind: userID), 'post_like', p.id
+                FROM inserted i JOIN posts p ON p.id = i.post_id
+                WHERE p.author_id <> \(bind: userID)
+                ON CONFLICT DO NOTHING
             )
             SELECT ((SELECT count(*) FROM post_likes l WHERE l.post_id = t.id)
                     + (SELECT count(*) FROM inserted))::int AS like_count
@@ -330,6 +337,10 @@ struct PostgresPostRepository: PostRepository {
             WITH deleted AS (
                 DELETE FROM post_likes WHERE post_id = \(bind: postID) AND user_id = \(bind: userID)
                 RETURNING post_id
+            ),
+            retracted AS (
+                DELETE FROM notifications
+                WHERE kind = 'post_like' AND actor_id = \(bind: userID) AND post_id = \(bind: postID)
             )
             SELECT ((SELECT count(*) FROM post_likes l WHERE l.post_id = \(bind: postID))
                     - (SELECT count(*) FROM deleted))::int AS like_count
@@ -382,6 +393,7 @@ struct PostgresPostRepository: PostRepository {
                 """).first()
             else { throw AppError(status: .internalServerError, code: APIErrorCode.internalError, message: "Comment was not created.") }
             let id = try inserted.decode(column: "id", as: UUID.self)
+            try await NotificationWriter.commentAdded(commentID: id, sql: sql)
             return try await sql.raw("""
                 WITH viewer AS (SELECT \(bind: authorID)::uuid AS viewer_id)
                 \(unsafeRaw: Self.commentSelect)

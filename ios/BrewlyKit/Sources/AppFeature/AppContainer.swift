@@ -7,6 +7,7 @@ import BrewlyNetworking
 import FeedFeature
 import Foundation
 import MethodsFeature
+import NotificationsFeature
 import PeopleFeature
 import ProfileFeature
 import RecipesFeature
@@ -27,6 +28,7 @@ public final class AppContainer {
     let people: any PeopleRepository
     let posts: any PostRepository
     let imageLoader: any ImageLoader
+    let notifications: any NotificationRepository
 
     public init(apiBaseURL: URL, tokenStore: any TokenStore = KeychainTokenStore()) {
         let publicClient = APIClient(baseURL: apiBaseURL)
@@ -45,10 +47,11 @@ public final class AppContainer {
         people = APIPeopleRepository(client: client)
         posts = APIPostRepository(client: client)
         imageLoader = APIImageLoader(client: client)
+        notifications = APINotificationRepository(client: client)
     }
 
     func feedDependencies(currentUserID: UUID) -> FeedDependencies {
-        FeedDependencies(posts: posts, recipes: recipes, beans: beans, catalog: catalog, currentUserID: currentUserID)
+        FeedDependencies(posts: posts, notifications: notifications, recipes: recipes, beans: beans, catalog: catalog, currentUserID: currentUserID)
     }
 
     var authDependencies: AuthDependencies {
@@ -91,6 +94,8 @@ public final class AppContainer {
                 AnyView(MemberProfileView(memberID: id, dependencies: peopleDependencies))
             case let .recipe(id):
                 AnyView(RecipeDetailView(recipeID: id, dependencies: recipesDependencies(currentUserID: currentUserID)))
+            case .notifications:
+                AnyView(NotificationsView(dependencies: NotificationsDependencies(notifications: notifications)))
             case let .post(id):
                 AnyView(PostDetailView(postID: id, dependencies: feedDependencies(currentUserID: currentUserID)))
             case .memberSearch:

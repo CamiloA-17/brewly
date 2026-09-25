@@ -7,6 +7,7 @@ import UIKit
 public struct FeedView: View {
     @State private var model: FeedViewModel
     @State private var isComposing = false
+    @Environment(\.scenePhase) private var scenePhase
 
     public init(dependencies: FeedDependencies) {
         _model = State(initialValue: FeedViewModel(dependencies: dependencies))
@@ -43,6 +44,13 @@ public struct FeedView: View {
                     }
                 }
                 ToolbarItem(placement: .primaryAction) {
+                    NavigationLink(value: AppRoute.notifications) {
+                        Image(systemName: model.unreadCount > 0 ? "bell.badge" : "bell")
+                            .symbolRenderingMode(model.unreadCount > 0 ? .multicolor : .monochrome)
+                            .accessibilityLabel(notificationsLabel)
+                    }
+                }
+                ToolbarItem(placement: .primaryAction) {
                     Button {
                         isComposing = true
                     } label: {
@@ -61,10 +69,25 @@ public struct FeedView: View {
             }
             .appRouteDestinations()
             .task { await model.load() }
+            // Also runs when coming back from the notifications list.
+            .onAppear {
+                Task { await model.refreshUnreadCount() }
+            }
+            .onChange(of: scenePhase) {
+                if scenePhase == .active {
+                    Task { await model.refreshUnreadCount() }
+                }
+            }
             .onChange(of: model.scope) {
                 Task { await model.reload() }
             }
         }
+    }
+
+    private var notificationsLabel: Text {
+        model.unreadCount > 0
+            ? Text("Notifications, \(model.unreadCount) new", bundle: .module)
+            : Text("Notifications", bundle: .module)
     }
 
     @ViewBuilder

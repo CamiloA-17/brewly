@@ -11,6 +11,7 @@ public enum AppRoute: Hashable, Sendable {
     case memberSearch
     case followers(of: UUID)
     case following(of: UUID)
+    case notifications
 }
 
 /// Builds the view for each `AppRoute`.

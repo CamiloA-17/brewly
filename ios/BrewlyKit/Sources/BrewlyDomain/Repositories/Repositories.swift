@@ -95,3 +95,11 @@ public protocol PostRepository: Sendable {
 public protocol ImageLoader: Sendable {
     func imageData(for url: URL) async throws -> Data
 }
+
+/// The signed-in user's notifications.
+public protocol NotificationRepository: Sendable {
+    /// Newest first.
+    func notifications(cursor: String?) async throws -> PagedResult<AppNotification>
+    func unreadCount() async throws -> Int
+    func markAllRead() async throws
+}

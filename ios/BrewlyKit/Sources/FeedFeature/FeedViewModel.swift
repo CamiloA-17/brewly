@@ -17,6 +17,8 @@ final class FeedViewModel {
     private(set) var paginator: Paginator<Post>
     private(set) var catalog: Catalog = .empty
     private(set) var errorMessage: String?
+    /// Notifications the user hasn't seen, for the bell's badge.
+    private(set) var unreadCount = 0
 
     let dependencies: FeedDependencies
 
@@ -30,6 +32,13 @@ final class FeedViewModel {
             catalog = loaded
         }
         await paginator.load()
+    }
+
+    /// Keeps the previous count when offline.
+    func refreshUnreadCount() async {
+        if let count = try? await dependencies.notifications.unreadCount() {
+            unreadCount = count
+        }
     }
 
     /// Shows the posts of the selected scope.

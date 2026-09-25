@@ -175,6 +175,16 @@ public enum Endpoints {
         Endpoint(.delete, "v1/comments/\(id.uuidString)")
     }
 
+    // MARK: Notifications
+
+    public static func notifications(cursor: String?) -> Endpoint<Page<NotificationDTO>> {
+        Endpoint(.get, "v1/me/notifications", queryItems: queryItems(["cursor": cursor]))
+    }
+
+    public static let unreadNotificationCount = Endpoint<UnreadCountDTO>(.get, "v1/me/notifications/unread-count")
+
+    public static let markNotificationsRead = Endpoint<EmptyResponse>(.post, "v1/me/notifications/read")
+
     // MARK: People
 
     public static func searchUsers(query: String) -> Endpoint<[UserSummaryDTO]> {

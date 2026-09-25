@@ -481,6 +481,83 @@ final class IntegrationTests: XCTestCase {
         })
     }
 
+    // MARK: - Notifications
+
+    func testNotificationsForSocialActions() async throws {
+        let ana = try await register("ana.barista")
+        let leo = try await register("leo.roaster")
+        let bean: BeanDTO = try await send(.POST, "v1/beans", token: ana.accessToken, body: Self.geisha)
+        let leoBean: BeanDTO = try await send(.POST, "v1/beans", token: leo.accessToken, body: Self.geisha)
+        let recipe: RecipeDTO = try await send(.POST, "v1/recipes", token: ana.accessToken, body: Self.v60(beanID: bean.id))
+        let post: PostDTO = try await send(.POST, "v1/posts", token: ana.accessToken,
+            body: CreatePostRequest(body: "Morning V60", recipeId: recipe.id))
+
+        // Follow, like and save; undoing and redoing a like notifies once.
+        let _: FollowStateDTO = try await send(.PUT, "v1/users/\(ana.user.id)/follow", token: leo.accessToken)
+        let _: LikeStateDTO = try await send(.PUT, "v1/posts/\(post.id)/like", token: leo.accessToken)
+        let _: LikeStateDTO = try await send(.DELETE, "v1/posts/\(post.id)/like", token: leo.accessToken)
+        let _: LikeStateDTO = try await send(.PUT, "v1/posts/\(post.id)/like", token: leo.accessToken)
+        let _: SaveStateDTO = try await send(.PUT, "v1/recipes/\(recipe.id)/save", token: leo.accessToken)
+        // Ana's own like and comment don't notify her.
+        let _: LikeStateDTO = try await send(.PUT, "v1/posts/\(post.id)/like", token: ana.accessToken)
+        let question: CommentDTO = try await send(.POST, "v1/posts/\(post.id)/comments", token: leo.accessToken,
+            body: CreateCommentRequest(body: "What grinder?"))
+        let _: CommentDTO = try await send(.POST, "v1/posts/\(post.id)/comments", token: ana.accessToken,
+            body: CreateCommentRequest(body: "Comandante", parentId: question.id))
+        var remix = Self.v60(beanID: leoBean.id)
+        remix.forkedFromId = recipe.id
+        let remixed: RecipeDTO = try await send(.POST, "v1/recipes", token: leo.accessToken, body: remix)
+
+        let unread: UnreadCountDTO = try await send(.GET, "v1/me/notifications/unread-count", token: ana.accessToken)
+        XCTAssertEqual(unread.count, 5)
+        let anaInbox: BrewlyAPI.Page<NotificationDTO> = try await send(.GET, "v1/me/notifications", token: ana.accessToken)
+        XCTAssertEqual(anaInbox.items.map(\.kind), [.recipeFork, .comment, .recipeSave, .postLike, .follow])
+        XCTAssertTrue(anaInbox.items.allSatisfy { $0.actor.id == leo.user.id && !$0.isRead })
+        XCTAssertEqual(anaInbox.items.first?.recipeId, remixed.id)
+        XCTAssertEqual(anaInbox.items[1].commentExcerpt, "What grinder?")
+        XCTAssertEqual(anaInbox.items[1].postExcerpt, "Morning V60")
+
+        // Leo gets the reply to his comment.
+        let leoInbox: BrewlyAPI.Page<NotificationDTO> = try await send(.GET, "v1/me/notifications", token: leo.accessToken)
+        XCTAssertEqual(leoInbox.items.map(\.kind), [.commentReply])
+
+        try await expectStatus(.POST, "v1/me/notifications/read", token: ana.accessToken, status: .noContent)
+        let afterRead: UnreadCountDTO = try await send(.GET, "v1/me/notifications/unread-count", token: ana.accessToken)
+        XCTAssertEqual(afterRead.count, 0)
+
+        // Undoing a follow removes its notification.
+        let _: FollowStateDTO = try await send(.DELETE, "v1/users/\(ana.user.id)/follow", token: leo.accessToken)
+        let final: BrewlyAPI.Page<NotificationDTO> = try await send(.GET, "v1/me/notifications?limit=2", token: ana.accessToken)
+        XCTAssertEqual(final.items.map(\.kind), [.recipeFork, .comment])
+        let cursor = try XCTUnwrap(final.nextCursor)
+        let rest: BrewlyAPI.Page<NotificationDTO> = try await send(
+            .GET, "v1/me/notifications?limit=2&cursor=\(cursor)", token: ana.accessToken)
+        XCTAssertEqual(rest.items.map(\.kind), [.recipeSave, .postLike])
+    }
+
+    func testPrivateRemixesAndBlockedMembersDontNotify() async throws {
+        let ana = try await register("ana.barista")
+        let leo = try await register("leo.roaster")
+        let bean: BeanDTO = try await send(.POST, "v1/beans", token: ana.accessToken, body: Self.geisha)
+        let leoBean: BeanDTO = try await send(.POST, "v1/beans", token: leo.accessToken, body: Self.geisha)
+        let recipe: RecipeDTO = try await send(.POST, "v1/recipes", token: ana.accessToken, body: Self.v60(beanID: bean.id))
+
+        var remix = Self.v60(beanID: leoBean.id)
+        remix.forkedFromId = recipe.id
+        remix.visibility = .private
+        let _: RecipeDTO = try await send(.POST, "v1/recipes", token: leo.accessToken, body: remix)
+        let _: SaveStateDTO = try await send(.PUT, "v1/recipes/\(recipe.id)/save", token: leo.accessToken)
+
+        // After a block, the existing notification is hidden.
+        try await app.db.sql.raw("""
+            INSERT INTO user_blocks (blocker_id, blocked_id) VALUES (\(bind: ana.user.id), \(bind: leo.user.id))
+            """).run()
+        let inbox: BrewlyAPI.Page<NotificationDTO> = try await send(.GET, "v1/me/notifications", token: ana.accessToken)
+        XCTAssertTrue(inbox.items.isEmpty)
+        let unread: UnreadCountDTO = try await send(.GET, "v1/me/notifications/unread-count", token: ana.accessToken)
+        XCTAssertEqual(unread.count, 0)
+    }
+
     // MARK: - Fixtures
 
     private static let geisha = UpsertBeanRequest(

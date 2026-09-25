@@ -221,6 +221,56 @@
         }
       }
     },
+    "Notifications": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Notificaciones"
+          }
+        }
+      }
+    },
+    "Notifications, %lld new": {
+      "localizations": {
+        "en": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Notifications, %lld new"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Notifications, %lld new"
+                }
+              }
+            }
+          }
+        },
+        "es": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Notificaciones, %lld nueva"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Notificaciones, %lld nuevas"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "Photos": {
       "localizations": {
         "es": {
