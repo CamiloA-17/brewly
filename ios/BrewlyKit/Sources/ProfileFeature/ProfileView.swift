@@ -121,6 +121,10 @@ public struct ProfileView: View {
                     }
 
                     Section {
+                        AppearancePicker()
+                    }
+
+                    Section {
                         if let email = user.email {
                             LabeledContent {
                                 Text(email)

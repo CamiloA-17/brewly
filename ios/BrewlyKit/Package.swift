@@ -71,6 +71,7 @@ let package = Package(
         // MARK: Tests
         .testTarget(name: "BrewlyDomainTests", dependencies: ["BrewlyDomain"]),
         .testTarget(name: "BrewlyNetworkingTests", dependencies: ["BrewlyNetworking"]),
+        .testTarget(name: "BrewlyDesignSystemTests", dependencies: ["BrewlyDesignSystem"]),
         .testTarget(name: "BrewlyDataTests", dependencies: ["BrewlyData", "BrewlyDomain", "BrewlyNetworking"]),
         .testTarget(name: "BeansFeatureTests", dependencies: ["BeansFeature", "BrewlyDomain"]),
         .testTarget(name: "RecipesFeatureTests", dependencies: ["RecipesFeature", "BrewlyDomain"]),

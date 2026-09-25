@@ -11,6 +11,8 @@ public extension Color {
     static let brewlyCard = Color(light: 0xF8F1EA, dark: 0x2A211C)
     /// Secondary tint for badges.
     static let brewlyCrema = Color(light: 0xEAD7C3, dark: 0x4A382D)
+    /// Validation and error messages, readable on light and dark backgrounds.
+    static let brewlyError = Color(light: 0xB3261E, dark: 0xF2B8B5)
 
     init(light: UInt32, dark: UInt32) {
         self.init(uiColor: UIColor { traits in

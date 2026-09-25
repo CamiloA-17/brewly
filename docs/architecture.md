@@ -85,6 +85,10 @@ flowchart TD
 - **Networking.** `APIClient` sends typed `Endpoint<Response>` values with async/await. On a 401
   it asks `SessionManager` (an actor) for a new access token and retries once; concurrent
   refreshes share a single request.
+- **Appearance.** Every color in `BrewlyDesignSystem` has a light and a dark value. The app
+  follows the device setting by default; Profile → Appearance lets the user force light or dark.
+  The choice is stored per device (`@AppStorage`) and applied to the app's windows, so sheets and
+  alerts follow it too.
 - **Localization.** English is the development language and every module ships a String Catalog
   with Spanish translations. Catalog items arrive from the API with canonical English names and
   are translated by `BrewlyDesignSystem`; countries are localized from their ISO code.
