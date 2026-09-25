@@ -66,6 +66,6 @@ The database checks need Docker and the `psql` client (`brew install libpq`, the
 ```bash
 make db-up && make db-test
 make shared-test
-TEST_DATABASE_URL=postgres://brewly:brewly@localhost:5432/brewly_test make server-test
+TEST_DATABASE_URL=postgres://<user>:<password>@localhost:5432/brewly_test make server-test
 make ios-project && make ios-test
 ```

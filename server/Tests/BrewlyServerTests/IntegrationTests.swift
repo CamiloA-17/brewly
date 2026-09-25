@@ -6,9 +6,10 @@ import XCTVapor
 
 /// End-to-end tests against a real, migrated PostgreSQL database.
 ///
-/// They run only when `TEST_DATABASE_URL` is set, because every test truncates all user data:
+/// They run only when `TEST_DATABASE_URL` is set, because every test truncates all user data.
+/// Tokens are signed with the `JWT_SECRET` of the environment (`make server-test` loads it from `.env`):
 ///
-///     TEST_DATABASE_URL=postgres://brewly:brewly@localhost:5432/brewly_test swift test
+///     TEST_DATABASE_URL=postgres://<user>:<password>@localhost:5432/brewly_test make server-test
 final class IntegrationTests: XCTestCase {
     private var app: Application!
 
@@ -16,8 +17,10 @@ final class IntegrationTests: XCTestCase {
         guard let url = ProcessInfo.processInfo.environment["TEST_DATABASE_URL"], !url.isEmpty else {
             throw XCTSkip("Set TEST_DATABASE_URL to run integration tests.")
         }
+        guard let secret = ProcessInfo.processInfo.environment["JWT_SECRET"], secret.count >= 32 else {
+            throw ConfigurationError("Set JWT_SECRET (at least 32 characters) to run integration tests.")
+        }
         setenv("DATABASE_URL", url, 1)
-        setenv("JWT_SECRET", "integration-tests-secret-that-is-long-enough", 1)
 
         app = try await Application.make(.testing)
         try await configure(app)

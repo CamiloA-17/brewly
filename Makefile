@@ -42,7 +42,7 @@ shared-test: ## Test the shared Swift package
 server-run: ## Run the API on http://localhost:8080
 	swift run --package-path server BrewlyServer serve --hostname 0.0.0.0 --port 8080
 
-server-test: ## Test the API (integration tests need DATABASE_URL)
+server-test: ## Test the API (integration tests need TEST_DATABASE_URL and JWT_SECRET)
 	swift test --package-path server
 
 ios-project: ## Generate ios/Brewly.xcodeproj with XcodeGen

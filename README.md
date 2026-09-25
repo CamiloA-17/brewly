@@ -71,7 +71,7 @@ Run the **Brewly** scheme on an iOS simulator. Debug builds talk to `http://loca
 ```bash
 make db-test          # SQL tests (needs a migrated database)
 make shared-test      # shared package, runs on macOS and Linux
-TEST_DATABASE_URL=postgres://brewly:brewly@localhost:5432/brewly_test make server-test
+TEST_DATABASE_URL=postgres://<user>:<password>@localhost:5432/brewly_test make server-test
 make ios-test         # BrewlyKit on the newest iPhone simulator
 ```
 
