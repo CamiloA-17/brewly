@@ -92,8 +92,10 @@ jobs:
         uses: actions/cache@v4
         with:
           path: server/.build
-          key: server-${{ runner.os }}-${{ hashFiles('server/Package.swift', 'server/Package.resolved', 'shared/BrewlyShared/Package.swift') }}
-          restore-keys: server-${{ runner.os }}-
+          # The build directory stores absolute paths, so the key includes the checkout path
+          # (it changes when the repository is renamed).
+          key: server-${{ runner.os }}-${{ github.workspace }}-${{ hashFiles('server/Package.swift', 'server/Package.resolved', 'shared/BrewlyShared/Package.swift') }}
+          restore-keys: server-${{ runner.os }}-${{ github.workspace }}-
       - name: Build
         run: swift build --package-path server --build-tests
       - name: Test
