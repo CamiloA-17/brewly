@@ -83,7 +83,7 @@ public struct LikeState: Hashable, Sendable {
     }
 }
 
-public struct Comment: Identifiable, Hashable, Sendable {
+public struct PostComment: Identifiable, Hashable, Sendable {
     public var id: UUID
     public var postID: UUID
     /// The top-level comment this one replies to.

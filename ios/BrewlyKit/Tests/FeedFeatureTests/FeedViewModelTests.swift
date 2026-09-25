@@ -9,7 +9,7 @@ private let leo = UserSummary(id: UUID(), username: "leo.roaster", displayName: 
 /// An in-memory post with its comments; likes fail when `failing` is set.
 actor FakePostRepository: PostRepository {
     var post: Post
-    var comments: [Comment] = []
+    var comments: [PostComment] = []
     var failing = false
     private(set) var created: [PostDraft] = []
 
@@ -18,7 +18,7 @@ actor FakePostRepository: PostRepository {
     }
 
     func setFailing(_ failing: Bool) { self.failing = failing }
-    func setComments(_ comments: [Comment]) { self.comments = comments }
+    func setComments(_ comments: [PostComment]) { self.comments = comments }
 
     func feed(cursor: String?) async throws -> PagedResult<Post> { PagedResult(items: [post], nextCursor: nil) }
     func explore(cursor: String?) async throws -> PagedResult<Post> { PagedResult(items: [], nextCursor: nil) }
@@ -44,12 +44,12 @@ actor FakePostRepository: PostRepository {
         return LikeState(isLiked: false, likeCount: post.likeCount)
     }
 
-    func comments(postID: UUID, cursor: String?) async throws -> PagedResult<Comment> {
+    func comments(postID: UUID, cursor: String?) async throws -> PagedResult<PostComment> {
         PagedResult(items: comments, nextCursor: nil)
     }
 
-    func addComment(postID: UUID, body: String, parentID: UUID?) async throws -> Comment {
-        let comment = Comment(id: UUID(), postID: postID, parentID: parentID, author: ana, body: body, canDelete: true)
+    func addComment(postID: UUID, body: String, parentID: UUID?) async throws -> PostComment {
+        let comment = PostComment(id: UUID(), postID: postID, parentID: parentID, author: ana, body: body, canDelete: true)
         comments.append(comment)
         return comment
     }
@@ -168,9 +168,9 @@ struct PostDetailViewModelTests {
     @Test("Replies are shown under their comment")
     func threads() async {
         let postID = UUID()
-        let first = Comment(id: UUID(), postID: postID, author: leo, body: "What grinder?")
-        let second = Comment(id: UUID(), postID: postID, author: leo, body: "Lovely")
-        let reply = Comment(id: UUID(), postID: postID, parentID: first.id, author: ana, body: "Comandante")
+        let first = PostComment(id: UUID(), postID: postID, author: leo, body: "What grinder?")
+        let second = PostComment(id: UUID(), postID: postID, author: leo, body: "Lovely")
+        let reply = PostComment(id: UUID(), postID: postID, parentID: first.id, author: ana, body: "Comandante")
         let posts = FakePostRepository(post: Post(id: postID, author: ana, body: "V60", commentCount: 3))
         await posts.setComments([first, second, reply])
         let model = PostDetailViewModel(postID: postID, dependencies: makeDependencies(posts))
@@ -182,7 +182,7 @@ struct PostDetailViewModelTests {
     @Test("Sending a reply adds it and updates the count; deleting removes its thread")
     func sendAndDelete() async throws {
         let postID = UUID()
-        let first = Comment(id: UUID(), postID: postID, author: leo, body: "What grinder?", canDelete: true)
+        let first = PostComment(id: UUID(), postID: postID, author: leo, body: "What grinder?", canDelete: true)
         let posts = FakePostRepository(post: Post(id: postID, author: ana, body: "V60", commentCount: 1))
         await posts.setComments([first])
         let model = PostDetailViewModel(postID: postID, dependencies: makeDependencies(posts))

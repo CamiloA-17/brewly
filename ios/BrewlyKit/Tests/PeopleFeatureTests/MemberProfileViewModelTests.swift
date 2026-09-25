@@ -16,8 +16,8 @@ struct EmptyPostRepository: PostRepository {
     func delete(id: UUID) async throws {}
     func like(postID: UUID) async throws -> LikeState { LikeState(isLiked: true, likeCount: 1) }
     func unlike(postID: UUID) async throws -> LikeState { LikeState(isLiked: false, likeCount: 0) }
-    func comments(postID: UUID, cursor: String?) async throws -> PagedResult<Comment> { PagedResult(items: [], nextCursor: nil) }
-    func addComment(postID: UUID, body: String, parentID: UUID?) async throws -> Comment { throw DomainError.notFound }
+    func comments(postID: UUID, cursor: String?) async throws -> PagedResult<PostComment> { PagedResult(items: [], nextCursor: nil) }
+    func addComment(postID: UUID, body: String, parentID: UUID?) async throws -> PostComment { throw DomainError.notFound }
     func deleteComment(id: UUID) async throws {}
 }
 

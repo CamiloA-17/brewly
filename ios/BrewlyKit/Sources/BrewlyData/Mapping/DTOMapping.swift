@@ -175,7 +175,7 @@ extension LikeState {
     }
 }
 
-extension Comment {
+extension PostComment {
     init(_ dto: CommentDTO) {
         self.init(
             id: dto.id,

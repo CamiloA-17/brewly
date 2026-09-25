@@ -86,8 +86,8 @@ public protocol PostRepository: Sendable {
     func like(postID: UUID) async throws -> LikeState
     func unlike(postID: UUID) async throws -> LikeState
     /// Comments oldest first.
-    func comments(postID: UUID, cursor: String?) async throws -> PagedResult<Comment>
-    func addComment(postID: UUID, body: String, parentID: UUID?) async throws -> Comment
+    func comments(postID: UUID, cursor: String?) async throws -> PagedResult<PostComment>
+    func addComment(postID: UUID, body: String, parentID: UUID?) async throws -> PostComment
     func deleteComment(id: UUID) async throws
 }
 

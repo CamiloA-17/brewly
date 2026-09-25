@@ -8,10 +8,10 @@ import Observation
 final class PostDetailViewModel {
     private(set) var state: LoadState<Post> = .idle
     private(set) var catalog: Catalog = .empty
-    let comments: Paginator<Comment>
+    let comments: Paginator<PostComment>
     var newComment = ""
     /// The comment the new one replies to.
-    private(set) var replyingTo: Comment?
+    private(set) var replyingTo: PostComment?
     private(set) var isSending = false
     private(set) var errorMessage: String?
 
@@ -34,7 +34,7 @@ final class PostDetailViewModel {
     }
 
     /// Top-level comments in order, each followed by its replies.
-    var threadedComments: [Comment] {
+    var threadedComments: [PostComment] {
         let all = comments.state.value ?? []
         let loadedIDs = Set(all.map(\.id))
         let replies = Dictionary(grouping: all.filter { $0.parentID.map(loadedIDs.contains) == true }, by: { $0.parentID! })
@@ -76,7 +76,7 @@ final class PostDetailViewModel {
         }
     }
 
-    func reply(to comment: Comment?) {
+    func reply(to comment: PostComment?) {
         replyingTo = comment
     }
 
@@ -100,7 +100,7 @@ final class PostDetailViewModel {
     }
 
     /// Deletes a comment and its replies.
-    func delete(_ comment: Comment) async {
+    func delete(_ comment: PostComment) async {
         do {
             try await dependencies.posts.deleteComment(id: comment.id)
             var removed = 0

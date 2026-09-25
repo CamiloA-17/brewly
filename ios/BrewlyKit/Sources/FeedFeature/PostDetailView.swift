@@ -134,7 +134,7 @@ public struct PostDetailView: View {
 }
 
 private struct CommentRow: View {
-    let comment: Comment
+    let comment: PostComment
     let onReply: () -> Void
     let onDelete: () -> Void
 

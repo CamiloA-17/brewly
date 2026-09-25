@@ -297,16 +297,16 @@ public struct APIPostRepository: PostRepository {
         try await mappingErrors { LikeState(try await client.send(Endpoints.unlikePost(id: postID))) }
     }
 
-    public func comments(postID: UUID, cursor: String?) async throws -> PagedResult<Comment> {
+    public func comments(postID: UUID, cursor: String?) async throws -> PagedResult<PostComment> {
         try await mappingErrors {
             let page = try await client.send(Endpoints.comments(postID: postID, cursor: cursor))
-            return PagedResult(items: page.items.map(Comment.init), nextCursor: page.nextCursor)
+            return PagedResult(items: page.items.map(PostComment.init), nextCursor: page.nextCursor)
         }
     }
 
-    public func addComment(postID: UUID, body: String, parentID: UUID?) async throws -> Comment {
+    public func addComment(postID: UUID, body: String, parentID: UUID?) async throws -> PostComment {
         try await mappingErrors {
-            Comment(try await client.send(Endpoints.addComment(
+            PostComment(try await client.send(Endpoints.addComment(
                 postID: postID, CreateCommentRequest(body: body, parentId: parentID)
             )))
         }
