@@ -17,7 +17,7 @@ final class IntegrationTests: XCTestCase {
         guard let url = ProcessInfo.processInfo.environment["TEST_DATABASE_URL"], !url.isEmpty else {
             throw XCTSkip("Set TEST_DATABASE_URL to run integration tests.")
         }
-        guard let secret = ProcessInfo.processInfo.environment["JWT_SECRET"], secret.count >= 32 else {
+        guard (ProcessInfo.processInfo.environment["JWT_SECRET"]?.count ?? 0) >= 32 else {
             throw ConfigurationError("Set JWT_SECRET (at least 32 characters) to run integration tests.")
         }
         setenv("DATABASE_URL", url, 1)
