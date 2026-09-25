@@ -37,6 +37,9 @@ erDiagram
     recipes |o--o{ posts : "shared in"
     coffee_beans |o--o{ posts : "shared in"
     posts ||--o{ post_media : has
+    users ||--o{ media : uploads
+    media ||--o| post_media : "shown in"
+    media |o--o| users : "avatar of"
     posts ||--o{ post_likes : receives
     posts ||--o{ comments : receives
     comments |o--o{ comments : "replies to"
@@ -109,6 +112,8 @@ erDiagram
 | `recipes` | `recipes`, `recipe_steps`, `recipe_flavor_notes`, `recipe_saves`, `user_brew_methods` | Recipes (preparations), pour schedule, perceived notes, bookmarks, the user's methods. |
 | `social` | `follows`, `user_blocks`, `posts`, `post_media`, `post_likes`, `comments` | Social graph and feed content; `can_view_content()` function. |
 | `notifications_moderation` | `notifications`, `reports` | Activity notifications and reports of objectionable content. |
+| `media` | `media` (and changes to `post_media`, `posts`, `users`) | Uploaded JPEG images stored as `bytea`; post photos and avatars reference them. |
+| `notification_delivery` | — | Deduplication and pagination indexes for `notifications`. |
 
 ## Integrity rules
 
@@ -135,6 +140,20 @@ erDiagram
   otherwise `public` is visible to everyone and `followers` only to followers.
 - **Catalog keys.** Catalogs use stable slugs (`v60`, `washed`, `geisha`) or ISO codes as primary
   keys, so references are identical in every environment and readable in queries.
+
+- **Counts are computed when read.** Follower, save, remix and recipe counts are `count(*)`
+  subqueries over indexed keys (for example the `follows` primary key and
+  `recipe_saves_recipe_idx`), so there are no counter columns to keep in sync.
+- **Images.** `media` stores JPEG bytes (at most 2 MB and 4096 × 4096 px) with the uploader as
+  owner. Each image is in at most one post (`post_media.media_id` is unique) or used as an
+  avatar; `users.avatar_url` is generated from `avatar_media_id`, so it always points to
+  `/v1/media/{id}`. Deleting a post deletes its images, and uploads that are never used are
+  deleted after a day. See [ADR 0006](adr/0006-media-in-postgresql.md).
+- **Notifications** are written by the API in the same transaction as the action.
+  `notifications_once_idx` makes follows, likes and saves notify once per actor and target, and
+  `notifications_kind_target` checks that each kind points to the right post, comment or recipe.
+- **Remixes.** `recipes.forked_from_id` points to the original recipe and becomes `NULL` when the
+  original is deleted, so a remix survives its original.
 
 ## Conventions
 

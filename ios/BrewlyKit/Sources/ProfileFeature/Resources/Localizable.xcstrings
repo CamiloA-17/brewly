@@ -31,6 +31,16 @@
         }
       }
     },
+    "Choose profile photo": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Elegir foto de perfil"
+          }
+        }
+      }
+    },
     "Delete account": {
       "localizations": {
         "es": {
@@ -91,6 +101,26 @@
         }
       }
     },
+    "Followers": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Seguidores"
+          }
+        }
+      }
+    },
+    "Following": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Siguiendo"
+          }
+        }
+      }
+    },
     "Location": {
       "localizations": {
         "es": {
@@ -107,6 +137,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Perfil"
+          }
+        }
+      }
+    },
+    "Remove profile photo": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Quitar foto de perfil"
           }
         }
       }

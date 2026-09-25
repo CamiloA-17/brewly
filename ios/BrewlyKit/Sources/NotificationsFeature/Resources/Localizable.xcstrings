@@ -1,0 +1,96 @@
+{
+  "sourceLanguage": "en",
+  "strings": {
+    "%@ commented on your post.": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ comentó tu publicación."
+          }
+        }
+      }
+    },
+    "%@ liked your post.": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "A %@ le gustó tu publicación."
+          }
+        }
+      }
+    },
+    "%@ remixed your recipe: %@.": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%1$@ hizo un remix de tu receta: %2$@."
+          }
+        }
+      }
+    },
+    "%@ replied to your comment.": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ respondió a tu comentario."
+          }
+        }
+      }
+    },
+    "%@ saved your recipe %@.": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%1$@ guardó tu receta %2$@."
+          }
+        }
+      }
+    },
+    "%@ started following you.": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ empezó a seguirte."
+          }
+        }
+      }
+    },
+    "No notifications yet": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aún no tienes notificaciones"
+          }
+        }
+      }
+    },
+    "Notifications": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Notificaciones"
+          }
+        }
+      }
+    },
+    "When people follow you or react to your posts and recipes, you'll see it here.": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cuando alguien te siga o reaccione a tus publicaciones y recetas, lo verás aquí."
+          }
+        }
+      }
+    }
+  },
+  "version": "1.0"
+}

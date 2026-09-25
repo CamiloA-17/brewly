@@ -91,3 +91,24 @@ public enum FlavorCategory: String, Codable, CaseIterable, Hashable, Sendable {
     case greenVegetative = "green_vegetative"
     case other
 }
+
+/// What a post shares besides its text and photos.
+public enum PostKind: String, Codable, CaseIterable, Hashable, Sendable {
+    /// Text, photos or both.
+    case text
+    /// One of the author's recipes.
+    case recipe
+    /// One of the author's beans.
+    case bean
+}
+
+/// Why a member was notified. Raw values match `notifications.kind`.
+public enum NotificationKind: String, Codable, CaseIterable, Hashable, Sendable {
+    case follow
+    case postLike = "post_like"
+    case comment
+    case commentReply = "comment_reply"
+    case recipeSave = "recipe_save"
+    /// Someone remixed the member's recipe; the notification links to the remix.
+    case recipeFork = "recipe_fork"
+}

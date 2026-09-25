@@ -27,8 +27,9 @@ SELECT pg_temp.expect_error($$DELETE FROM brew_methods WHERE slug = 'v60'$$, '23
 SELECT pg_temp.expect_error($$
     INSERT INTO posts (author_id, kind, recipe_id)
     VALUES ('00000000-0000-0000-0000-00000000000e', 'recipe', '00000000-0000-0000-0000-0000000000c1')$$, '23503');
+-- A post's kind matches what it shares.
 SELECT pg_temp.expect_error($$
-    INSERT INTO posts (author_id, kind) VALUES ('00000000-0000-0000-0000-00000000000e', 'text')$$, '23514');
+    INSERT INTO posts (author_id, kind) VALUES ('00000000-0000-0000-0000-00000000000e', 'recipe')$$, '23514');
 
 -- Deleting a recipe removes its steps, saves and the posts that shared it.
 INSERT INTO recipes (id, author_id, bean_id, method_slug, title, dose_g, water_g, grind_size)

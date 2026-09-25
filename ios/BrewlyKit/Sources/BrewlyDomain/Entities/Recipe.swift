@@ -23,6 +23,8 @@ public struct Recipe: Identifiable, Hashable, Sendable {
     public var bean: BeanSummary
     public var methodSlug: String
     public var forkedFromID: UUID?
+    /// The original of a remix, when the viewer can see it.
+    public var forkedFrom: RecipeReference?
     public var title: String
     public var description: String?
     public var doseG: Double
@@ -48,6 +50,10 @@ public struct Recipe: Identifiable, Hashable, Sendable {
     public var flavorNoteSlugs: [String]
     public var steps: [RecipeStep]
     public var visibility: Visibility
+    public var saveCount: Int
+    public var forkCount: Int
+    /// Whether the signed-in user saved the recipe.
+    public var isSaved: Bool
     public var createdAt: Date
     public var updatedAt: Date
 
@@ -57,6 +63,7 @@ public struct Recipe: Identifiable, Hashable, Sendable {
         bean: BeanSummary,
         methodSlug: String,
         forkedFromID: UUID? = nil,
+        forkedFrom: RecipeReference? = nil,
         title: String,
         description: String? = nil,
         doseG: Double,
@@ -82,6 +89,9 @@ public struct Recipe: Identifiable, Hashable, Sendable {
         flavorNoteSlugs: [String] = [],
         steps: [RecipeStep] = [],
         visibility: Visibility = .public,
+        saveCount: Int = 0,
+        forkCount: Int = 0,
+        isSaved: Bool = false,
         createdAt: Date = Date(),
         updatedAt: Date = Date()
     ) {
@@ -90,6 +100,7 @@ public struct Recipe: Identifiable, Hashable, Sendable {
         self.bean = bean
         self.methodSlug = methodSlug
         self.forkedFromID = forkedFromID
+        self.forkedFrom = forkedFrom
         self.title = title
         self.description = description
         self.doseG = doseG
@@ -115,8 +126,35 @@ public struct Recipe: Identifiable, Hashable, Sendable {
         self.flavorNoteSlugs = flavorNoteSlugs
         self.steps = steps
         self.visibility = visibility
+        self.saveCount = saveCount
+        self.forkCount = forkCount
+        self.isSaved = isSaved
         self.createdAt = createdAt
         self.updatedAt = updatedAt
+    }
+}
+
+/// A link to another recipe, e.g. the original of a remix.
+public struct RecipeReference: Identifiable, Hashable, Sendable {
+    public var id: UUID
+    public var title: String
+    public var author: UserSummary
+
+    public init(id: UUID, title: String, author: UserSummary) {
+        self.id = id
+        self.title = title
+        self.author = author
+    }
+}
+
+/// Whether the signed-in user saved a recipe, and how many people did.
+public struct SaveState: Hashable, Sendable {
+    public var isSaved: Bool
+    public var saveCount: Int
+
+    public init(isSaved: Bool, saveCount: Int) {
+        self.isSaved = isSaved
+        self.saveCount = saveCount
     }
 }
 

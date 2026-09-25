@@ -64,6 +64,17 @@ public struct APIProfileRepository: ProfileRepository {
         try await mappingErrors { _ = try await client.send(Endpoints.deleteMe) }
         await session.discard()
     }
+
+    public func updateAvatar(imageData: Data) async throws -> UserProfile {
+        try await mappingErrors {
+            let media = try await APIPostRepository.upload(imageData, client: client)
+            return UserProfile(try await client.send(Endpoints.setAvatar(mediaID: media.id)))
+        }
+    }
+
+    public func removeAvatar() async throws -> UserProfile {
+        try await mappingErrors { UserProfile(try await client.send(Endpoints.removeAvatar)) }
+    }
 }
 
 /// Loads the catalogs once and keeps them in memory.
@@ -169,5 +180,177 @@ public struct APIRecipeRepository: RecipeRepository {
 
     public func delete(id: UUID) async throws {
         try await mappingErrors { _ = try await client.send(Endpoints.deleteRecipe(id: id)) }
+    }
+}
+
+extension APIRecipeRepository: RecipeSavesRepository {
+    public func savedRecipes(cursor: String?) async throws -> PagedResult<RecipeSummary> {
+        try await mappingErrors {
+            let page = try await client.send(Endpoints.savedRecipes(cursor: cursor))
+            return PagedResult(items: page.items.map(RecipeSummary.init), nextCursor: page.nextCursor)
+        }
+    }
+
+    public func save(recipeID: UUID) async throws -> SaveState {
+        try await mappingErrors { SaveState(try await client.send(Endpoints.saveRecipe(id: recipeID))) }
+    }
+
+    public func unsave(recipeID: UUID) async throws -> SaveState {
+        try await mappingErrors { SaveState(try await client.send(Endpoints.unsaveRecipe(id: recipeID))) }
+    }
+}
+
+public struct APIPeopleRepository: PeopleRepository {
+    private let client: APIClient
+
+    public init(client: APIClient) {
+        self.client = client
+    }
+
+    public func search(_ query: String) async throws -> [UserSummary] {
+        try await mappingErrors { try await client.send(Endpoints.searchUsers(query: query)).map(UserSummary.init) }
+    }
+
+    public func profile(id: UUID) async throws -> MemberProfile {
+        try await mappingErrors { MemberProfile(try await client.send(Endpoints.userProfile(id: id))) }
+    }
+
+    public func recipes(of memberID: UUID, cursor: String?) async throws -> PagedResult<RecipeSummary> {
+        try await mappingErrors {
+            let page = try await client.send(Endpoints.userRecipes(id: memberID, cursor: cursor))
+            return PagedResult(items: page.items.map(RecipeSummary.init), nextCursor: page.nextCursor)
+        }
+    }
+
+    public func followers(of memberID: UUID, cursor: String?) async throws -> PagedResult<UserSummary> {
+        try await mappingErrors {
+            let page = try await client.send(Endpoints.followers(of: memberID, cursor: cursor))
+            return PagedResult(items: page.items.map(UserSummary.init), nextCursor: page.nextCursor)
+        }
+    }
+
+    public func following(of memberID: UUID, cursor: String?) async throws -> PagedResult<UserSummary> {
+        try await mappingErrors {
+            let page = try await client.send(Endpoints.following(of: memberID, cursor: cursor))
+            return PagedResult(items: page.items.map(UserSummary.init), nextCursor: page.nextCursor)
+        }
+    }
+
+    public func follow(_ memberID: UUID) async throws -> FollowState {
+        try await mappingErrors { FollowState(try await client.send(Endpoints.follow(id: memberID))) }
+    }
+
+    public func unfollow(_ memberID: UUID) async throws -> FollowState {
+        try await mappingErrors { FollowState(try await client.send(Endpoints.unfollow(id: memberID))) }
+    }
+}
+
+public struct APIPostRepository: PostRepository {
+    private let client: APIClient
+
+    public init(client: APIClient) {
+        self.client = client
+    }
+
+    public func feed(cursor: String?) async throws -> PagedResult<Post> {
+        try await page(Endpoints.feed(cursor: cursor))
+    }
+
+    public func explore(cursor: String?) async throws -> PagedResult<Post> {
+        try await page(Endpoints.explorePosts(cursor: cursor))
+    }
+
+    public func posts(of memberID: UUID, cursor: String?) async throws -> PagedResult<Post> {
+        try await page(Endpoints.userPosts(id: memberID, cursor: cursor))
+    }
+
+    public func post(id: UUID) async throws -> Post {
+        try await mappingErrors { Post(try await client.send(Endpoints.post(id: id))) }
+    }
+
+    public func create(_ draft: PostDraft) async throws -> Post {
+        try await mappingErrors {
+            var mediaIDs: [UUID] = []
+            for photo in draft.photos {
+                mediaIDs.append(try await Self.upload(photo, client: client).id)
+            }
+            let request = CreatePostRequest(
+                body: draft.body.nilIfBlank,
+                recipeId: draft.recipeID,
+                beanId: draft.beanID,
+                mediaIds: mediaIDs,
+                visibility: draft.visibility
+            )
+            return Post(try await client.send(Endpoints.createPost(request)))
+        }
+    }
+
+    public func delete(id: UUID) async throws {
+        try await mappingErrors { _ = try await client.send(Endpoints.deletePost(id: id)) }
+    }
+
+    public func like(postID: UUID) async throws -> LikeState {
+        try await mappingErrors { LikeState(try await client.send(Endpoints.likePost(id: postID))) }
+    }
+
+    public func unlike(postID: UUID) async throws -> LikeState {
+        try await mappingErrors { LikeState(try await client.send(Endpoints.unlikePost(id: postID))) }
+    }
+
+    public func comments(postID: UUID, cursor: String?) async throws -> PagedResult<PostComment> {
+        try await mappingErrors {
+            let page = try await client.send(Endpoints.comments(postID: postID, cursor: cursor))
+            return PagedResult(items: page.items.map(PostComment.init), nextCursor: page.nextCursor)
+        }
+    }
+
+    public func addComment(postID: UUID, body: String, parentID: UUID?) async throws -> PostComment {
+        try await mappingErrors {
+            PostComment(try await client.send(Endpoints.addComment(
+                postID: postID, CreateCommentRequest(body: body, parentId: parentID)
+            )))
+        }
+    }
+
+    public func deleteComment(id: UUID) async throws {
+        try await mappingErrors { _ = try await client.send(Endpoints.deleteComment(id: id)) }
+    }
+
+    /// Resizes a picked image and uploads it.
+    static func upload(_ imageData: Data, client: APIClient) async throws -> MediaDTO {
+        guard let jpeg = ImageCompressor.jpeg(from: imageData) else {
+            throw DomainError.validation([RuleViolation(field: "photos", kind: .invalidFormat)])
+        }
+        return try await client.send(Endpoints.uploadImage(jpeg: jpeg))
+    }
+
+    private func page(_ endpoint: Endpoint<Page<PostDTO>>) async throws -> PagedResult<Post> {
+        try await mappingErrors {
+            let page = try await client.send(endpoint)
+            return PagedResult(items: page.items.map(Post.init), nextCursor: page.nextCursor)
+        }
+    }
+}
+
+public struct APINotificationRepository: NotificationRepository {
+    private let client: APIClient
+
+    public init(client: APIClient) {
+        self.client = client
+    }
+
+    public func notifications(cursor: String?) async throws -> PagedResult<AppNotification> {
+        try await mappingErrors {
+            let page = try await client.send(Endpoints.notifications(cursor: cursor))
+            return PagedResult(items: page.items.map(AppNotification.init), nextCursor: page.nextCursor)
+        }
+    }
+
+    public func unreadCount() async throws -> Int {
+        try await mappingErrors { try await client.send(Endpoints.unreadNotificationCount).count }
+    }
+
+    public func markAllRead() async throws {
+        try await mappingErrors { _ = try await client.send(Endpoints.markNotificationsRead) }
     }
 }

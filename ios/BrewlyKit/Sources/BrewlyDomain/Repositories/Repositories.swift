@@ -12,6 +12,9 @@ public protocol AuthRepository: Sendable {
 public protocol ProfileRepository: Sendable {
     func currentUser() async throws -> UserProfile
     func updateProfile(displayName: String, bio: String?, location: String?) async throws -> UserProfile
+    /// Uploads a picked image (resized before sending) and uses it as the profile picture.
+    func updateAvatar(imageData: Data) async throws -> UserProfile
+    func removeAvatar() async throws -> UserProfile
     /// Permanently deletes the account and everything it owns.
     func deleteAccount() async throws
 }
@@ -48,4 +51,55 @@ public protocol RecipeRepository: Sendable {
     func create(_ input: RecipeInput) async throws -> Recipe
     func update(id: UUID, _ input: RecipeInput) async throws -> Recipe
     func delete(id: UUID) async throws
+}
+
+/// Recipes the signed-in user saved to brew later.
+public protocol RecipeSavesRepository: Sendable {
+    func savedRecipes(cursor: String?) async throws -> PagedResult<RecipeSummary>
+    func save(recipeID: UUID) async throws -> SaveState
+    func unsave(recipeID: UUID) async throws -> SaveState
+}
+
+/// Other members: search, profiles, their recipes and the follow graph.
+public protocol PeopleRepository: Sendable {
+    /// Members whose username or name starts with `query`.
+    func search(_ query: String) async throws -> [UserSummary]
+    func profile(id: UUID) async throws -> MemberProfile
+    func recipes(of memberID: UUID, cursor: String?) async throws -> PagedResult<RecipeSummary>
+    func followers(of memberID: UUID, cursor: String?) async throws -> PagedResult<UserSummary>
+    func following(of memberID: UUID, cursor: String?) async throws -> PagedResult<UserSummary>
+    func follow(_ memberID: UUID) async throws -> FollowState
+    func unfollow(_ memberID: UUID) async throws -> FollowState
+}
+
+/// Posts, the home feed, likes and comments.
+public protocol PostRepository: Sendable {
+    /// The user's posts and those of the people they follow.
+    func feed(cursor: String?) async throws -> PagedResult<Post>
+    /// Public posts of the community.
+    func explore(cursor: String?) async throws -> PagedResult<Post>
+    func posts(of memberID: UUID, cursor: String?) async throws -> PagedResult<Post>
+    func post(id: UUID) async throws -> Post
+    /// Uploads the draft's photos, then publishes the post.
+    func create(_ draft: PostDraft) async throws -> Post
+    func delete(id: UUID) async throws
+    func like(postID: UUID) async throws -> LikeState
+    func unlike(postID: UUID) async throws -> LikeState
+    /// Comments oldest first.
+    func comments(postID: UUID, cursor: String?) async throws -> PagedResult<PostComment>
+    func addComment(postID: UUID, body: String, parentID: UUID?) async throws -> PostComment
+    func deleteComment(id: UUID) async throws
+}
+
+/// Loads images from the API, which requires the access token.
+public protocol ImageLoader: Sendable {
+    func imageData(for url: URL) async throws -> Data
+}
+
+/// The signed-in user's notifications.
+public protocol NotificationRepository: Sendable {
+    /// Newest first.
+    func notifications(cursor: String?) async throws -> PagedResult<AppNotification>
+    func unreadCount() async throws -> Int
+    func markAllRead() async throws
 }

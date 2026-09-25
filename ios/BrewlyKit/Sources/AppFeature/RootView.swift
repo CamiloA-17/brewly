@@ -47,7 +47,7 @@ struct MainTabView: View {
 
     var body: some View {
         TabView {
-            FeedView()
+            FeedView(dependencies: container.feedDependencies(currentUserID: user.id))
                 .tabItem {
                     Label {
                         Text("Home", bundle: .module)
@@ -88,5 +88,7 @@ struct MainTabView: View {
                     }
                 }
         }
+        .environment(\.routeDestinations, container.routeDestinations(currentUserID: user.id))
+        .environment(\.imageLoader, container.imageLoader)
     }
 }

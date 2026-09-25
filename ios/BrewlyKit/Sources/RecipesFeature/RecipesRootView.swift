@@ -16,6 +16,7 @@ public struct RecipesRootView: View {
             VStack(spacing: 0) {
                 Picker(selection: $model.scope) {
                     Text("My recipes", bundle: .module).tag(RecipeListViewModel.Scope.mine)
+                    Text("Saved", bundle: .module).tag(RecipeListViewModel.Scope.saved)
                     Text("Explore", bundle: .module).tag(RecipeListViewModel.Scope.explore)
                 } label: {
                     Text("Recipes", bundle: .module)
@@ -36,6 +37,7 @@ public struct RecipesRootView: View {
             .navigationDestination(for: RecipeSummary.self) { summary in
                 RecipeDetailView(recipeID: summary.id, dependencies: model.dependencies)
             }
+            .appRouteDestinations()
             .toolbar {
                 if model.scope == .explore {
                     ToolbarItem(placement: .topBarLeading) {
@@ -73,7 +75,7 @@ public struct RecipesRootView: View {
         List {
             ForEach(recipes) { recipe in
                 NavigationLink(value: recipe) {
-                    RecipeRow(recipe: recipe, catalog: model.catalog, showsAuthor: model.scope == .explore)
+                    RecipeSummaryRow(recipe: recipe, catalog: model.catalog, showsAuthor: model.scope != .mine)
                 }
             }
             if model.canLoadMore {
@@ -104,6 +106,16 @@ public struct RecipesRootView: View {
                     Text("New recipe", bundle: .module)
                 }
                 .buttonStyle(.borderedProminent)
+            }
+        case .saved:
+            ContentUnavailableView {
+                Label {
+                    Text("No saved recipes", bundle: .module)
+                } icon: {
+                    Image(systemName: "bookmark")
+                }
+            } description: {
+                Text("Save recipes from the community to brew them later.", bundle: .module)
             }
         case .explore:
             ContentUnavailableView {
@@ -137,41 +149,5 @@ public struct RecipesRootView: View {
                       : "line.3.horizontal.decrease.circle.fill")
             }
         }
-    }
-}
-
-struct RecipeRow: View {
-    let recipe: RecipeSummary
-    let catalog: Catalog
-    let showsAuthor: Bool
-
-    var body: some View {
-        VStack(alignment: .leading, spacing: Spacing.xs) {
-            HStack(alignment: .firstTextBaseline) {
-                Text(recipe.title).font(.headline)
-                Spacer()
-                if let rating = recipe.rating {
-                    RatingView(rating: rating).font(.caption2)
-                }
-            }
-            Text(subtitle)
-                .font(.subheadline)
-                .foregroundStyle(.secondary)
-            RecipeParametersRow(
-                doseG: recipe.doseG,
-                ratio: recipe.ratio,
-                grindSize: recipe.grindSize,
-                waterTempC: recipe.waterTempC,
-                totalTimeS: recipe.totalTimeS
-            )
-        }
-        .padding(.vertical, Spacing.xs)
-    }
-
-    private var subtitle: String {
-        let method = catalog.brewMethod(recipe.methodSlug)?.localizedName ?? recipe.methodSlug
-        var parts = [method, recipe.beanName]
-        if showsAuthor { parts.append("@" + recipe.author.username) }
-        return parts.joined(separator: " · ")
     }
 }

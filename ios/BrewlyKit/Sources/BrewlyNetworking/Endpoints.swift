@@ -100,6 +100,121 @@ public enum Endpoints {
         Endpoint(.delete, "v1/recipes/\(id.uuidString)")
     }
 
+    public static func savedRecipes(cursor: String?) -> Endpoint<Page<RecipeSummaryDTO>> {
+        Endpoint(.get, "v1/me/saved-recipes", queryItems: queryItems(["cursor": cursor]))
+    }
+
+    public static func saveRecipe(id: UUID) -> Endpoint<SaveStateDTO> {
+        Endpoint(.put, "v1/recipes/\(id.uuidString)/save")
+    }
+
+    public static func unsaveRecipe(id: UUID) -> Endpoint<SaveStateDTO> {
+        Endpoint(.delete, "v1/recipes/\(id.uuidString)/save")
+    }
+
+    // MARK: Media
+
+    public static func uploadImage(jpeg: Data) -> Endpoint<MediaDTO> {
+        Endpoint(.post, "v1/media", rawBody: RawBody(data: jpeg, contentType: "image/jpeg"))
+    }
+
+    /// `path` is the server's media URL without the leading slash, e.g. `v1/media/<id>`.
+    public static func image(path: String) -> Endpoint<Data> {
+        Endpoint(.get, path)
+    }
+
+    public static func setAvatar(mediaID: UUID) -> Endpoint<CurrentUserDTO> {
+        Endpoint(.put, "v1/me/avatar", body: UpdateAvatarRequest(mediaId: mediaID))
+    }
+
+    public static let removeAvatar = Endpoint<CurrentUserDTO>(.delete, "v1/me/avatar")
+
+    // MARK: Posts
+
+    public static func feed(cursor: String?) -> Endpoint<Page<PostDTO>> {
+        Endpoint(.get, "v1/feed", queryItems: queryItems(["cursor": cursor]))
+    }
+
+    public static func explorePosts(cursor: String?) -> Endpoint<Page<PostDTO>> {
+        Endpoint(.get, "v1/posts/explore", queryItems: queryItems(["cursor": cursor]))
+    }
+
+    public static func userPosts(id: UUID, cursor: String?) -> Endpoint<Page<PostDTO>> {
+        Endpoint(.get, "v1/users/\(id.uuidString)/posts", queryItems: queryItems(["cursor": cursor]))
+    }
+
+    public static func post(id: UUID) -> Endpoint<PostDTO> {
+        Endpoint(.get, "v1/posts/\(id.uuidString)")
+    }
+
+    public static func createPost(_ body: CreatePostRequest) -> Endpoint<PostDTO> {
+        Endpoint(.post, "v1/posts", body: body)
+    }
+
+    public static func deletePost(id: UUID) -> Endpoint<EmptyResponse> {
+        Endpoint(.delete, "v1/posts/\(id.uuidString)")
+    }
+
+    public static func likePost(id: UUID) -> Endpoint<LikeStateDTO> {
+        Endpoint(.put, "v1/posts/\(id.uuidString)/like")
+    }
+
+    public static func unlikePost(id: UUID) -> Endpoint<LikeStateDTO> {
+        Endpoint(.delete, "v1/posts/\(id.uuidString)/like")
+    }
+
+    public static func comments(postID: UUID, cursor: String?) -> Endpoint<Page<CommentDTO>> {
+        Endpoint(.get, "v1/posts/\(postID.uuidString)/comments", queryItems: queryItems(["cursor": cursor, "limit": "50"]))
+    }
+
+    public static func addComment(postID: UUID, _ body: CreateCommentRequest) -> Endpoint<CommentDTO> {
+        Endpoint(.post, "v1/posts/\(postID.uuidString)/comments", body: body)
+    }
+
+    public static func deleteComment(id: UUID) -> Endpoint<EmptyResponse> {
+        Endpoint(.delete, "v1/comments/\(id.uuidString)")
+    }
+
+    // MARK: Notifications
+
+    public static func notifications(cursor: String?) -> Endpoint<Page<NotificationDTO>> {
+        Endpoint(.get, "v1/me/notifications", queryItems: queryItems(["cursor": cursor]))
+    }
+
+    public static let unreadNotificationCount = Endpoint<UnreadCountDTO>(.get, "v1/me/notifications/unread-count")
+
+    public static let markNotificationsRead = Endpoint<EmptyResponse>(.post, "v1/me/notifications/read")
+
+    // MARK: People
+
+    public static func searchUsers(query: String) -> Endpoint<[UserSummaryDTO]> {
+        Endpoint(.get, "v1/users", queryItems: queryItems(["q": query]))
+    }
+
+    public static func userProfile(id: UUID) -> Endpoint<UserProfileDTO> {
+        Endpoint(.get, "v1/users/\(id.uuidString)")
+    }
+
+    public static func userRecipes(id: UUID, cursor: String?) -> Endpoint<Page<RecipeSummaryDTO>> {
+        Endpoint(.get, "v1/users/\(id.uuidString)/recipes", queryItems: queryItems(["cursor": cursor]))
+    }
+
+    public static func followers(of id: UUID, cursor: String?) -> Endpoint<Page<UserSummaryDTO>> {
+        Endpoint(.get, "v1/users/\(id.uuidString)/followers", queryItems: queryItems(["cursor": cursor]))
+    }
+
+    public static func following(of id: UUID, cursor: String?) -> Endpoint<Page<UserSummaryDTO>> {
+        Endpoint(.get, "v1/users/\(id.uuidString)/following", queryItems: queryItems(["cursor": cursor]))
+    }
+
+    public static func follow(id: UUID) -> Endpoint<FollowStateDTO> {
+        Endpoint(.put, "v1/users/\(id.uuidString)/follow")
+    }
+
+    public static func unfollow(id: UUID) -> Endpoint<FollowStateDTO> {
+        Endpoint(.delete, "v1/users/\(id.uuidString)/follow")
+    }
+
     private static func queryItems(_ values: KeyValuePairs<String, String?>) -> [URLQueryItem] {
         values.compactMap { name, value in value.map { URLQueryItem(name: name, value: $0) } }
     }

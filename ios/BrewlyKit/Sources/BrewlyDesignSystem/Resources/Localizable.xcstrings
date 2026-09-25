@@ -81,6 +81,16 @@
         }
       }
     },
+    "Comments": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Comentarios"
+          }
+        }
+      }
+    },
     "Dark": {
       "localizations": {
         "es": {
@@ -251,6 +261,16 @@
         }
       }
     },
+    "Like": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Me gusta"
+          }
+        }
+      }
+    },
     "Medium": {
       "localizations": {
         "es": {
@@ -397,6 +417,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Papel"
+          }
+        }
+      }
+    },
+    "Photo": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Foto"
           }
         }
       }
@@ -581,6 +611,16 @@
         }
       }
     },
+    "This bean isn't available.": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Este grano no está disponible."
+          }
+        }
+      }
+    },
     "This field is required.": {
       "localizations": {
         "es": {
@@ -591,12 +631,32 @@
         }
       }
     },
+    "This recipe isn't available.": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Esta receta no está disponible."
+          }
+        }
+      }
+    },
     "Try again": {
       "localizations": {
         "es": {
           "stringUnit": {
             "state": "translated",
             "value": "Reintentar"
+          }
+        }
+      }
+    },
+    "Unlike": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Quitar me gusta"
           }
         }
       }

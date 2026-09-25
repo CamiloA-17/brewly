@@ -19,13 +19,24 @@ final class RecipeFormViewModel {
     let recipeID: UUID?
     private let dependencies: RecipesDependencies
 
-    init(recipe: Recipe?, dependencies: RecipesDependencies) {
+    /// - Parameters:
+    ///   - recipe: The recipe to edit, or `nil` to create one.
+    ///   - remixOf: A recipe to start from when creating a remix.
+    init(recipe: Recipe?, remixOf original: Recipe? = nil, dependencies: RecipesDependencies) {
         self.recipeID = recipe?.id
-        self.draft = recipe.map(RecipeDraft.init(recipe:)) ?? RecipeDraft()
+        if let recipe {
+            draft = RecipeDraft(recipe: recipe)
+        } else if let original {
+            draft = RecipeDraft(remixOf: original)
+        } else {
+            draft = RecipeDraft()
+        }
         self.dependencies = dependencies
     }
 
     var isEditing: Bool { recipeID != nil }
+
+    var isRemix: Bool { !isEditing && draft.forkedFromID != nil }
 
     var method: BrewMethod? { catalog.brewMethod(draft.methodSlug) }
 

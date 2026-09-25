@@ -8,6 +8,7 @@ import Observation
 final class RecipeListViewModel {
     enum Scope: Hashable {
         case mine
+        case saved
         case explore
     }
 
@@ -58,6 +59,8 @@ final class RecipeListViewModel {
         switch scope {
         case .mine:
             return try await dependencies.recipes.myRecipes(cursor: cursor)
+        case .saved:
+            return try await dependencies.saves.savedRecipes(cursor: cursor)
         case .explore:
             return try await dependencies.recipes.explore(filter: RecipeFilter(methodSlug: methodFilter), cursor: cursor)
         }
