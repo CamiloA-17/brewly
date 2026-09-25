@@ -35,7 +35,7 @@ struct AccountRulesTests {
     }
 
     @Test("Email format", arguments: [
-        ("ana@brewly.dev", true), ("ana@brewly", false), ("@brewly.dev", false), ("ana @brewly.dev", false),
+        ("ana@example.com", true), ("ana@example", false), ("@example.com", false), ("ana @example.com", false),
     ])
     func email(_ value: String, _ isValid: Bool) {
         #expect(AccountRules.isValidEmail(value) == isValid)
@@ -44,7 +44,7 @@ struct AccountRulesTests {
     @Test("Sign-up normalizes email and username before validating")
     func signUp() {
         #expect(AccountRules.validateSignUp(
-            email: " Ana@Brewly.dev ", password: "brewly-demo", username: "Ana.Barista", displayName: "Ana"
+            email: " Ana@Example.com ", password: "test-password", username: "Ana.Barista", displayName: "Ana"
         ).isEmpty)
         let fields = Set(AccountRules.validateSignUp(
             email: "nope", password: "short", username: "a", displayName: " "

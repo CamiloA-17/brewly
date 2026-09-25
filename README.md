@@ -47,11 +47,11 @@ echo 'export PATH="$(brew --prefix libpq)/bin:$PATH"' >> ~/.zshrc && source ~/.z
 ```
 
 ```bash
-cp .env.example .env
+cp .env.example .env   # then set JWT_SECRET and DEMO_PASSWORD
 
 # 1. Database: PostgreSQL + migrations, then demo data
 make db-up
-make db-seed          # demo users: ana@brewly.dev / leo@brewly.dev, password "brewly-demo"
+make db-seed          # demo users ana@example.com and leo@example.com, password = DEMO_PASSWORD
 
 # 2. API on http://localhost:8080
 make server-run

@@ -46,7 +46,9 @@ jobs:
           for _ in database/migrations/*.sql; do dbmate rollback; done
           dbmate up
       - name: Load development seed
-        run: psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -f database/seeds/dev_seed.sql
+        run: |
+          psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -v demo_password="$(openssl rand -hex 16)" \
+            -f database/seeds/dev_seed.sql
       - name: Run SQL tests against seeded data
         run: database/tests/run.sh
 

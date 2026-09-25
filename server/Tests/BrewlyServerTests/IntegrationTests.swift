@@ -35,14 +35,14 @@ final class IntegrationTests: XCTestCase {
     func testRegisterLoginRefreshAndLogout() async throws {
         let registered = try await register("ana.barista")
         XCTAssertEqual(registered.user.username, "ana.barista")
-        XCTAssertEqual(registered.user.email, "ana.barista@brewly.dev")
+        XCTAssertEqual(registered.user.email, "ana.barista@example.com")
 
         let loggedIn: AuthResponse = try await send(.POST, "v1/auth/login",
-            body: LoginRequest(email: "ANA.BARISTA@brewly.dev", password: "brewly-demo"))
+            body: LoginRequest(email: "ANA.BARISTA@example.com", password: "test-password"))
         XCTAssertEqual(loggedIn.user.id, registered.user.id)
 
         try await expectError(.POST, "v1/auth/login",
-            body: LoginRequest(email: "ana.barista@brewly.dev", password: "wrong-password"),
+            body: LoginRequest(email: "ana.barista@example.com", password: "wrong-password"),
             status: .unauthorized, code: APIErrorCode.invalidCredentials)
 
         let refreshed: AuthResponse = try await send(.POST, "v1/auth/refresh",
@@ -59,10 +59,10 @@ final class IntegrationTests: XCTestCase {
     func testRegistrationConflictsAndValidation() async throws {
         _ = try await register("ana.barista")
         try await expectError(.POST, "v1/auth/register",
-            body: RegisterRequest(email: "other@brewly.dev", password: "brewly-demo", username: "ana.barista", displayName: "Ana"),
+            body: RegisterRequest(email: "other@example.com", password: "test-password", username: "ana.barista", displayName: "Ana"),
             status: .conflict, code: APIErrorCode.usernameTaken)
         try await expectError(.POST, "v1/auth/register",
-            body: RegisterRequest(email: "ana.barista@brewly.dev", password: "brewly-demo", username: "ana2", displayName: "Ana"),
+            body: RegisterRequest(email: "ana.barista@example.com", password: "test-password", username: "ana2", displayName: "Ana"),
             status: .conflict, code: APIErrorCode.emailTaken)
         try await expectError(.POST, "v1/auth/register",
             body: RegisterRequest(email: "nope", password: "short", username: "A", displayName: ""),
@@ -246,7 +246,7 @@ final class IntegrationTests: XCTestCase {
 
     private func register(_ username: String) async throws -> AuthResponse {
         try await send(.POST, "v1/auth/register", body: RegisterRequest(
-            email: "\(username)@brewly.dev", password: "brewly-demo", username: username, displayName: username
+            email: "\(username)@example.com", password: "test-password", username: username, displayName: username
         ))
     }
 

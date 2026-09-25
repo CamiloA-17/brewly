@@ -51,7 +51,7 @@ and the server always agree on the contract.
 POST /v1/auth/login
 Content-Type: application/json
 
-{ "email": "ana@brewly.dev", "password": "brewly-demo" }
+{ "email": "ana@example.com", "password": "<password>" }
 ```
 
 ```json
@@ -60,7 +60,7 @@ Content-Type: application/json
   "accessTokenExpiresAt": "2026-09-25T10:15:00Z",
   "refreshToken": "3yQ0…",
   "refreshTokenExpiresAt": "2026-10-25T10:00:00Z",
-  "user": { "id": "1111…", "username": "ana.barista", "displayName": "Ana", "email": "ana@brewly.dev", "createdAt": "2026-09-01T00:00:00Z" }
+  "user": { "id": "1111…", "username": "ana.barista", "displayName": "Ana", "email": "ana@example.com", "createdAt": "2026-09-01T00:00:00Z" }
 }
 ```
 

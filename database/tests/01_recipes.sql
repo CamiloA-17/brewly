@@ -91,6 +91,6 @@ SELECT pg_temp.expect_error($$
     INSERT INTO users (username, display_name) VALUES ('ana.test', 'Duplicate')$$, '23505');
 SELECT pg_temp.expect_error($$
     INSERT INTO auth_identities (user_id, provider, subject)
-    VALUES ('00000000-0000-0000-0000-00000000000a', 'password', 'ana@test.dev')$$, '23514');
+    VALUES ('00000000-0000-0000-0000-00000000000a', 'password', 'ana@test.example.com')$$, '23514');
 
 ROLLBACK;

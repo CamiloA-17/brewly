@@ -29,8 +29,9 @@ db-rollback: ## Roll back the latest migration
 db-reset: ## Drop, recreate and migrate the database
 	$(DBMATE) drop && $(DBMATE) --wait up
 
-db-seed: ## Load demo data (development only)
-	psql "$(DATABASE_URL)" -v ON_ERROR_STOP=1 -f database/seeds/dev_seed.sql
+db-seed: ## Load demo data (development only; password from DEMO_PASSWORD)
+	@test -n "$(DEMO_PASSWORD)" || { echo "Set DEMO_PASSWORD in .env (at least 8 characters)"; exit 1; }
+	psql "$(DATABASE_URL)" -v ON_ERROR_STOP=1 -v demo_password="$(DEMO_PASSWORD)" -f database/seeds/dev_seed.sql
 
 db-test: ## Run the SQL test suite
 	database/tests/run.sh

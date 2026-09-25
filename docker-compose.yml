@@ -11,7 +11,7 @@ services:
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-brewly}
       POSTGRES_DB: ${POSTGRES_DB:-brewly_dev}
     ports:
-      - "5432:5432"
+      - "127.0.0.1:5432:5432"
     volumes:
       - db-data:/var/lib/postgresql/data
     healthcheck:
@@ -40,7 +40,7 @@ services:
       dockerfile: server/Dockerfile
     environment:
       DATABASE_URL: postgres://${POSTGRES_USER:-brewly}:${POSTGRES_PASSWORD:-brewly}@db:5432/${POSTGRES_DB:-brewly_dev}?sslmode=disable
-      JWT_SECRET: ${JWT_SECRET:-change-me-to-a-long-random-string-of-at-least-32-chars}
+      JWT_SECRET: ${JWT_SECRET:-}
       LOG_LEVEL: ${LOG_LEVEL:-info}
     ports:
       - "8080:8080"

@@ -28,9 +28,9 @@ $$;
 CREATE FUNCTION pg_temp.create_fixture_users() RETURNS void
 LANGUAGE sql AS $$
     INSERT INTO users (id, username, display_name, email) VALUES
-        ('00000000-0000-0000-0000-00000000000a', 'ana.test', 'Ana', 'ana@test.dev'),
-        ('00000000-0000-0000-0000-00000000000b', 'leo.test', 'Leo', 'leo@test.dev'),
-        ('00000000-0000-0000-0000-00000000000e', 'eve.test', 'Eve', 'eve@test.dev');
+        ('00000000-0000-0000-0000-00000000000a', 'ana.test', 'Ana', 'ana@test.example.com'),
+        ('00000000-0000-0000-0000-00000000000b', 'leo.test', 'Leo', 'leo@test.example.com'),
+        ('00000000-0000-0000-0000-00000000000e', 'eve.test', 'Eve', 'eve@test.example.com');
     INSERT INTO coffee_beans (id, owner_id, name, country_code, farm, altitude_min_m, altitude_max_m, processing_method_slug)
     VALUES
         ('00000000-0000-0000-0000-0000000000b1', '00000000-0000-0000-0000-00000000000a',

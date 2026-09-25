@@ -1,22 +1,23 @@
 -- Demo data for local development only. Never run against production.
--- Both demo accounts use the password: brewly-demo
+-- Both demo accounts use the password in the DEMO_PASSWORD variable of your .env file,
+-- which is never committed:
 --
---   make db-seed      (or: psql "$DATABASE_URL" -f database/seeds/dev_seed.sql)
+--   make db-seed      (or: psql "$DATABASE_URL" -v demo_password=... -f database/seeds/dev_seed.sql)
 
 BEGIN;
 
 CREATE EXTENSION IF NOT EXISTS pgcrypto;
 
 INSERT INTO users (id, username, display_name, email, bio, location) VALUES
-    ('11111111-1111-4111-8111-111111111111', 'ana.barista', 'Ana', 'ana@brewly.dev',
+    ('11111111-1111-4111-8111-111111111111', 'ana.barista', 'Ana', 'ana@example.com',
      'Home barista. Pour-over nerd.', 'Bogotá, CO'),
-    ('22222222-2222-4222-8222-222222222222', 'leo.roaster', 'Leo', 'leo@brewly.dev',
+    ('22222222-2222-4222-8222-222222222222', 'leo.roaster', 'Leo', 'leo@example.com',
      'Small-batch roaster. Espresso every morning.', 'Medellín, CO')
 ON CONFLICT (id) DO NOTHING;
 
 INSERT INTO auth_identities (user_id, provider, subject, password_hash) VALUES
-    ('11111111-1111-4111-8111-111111111111', 'password', 'ana@brewly.dev', crypt('brewly-demo', gen_salt('bf', 10))),
-    ('22222222-2222-4222-8222-222222222222', 'password', 'leo@brewly.dev', crypt('brewly-demo', gen_salt('bf', 10)))
+    ('11111111-1111-4111-8111-111111111111', 'password', 'ana@example.com', crypt(:'demo_password', gen_salt('bf', 10))),
+    ('22222222-2222-4222-8222-222222222222', 'password', 'leo@example.com', crypt(:'demo_password', gen_salt('bf', 10)))
 ON CONFLICT (provider, subject) DO NOTHING;
 
 INSERT INTO follows (follower_id, followed_id) VALUES
