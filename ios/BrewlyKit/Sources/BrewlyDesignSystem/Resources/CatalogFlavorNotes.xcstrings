@@ -1,0 +1,516 @@
+{
+  "sourceLanguage": "en",
+  "strings": {
+    "Almond": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Almendra"
+          }
+        }
+      }
+    },
+    "Anise": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Anís"
+          }
+        }
+      }
+    },
+    "Apple": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Manzana"
+          }
+        }
+      }
+    },
+    "Bergamot": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bergamota"
+          }
+        }
+      }
+    },
+    "Black Pepper": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pimienta negra"
+          }
+        }
+      }
+    },
+    "Black Tea": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Té negro"
+          }
+        }
+      }
+    },
+    "Blackberry": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mora"
+          }
+        }
+      }
+    },
+    "Blueberry": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Arándano"
+          }
+        }
+      }
+    },
+    "Brown Sugar": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Azúcar morena"
+          }
+        }
+      }
+    },
+    "Caramel": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Caramelo"
+          }
+        }
+      }
+    },
+    "Cereal": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cereal"
+          }
+        }
+      }
+    },
+    "Chamomile": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Manzanilla"
+          }
+        }
+      }
+    },
+    "Cherry": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cereza"
+          }
+        }
+      }
+    },
+    "Cinnamon": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Canela"
+          }
+        }
+      }
+    },
+    "Clove": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Clavo"
+          }
+        }
+      }
+    },
+    "Cocoa": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cacao"
+          }
+        }
+      }
+    },
+    "Coconut": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Coco"
+          }
+        }
+      }
+    },
+    "Dark Chocolate": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Chocolate amargo"
+          }
+        }
+      }
+    },
+    "Fermented": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Fermentado"
+          }
+        }
+      }
+    },
+    "Fresh Herbs": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hierbas frescas"
+          }
+        }
+      }
+    },
+    "Grape": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Uva"
+          }
+        }
+      }
+    },
+    "Grapefruit": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Toronja"
+          }
+        }
+      }
+    },
+    "Hazelnut": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Avellana"
+          }
+        }
+      }
+    },
+    "Herbal": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Herbal"
+          }
+        }
+      }
+    },
+    "Honey": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Miel"
+          }
+        }
+      }
+    },
+    "Jasmine": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Jazmín"
+          }
+        }
+      }
+    },
+    "Lemon": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Limón"
+          }
+        }
+      }
+    },
+    "Lime": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Lima"
+          }
+        }
+      }
+    },
+    "Malt": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Malta"
+          }
+        }
+      }
+    },
+    "Maple Syrup": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Jarabe de arce"
+          }
+        }
+      }
+    },
+    "Milk Chocolate": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Chocolate con leche"
+          }
+        }
+      }
+    },
+    "Molasses": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Melaza"
+          }
+        }
+      }
+    },
+    "Nutmeg": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nuez moscada"
+          }
+        }
+      }
+    },
+    "Orange": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Naranja"
+          }
+        }
+      }
+    },
+    "Panela": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Panela"
+          }
+        }
+      }
+    },
+    "Peach": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Durazno"
+          }
+        }
+      }
+    },
+    "Peanut": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Maní"
+          }
+        }
+      }
+    },
+    "Pear": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pera"
+          }
+        }
+      }
+    },
+    "Pineapple": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Piña"
+          }
+        }
+      }
+    },
+    "Pomegranate": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Granada"
+          }
+        }
+      }
+    },
+    "Prune": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ciruela pasa"
+          }
+        }
+      }
+    },
+    "Raisin": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Uva pasa"
+          }
+        }
+      }
+    },
+    "Raspberry": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Frambuesa"
+          }
+        }
+      }
+    },
+    "Rose": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Rosa"
+          }
+        }
+      }
+    },
+    "Smoky": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ahumado"
+          }
+        }
+      }
+    },
+    "Strawberry": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Fresa"
+          }
+        }
+      }
+    },
+    "Tobacco": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tabaco"
+          }
+        }
+      }
+    },
+    "Tropical Fruit": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Frutas tropicales"
+          }
+        }
+      }
+    },
+    "Vanilla": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Vainilla"
+          }
+        }
+      }
+    },
+    "Whiskey": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Whisky"
+          }
+        }
+      }
+    },
+    "Winey": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Vinoso"
+          }
+        }
+      }
+    }
+  },
+  "version": "1.0"
+}

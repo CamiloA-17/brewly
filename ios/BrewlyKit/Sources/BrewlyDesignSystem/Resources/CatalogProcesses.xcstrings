@@ -1,0 +1,206 @@
+{
+  "sourceLanguage": "en",
+  "strings": {
+    "Anaerobic Honey": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Honey anaeróbico"
+          }
+        }
+      }
+    },
+    "Anaerobic Natural": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Natural anaeróbico"
+          }
+        }
+      }
+    },
+    "Anaerobic Washed": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Lavado anaeróbico"
+          }
+        }
+      }
+    },
+    "Black Honey": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Honey negro"
+          }
+        }
+      }
+    },
+    "Carbonic Maceration": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Maceración carbónica"
+          }
+        }
+      }
+    },
+    "Co-fermented": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cofermentado"
+          }
+        }
+      }
+    },
+    "Double Fermentation": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Doble fermentación"
+          }
+        }
+      }
+    },
+    "Experimental": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Experimental"
+          }
+        }
+      }
+    },
+    "Extended Fermentation": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Fermentación prolongada"
+          }
+        }
+      }
+    },
+    "Honey": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Honey"
+          }
+        }
+      }
+    },
+    "Koji": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Koji"
+          }
+        }
+      }
+    },
+    "Natural": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Natural"
+          }
+        }
+      }
+    },
+    "Red Honey": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Honey rojo"
+          }
+        }
+      }
+    },
+    "Semi-washed": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Semilavado"
+          }
+        }
+      }
+    },
+    "Thermal Shock": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Choque térmico"
+          }
+        }
+      }
+    },
+    "Washed": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Lavado"
+          }
+        }
+      }
+    },
+    "Wet-hulled": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Descascarado húmedo"
+          }
+        }
+      }
+    },
+    "White Honey": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Honey blanco"
+          }
+        }
+      }
+    },
+    "Yeast Inoculated": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Inoculado con levaduras"
+          }
+        }
+      }
+    },
+    "Yellow Honey": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Honey amarillo"
+          }
+        }
+      }
+    }
+  },
+  "version": "1.0"
+}

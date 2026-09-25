@@ -1,0 +1,224 @@
+import BrewlyAPI
+import BrewlyDomain
+import Foundation
+
+// MARK: - API → Domain
+
+extension UserProfile {
+    init(_ dto: CurrentUserDTO) {
+        self.init(
+            id: dto.id,
+            username: dto.username,
+            displayName: dto.displayName,
+            email: dto.email,
+            bio: dto.bio,
+            avatarURL: dto.avatarURL.flatMap(URL.init(string:)),
+            location: dto.location,
+            createdAt: dto.createdAt
+        )
+    }
+}
+
+extension UserSummary {
+    init(_ dto: UserSummaryDTO) {
+        self.init(id: dto.id, username: dto.username, displayName: dto.displayName, avatarURL: dto.avatarURL.flatMap(URL.init(string:)))
+    }
+}
+
+extension Catalog {
+    init(_ dto: CatalogDTO) {
+        self.init(
+            brewMethods: dto.brewMethods.map {
+                BrewMethod(
+                    slug: $0.slug, name: $0.name, category: $0.category, ratioBasis: $0.ratioBasis,
+                    description: $0.description, defaultRatio: $0.defaultRatio,
+                    defaultGrindSize: $0.defaultGrindSize, defaultWaterTempC: $0.defaultWaterTempC
+                )
+            },
+            varietals: dto.varietals.map { Varietal(slug: $0.slug, name: $0.name, species: $0.species) },
+            processingMethods: dto.processingMethods.map {
+                ProcessingMethod(slug: $0.slug, name: $0.name, description: $0.description)
+            },
+            countries: dto.countries.map { Country(code: $0.code, name: $0.name) },
+            grinders: dto.grinders.map {
+                Grinder(slug: $0.slug, brand: $0.brand, model: $0.model, kind: $0.kind, burrType: $0.burrType)
+            },
+            flavorNotes: dto.flavorNotes.map { FlavorNote(slug: $0.slug, name: $0.name, category: $0.category) }
+        )
+    }
+}
+
+extension Bean {
+    init(_ dto: BeanDTO) {
+        self.init(
+            id: dto.id,
+            ownerID: dto.ownerId,
+            name: dto.name,
+            roaster: dto.roaster,
+            countryCode: dto.countryCode,
+            region: dto.region,
+            farm: dto.farm,
+            producer: dto.producer,
+            altitudeMinM: dto.altitudeMinM,
+            altitudeMaxM: dto.altitudeMaxM,
+            processingMethodSlug: dto.processingMethodSlug,
+            varietalSlugs: dto.varietalSlugs,
+            flavorNoteSlugs: dto.flavorNoteSlugs,
+            roastLevel: dto.roastLevel,
+            roastDate: dto.roastDate,
+            harvestYear: dto.harvestYear,
+            scaScore: dto.scaScore,
+            weightG: dto.weightG,
+            isDecaf: dto.isDecaf,
+            notes: dto.notes,
+            photoURL: dto.photoURL.flatMap(URL.init(string:)),
+            visibility: dto.visibility,
+            isArchived: dto.isArchived,
+            createdAt: dto.createdAt,
+            updatedAt: dto.updatedAt
+        )
+    }
+}
+
+extension Recipe {
+    init(_ dto: RecipeDTO) {
+        self.init(
+            id: dto.id,
+            author: UserSummary(dto.author),
+            bean: BeanSummary(
+                id: dto.bean.id,
+                name: dto.bean.name,
+                roaster: dto.bean.roaster,
+                countryCode: dto.bean.countryCode,
+                farm: dto.bean.farm,
+                processingMethodSlug: dto.bean.processingMethodSlug,
+                varietalSlugs: dto.bean.varietalSlugs,
+                roastLevel: dto.bean.roastLevel
+            ),
+            methodSlug: dto.methodSlug,
+            forkedFromID: dto.forkedFromId,
+            title: dto.title,
+            description: dto.description,
+            doseG: dto.doseG,
+            waterG: dto.waterG,
+            yieldG: dto.yieldG,
+            ratio: dto.ratio,
+            grindSize: dto.grindSize,
+            grinderSlug: dto.grinderSlug,
+            grindSetting: dto.grindSetting,
+            grindMicrons: dto.grindMicrons,
+            waterTempC: dto.waterTempC,
+            bloomWaterG: dto.bloomWaterG,
+            bloomTimeS: dto.bloomTimeS,
+            totalTimeS: dto.totalTimeS,
+            pressureBar: dto.pressureBar,
+            filterType: dto.filterType,
+            waterProfile: dto.waterProfile,
+            waterTdsPpm: dto.waterTdsPpm,
+            tdsPercent: dto.tdsPercent,
+            extractionYieldPercent: dto.extractionYieldPercent,
+            rating: dto.rating,
+            notes: dto.notes,
+            flavorNoteSlugs: dto.flavorNoteSlugs,
+            steps: dto.steps.map {
+                RecipeStep(position: $0.position, kind: $0.kind, startS: $0.startS,
+                           waterTargetG: $0.waterTargetG, instruction: $0.instruction)
+            },
+            visibility: dto.visibility,
+            createdAt: dto.createdAt,
+            updatedAt: dto.updatedAt
+        )
+    }
+}
+
+extension RecipeSummary {
+    init(_ dto: RecipeSummaryDTO) {
+        self.init(
+            id: dto.id,
+            author: UserSummary(dto.author),
+            beanName: dto.beanName,
+            methodSlug: dto.methodSlug,
+            title: dto.title,
+            doseG: dto.doseG,
+            ratio: dto.ratio,
+            grindSize: dto.grindSize,
+            waterTempC: dto.waterTempC,
+            totalTimeS: dto.totalTimeS,
+            rating: dto.rating,
+            visibility: dto.visibility,
+            createdAt: dto.createdAt
+        )
+    }
+}
+
+// MARK: - Domain → API
+
+extension UpsertBeanRequest {
+    init(_ draft: BeanDraft) {
+        self.init(
+            name: draft.name.trimmingWhitespace,
+            roaster: draft.roaster.nilIfBlank,
+            countryCode: draft.countryCode,
+            region: draft.region.nilIfBlank,
+            farm: draft.farm.nilIfBlank,
+            producer: draft.producer.nilIfBlank,
+            altitudeMinM: draft.altitudeMinM,
+            altitudeMaxM: draft.altitudeMaxM,
+            processingMethodSlug: draft.processingMethodSlug,
+            varietalSlugs: draft.varietalSlugs.sorted(),
+            flavorNoteSlugs: draft.flavorNoteSlugs.sorted(),
+            roastLevel: draft.roastLevel,
+            roastDate: draft.roastDate,
+            harvestYear: draft.harvestYear,
+            scaScore: draft.scaScore,
+            weightG: draft.weightG,
+            isDecaf: draft.isDecaf,
+            notes: draft.notes.nilIfBlank,
+            visibility: draft.visibility,
+            isArchived: draft.isArchived
+        )
+    }
+}
+
+extension UpsertRecipeRequest {
+    init(_ input: RecipeInput) {
+        let draft = input.draft
+        self.init(
+            beanId: input.beanID,
+            methodSlug: input.methodSlug,
+            title: draft.title.trimmingWhitespace,
+            description: draft.description.nilIfBlank,
+            doseG: draft.doseG ?? 0,
+            waterG: draft.waterG,
+            yieldG: draft.yieldG,
+            grindSize: draft.grindSize,
+            grinderSlug: draft.grinderSlug,
+            grindSetting: draft.grindSetting.nilIfBlank,
+            grindMicrons: draft.grindMicrons,
+            waterTempC: draft.waterTempC,
+            bloomWaterG: draft.bloomWaterG,
+            bloomTimeS: draft.bloomTimeS,
+            totalTimeS: draft.totalTimeS,
+            pressureBar: draft.pressureBar,
+            filterType: draft.filterType,
+            waterProfile: draft.waterProfile.nilIfBlank,
+            waterTdsPpm: draft.waterTdsPpm,
+            tdsPercent: draft.tdsPercent,
+            rating: draft.rating,
+            notes: draft.notes.nilIfBlank,
+            flavorNoteSlugs: draft.flavorNoteSlugs.sorted(),
+            steps: draft.steps.map {
+                RecipeStepInput(kind: $0.kind, startS: $0.startS, waterTargetG: $0.waterTargetG,
+                                instruction: $0.instruction.nilIfBlank)
+            },
+            visibility: draft.visibility
+        )
+    }
+}
+
+extension String {
+    var nilIfBlank: String? {
+        let trimmed = trimmingWhitespace
+        return trimmed.isEmpty ? nil : trimmed
+    }
+}

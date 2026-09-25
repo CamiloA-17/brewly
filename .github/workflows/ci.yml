@@ -94,3 +94,28 @@ jobs:
         run: swift build --package-path server --build-tests
       - name: Test
         run: swift test --package-path server --skip-build
+
+  ios:
+    name: iOS (build + tests)
+    runs-on: macos-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v5
+      - uses: maxim-lobanov/setup-xcode@v1
+        with:
+          xcode-version: latest-stable
+      - name: Install XcodeGen
+        run: brew install xcodegen
+      - name: Generate the Xcode project
+        run: cd ios && xcodegen generate
+      - name: Build the app
+        run: |
+          xcodebuild build \
+            -project ios/Brewly.xcodeproj \
+            -scheme Brewly \
+            -destination 'generic/platform=iOS Simulator' \
+            -skipPackagePluginValidation \
+            CODE_SIGNING_ALLOWED=NO \
+            -quiet
+      - name: Test BrewlyKit
+        run: scripts/ios-test.sh
