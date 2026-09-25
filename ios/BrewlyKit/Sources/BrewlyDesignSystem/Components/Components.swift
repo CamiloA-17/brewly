@@ -98,7 +98,7 @@ public struct FieldErrorText: View {
         if let message {
             Text(message)
                 .font(.footnote)
-                .foregroundStyle(.red)
+                .foregroundStyle(Color.brewlyError)
         }
     }
 }

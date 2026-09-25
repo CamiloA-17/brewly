@@ -35,6 +35,7 @@ public struct RootView: View {
             }
         }
         .tint(Color.brewlyAccent)
+        .brewlyAppearance()
         .task { await model.start() }
     }
 }
