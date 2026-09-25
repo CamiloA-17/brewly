@@ -1,0 +1,129 @@
+name: CI
+
+on:
+  push:
+    branches: [main, "feature/**", "bugfix/**", "release/**", "hotfix/**"]
+  pull_request:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  DBMATE_MIGRATIONS_DIR: database/migrations
+  DBMATE_NO_DUMP_SCHEMA: "true"
+
+jobs:
+  database:
+    name: Database (migrations + SQL tests)
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:17-alpine
+        env:
+          POSTGRES_USER: brewly
+          POSTGRES_PASSWORD: brewly
+          POSTGRES_DB: brewly_test
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd "pg_isready -U brewly -d brewly_test"
+          --health-interval 2s --health-timeout 5s --health-retries 30
+    env:
+      DATABASE_URL: postgres://brewly:brewly@localhost:5432/brewly_test?sslmode=disable
+    steps:
+      - uses: actions/checkout@v5
+      - name: Install dbmate
+        run: |
+          sudo curl -fsSL -o /usr/local/bin/dbmate \
+            https://github.com/amacneil/dbmate/releases/latest/download/dbmate-linux-amd64
+          sudo chmod +x /usr/local/bin/dbmate
+      - name: Apply migrations
+        run: dbmate --wait up
+      - name: Run SQL tests
+        run: database/tests/run.sh
+      - name: Roll back every migration, then migrate again
+        run: |
+          for _ in database/migrations/*.sql; do dbmate rollback; done
+          dbmate up
+      - name: Load development seed
+        run: |
+          psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -v demo_password="$(openssl rand -hex 16)" \
+            -f database/seeds/dev_seed.sql
+      - name: Run SQL tests against seeded data
+        run: database/tests/run.sh
+
+  shared:
+    name: Shared package (Linux)
+    runs-on: ubuntu-latest
+    container: swift:6.2-noble
+    steps:
+      - uses: actions/checkout@v5
+      - name: Test
+        run: swift test --package-path shared/BrewlyShared
+
+  server:
+    name: Server (build + tests)
+    runs-on: ubuntu-latest
+    container: swift:6.2-noble
+    services:
+      postgres:
+        image: postgres:17-alpine
+        env:
+          POSTGRES_USER: brewly
+          POSTGRES_PASSWORD: brewly
+          POSTGRES_DB: brewly_test
+        options: >-
+          --health-cmd "pg_isready -U brewly -d brewly_test"
+          --health-interval 2s --health-timeout 5s --health-retries 30
+    env:
+      DATABASE_URL: postgres://brewly:brewly@postgres:5432/brewly_test?sslmode=disable
+      TEST_DATABASE_URL: postgres://brewly:brewly@postgres:5432/brewly_test?sslmode=disable
+    steps:
+      - uses: actions/checkout@v5
+      - name: Install dbmate
+        run: |
+          apt-get -q update && apt-get -q install -y curl
+          curl -fsSL -o /usr/local/bin/dbmate \
+            https://github.com/amacneil/dbmate/releases/latest/download/dbmate-linux-amd64
+          chmod +x /usr/local/bin/dbmate
+      - name: Apply migrations
+        run: dbmate --wait up
+      - name: Cache SwiftPM build
+        uses: actions/cache@v4
+        with:
+          path: server/.build
+          # The build directory stores absolute paths, so the key includes the checkout path
+          # (it changes when the repository is renamed).
+          key: server-${{ runner.os }}-${{ github.workspace }}-${{ hashFiles('server/Package.swift', 'server/Package.resolved', 'shared/BrewlyShared/Package.swift') }}
+          restore-keys: server-${{ runner.os }}-${{ github.workspace }}-
+      - name: Build
+        run: swift build --package-path server --build-tests
+      - name: Generate a JWT secret for the tests
+        run: echo "JWT_SECRET=$(head -c 48 /dev/urandom | base64 -w0)" >> "$GITHUB_ENV"
+      - name: Test
+        run: swift test --package-path server --skip-build
+
+  ios:
+    name: iOS (build + tests)
+    runs-on: macos-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v5
+      - uses: maxim-lobanov/setup-xcode@v1
+        with:
+          xcode-version: latest-stable
+      - name: Install XcodeGen
+        run: brew install xcodegen
+      - name: Generate the Xcode project
+        run: cd ios && xcodegen generate
+      - name: Build the app
+        run: |
+          xcodebuild build \
+            -project ios/Brewly.xcodeproj \
+            -scheme Brewly \
+            -destination 'generic/platform=iOS Simulator' \
+            -skipPackagePluginValidation \
+            CODE_SIGNING_ALLOWED=NO \
+            -quiet
+      - name: Test BrewlyKit
+        run: scripts/ios-test.sh

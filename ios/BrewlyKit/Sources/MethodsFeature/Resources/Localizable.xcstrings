@@ -1,0 +1,36 @@
+{
+  "sourceLanguage": "en",
+  "strings": {
+    "Brew methods": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Métodos de preparación"
+          }
+        }
+      }
+    },
+    "I use it": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Lo uso"
+          }
+        }
+      }
+    },
+    "Mark the methods you use. They appear first when you create a recipe.": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Marca los métodos que usas. Aparecerán primero al crear una receta."
+          }
+        }
+      }
+    }
+  },
+  "version": "1.0"
+}

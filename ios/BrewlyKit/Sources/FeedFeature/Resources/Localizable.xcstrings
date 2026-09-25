@@ -1,0 +1,36 @@
+{
+  "sourceLanguage": "en",
+  "strings": {
+    "Home": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Inicio"
+          }
+        }
+      }
+    },
+    "Soon you'll see posts, recipes and tips from the people you follow.": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pronto verás publicaciones, recetas y consejos de las personas que sigues."
+          }
+        }
+      }
+    },
+    "Your feed is coming soon": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tu feed llegará pronto"
+          }
+        }
+      }
+    }
+  },
+  "version": "1.0"
+}

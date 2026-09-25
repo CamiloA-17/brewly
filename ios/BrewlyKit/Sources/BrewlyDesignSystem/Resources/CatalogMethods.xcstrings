@@ -1,0 +1,186 @@
+{
+  "sourceLanguage": "en",
+  "strings": {
+    "AeroPress": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "AeroPress"
+          }
+        }
+      }
+    },
+    "Batch Brew": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cafetera de goteo"
+          }
+        }
+      }
+    },
+    "Chemex": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Chemex"
+          }
+        }
+      }
+    },
+    "Clever Dripper": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Clever Dripper"
+          }
+        }
+      }
+    },
+    "Cloth Filter": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Colador de tela"
+          }
+        }
+      }
+    },
+    "Cold Brew": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cold brew"
+          }
+        }
+      }
+    },
+    "Cold Drip": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Goteo en frío"
+          }
+        }
+      }
+    },
+    "Cupping": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Catación"
+          }
+        }
+      }
+    },
+    "Espresso": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Espresso"
+          }
+        }
+      }
+    },
+    "French Press": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Prensa francesa"
+          }
+        }
+      }
+    },
+    "Hario Switch": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hario Switch"
+          }
+        }
+      }
+    },
+    "Kalita Wave": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kalita Wave"
+          }
+        }
+      }
+    },
+    "Melitta": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Melitta"
+          }
+        }
+      }
+    },
+    "Moka Pot": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cafetera moka"
+          }
+        }
+      }
+    },
+    "Origami": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Origami"
+          }
+        }
+      }
+    },
+    "Siphon": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sifón"
+          }
+        }
+      }
+    },
+    "Turkish Coffee": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Café turco"
+          }
+        }
+      }
+    },
+    "V60": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "V60"
+          }
+        }
+      }
+    }
+  },
+  "version": "1.0"
+}
