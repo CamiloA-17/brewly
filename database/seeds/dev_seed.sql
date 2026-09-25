@@ -108,4 +108,15 @@ INSERT INTO posts (id, author_id, kind, body, recipe_id) VALUES
      'My go-to recipe for washed Geishas.', 'bbbbbbbb-0000-4000-8000-000000000001')
 ON CONFLICT (id) DO NOTHING;
 
+INSERT INTO post_likes (post_id, user_id) VALUES
+    ('cccccccc-0000-4000-8000-000000000001', '22222222-2222-4222-8222-222222222222')
+ON CONFLICT DO NOTHING;
+
+INSERT INTO comments (id, post_id, author_id, parent_id, body) VALUES
+    ('dddddddd-0000-4000-8000-000000000001', 'cccccccc-0000-4000-8000-000000000001',
+     '22222222-2222-4222-8222-222222222222', NULL, 'What grind setting on the Comandante?'),
+    ('dddddddd-0000-4000-8000-000000000002', 'cccccccc-0000-4000-8000-000000000001',
+     '11111111-1111-4111-8111-111111111111', 'dddddddd-0000-4000-8000-000000000001', '24 clicks, then adjust by taste.')
+ON CONFLICT (id) DO NOTHING;
+
 COMMIT;

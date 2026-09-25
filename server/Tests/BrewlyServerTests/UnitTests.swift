@@ -114,6 +114,55 @@ final class PeopleServiceTests: XCTestCase {
     }
 }
 
+final class JPEGInfoTests: XCTestCase {
+    func testReadsSizeFromFrameHeader() {
+        XCTAssertEqual(JPEGInfo.dimensions(of: tinyJPEG(width: 800, height: 600))?.width, 800)
+        XCTAssertEqual(JPEGInfo.dimensions(of: tinyJPEG(width: 800, height: 600))?.height, 600)
+    }
+
+    func testRejectsOtherData() {
+        XCTAssertNil(JPEGInfo.dimensions(of: Data([0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A])))
+        XCTAssertNil(JPEGInfo.dimensions(of: Data([0xFF, 0xD8, 0xFF, 0xD9])))
+    }
+}
+
+final class PostServiceTests: XCTestCase {
+    private let service = PostService(posts: UnreachablePostRepository())
+
+    func testEmptyPostIsRejected() {
+        XCTAssertThrowsError(try service.validated(CreatePostRequest(body: "   "))) { error in
+            XCTAssertEqual((error as? AppError)?.fieldErrors?.map(\.field), ["body"])
+        }
+    }
+
+    func testPhotoOnlyPostIsAllowedAndBlankTextDropped() throws {
+        let post = try service.validated(CreatePostRequest(body: "  ", mediaIds: [UUID()]))
+        XCTAssertNil(post.body)
+    }
+
+    func testRepeatedOrTooManyPhotosAreRejected() {
+        let id = UUID()
+        XCTAssertThrowsError(try service.validated(CreatePostRequest(body: "Hi", mediaIds: [id, id])))
+        XCTAssertThrowsError(try service.validated(CreatePostRequest(body: "Hi", mediaIds: (0..<5).map { _ in UUID() })))
+    }
+
+    func testCannotShareRecipeAndBeanTogether() {
+        XCTAssertThrowsError(try service.validated(CreatePostRequest(recipeId: UUID(), beanId: UUID()))) { error in
+            XCTAssertEqual((error as? AppError)?.fieldErrors?.map(\.field), ["beanId"])
+        }
+    }
+}
+
+/// A minimal JPEG: start of image, a JFIF segment, a baseline frame header and end of image.
+func tinyJPEG(width: Int, height: Int) -> Data {
+    var bytes: [UInt8] = [0xFF, 0xD8]
+    bytes += [0xFF, 0xE0, 0x00, 0x10, 0x4A, 0x46, 0x49, 0x46, 0x00, 0x01, 0x01, 0x00, 0x00, 0x01, 0x00, 0x01, 0x00, 0x00]
+    bytes += [0xFF, 0xC0, 0x00, 0x11, 0x08, UInt8(height >> 8), UInt8(height & 0xFF), UInt8(width >> 8), UInt8(width & 0xFF),
+              0x03, 0x01, 0x22, 0x00, 0x02, 0x11, 0x01, 0x03, 0x11, 0x01]
+    bytes += [0xFF, 0xD9]
+    return Data(bytes)
+}
+
 func assertValidationError(
     fields: Set<String>,
     file: StaticString = #filePath,
@@ -181,4 +230,24 @@ struct UnreachablePeopleRepository: PeopleRepository {
     }
     func follow(memberID: UUID, followerID: UUID) async throws -> FollowStateDTO? { fatalError("Not used in unit tests") }
     func unfollow(memberID: UUID, followerID: UUID) async throws -> FollowStateDTO { fatalError("Not used in unit tests") }
+}
+
+struct UnreachablePostRepository: PostRepository {
+    func list(scope: PostListScope, viewerID: UUID, after cursor: PageCursor?, limit: Int) async throws -> BrewlyAPI.Page<PostDTO> {
+        fatalError("Not used in unit tests")
+    }
+    func find(id: UUID, viewerID: UUID) async throws -> PostDTO? { fatalError("Not used in unit tests") }
+    func create(authorID: UUID, kind: PostKind, _ request: CreatePostRequest) async throws -> PostDTO {
+        fatalError("Not used in unit tests")
+    }
+    func delete(id: UUID, authorID: UUID) async throws -> Bool { fatalError("Not used in unit tests") }
+    func like(postID: UUID, userID: UUID) async throws -> LikeStateDTO? { fatalError("Not used in unit tests") }
+    func unlike(postID: UUID, userID: UUID) async throws -> LikeStateDTO { fatalError("Not used in unit tests") }
+    func comments(postID: UUID, viewerID: UUID, after cursor: PageCursor?, limit: Int) async throws -> BrewlyAPI.Page<CommentDTO>? {
+        fatalError("Not used in unit tests")
+    }
+    func addComment(postID: UUID, authorID: UUID, body: String, parentID: UUID?) async throws -> CommentDTO? {
+        fatalError("Not used in unit tests")
+    }
+    func deleteComment(id: UUID, userID: UUID) async throws -> Bool { fatalError("Not used in unit tests") }
 }

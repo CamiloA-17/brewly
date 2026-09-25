@@ -45,6 +45,21 @@ and the server always agree on the contract.
 | PUT | `/v1/recipes/{id}/save` | Save a recipe the user can see. Returns `SaveStateDTO` (idempotent). |
 | DELETE | `/v1/recipes/{id}/save` | Remove a saved recipe. Returns `SaveStateDTO` (idempotent). |
 | GET | `/v1/me/saved-recipes?cursor=&limit=` | Saved recipes, newest save first. |
+| POST | `/v1/media` | Upload a JPEG (`Content-Type: image/jpeg`, at most 2 MB). Returns `MediaDTO` (201). |
+| GET | `/v1/media/{id}` | Image bytes, if the user uploaded it or can see the post or avatar that uses it. Cacheable forever (`ETag`). |
+| PUT | `/v1/me/avatar` | Use an uploaded image as profile picture (`{ "mediaId": … }`). Returns `CurrentUserDTO`. |
+| DELETE | `/v1/me/avatar` | Remove the profile picture. Returns `CurrentUserDTO`. |
+| GET | `/v1/feed?cursor=&limit=` | The user's posts and those of the people they follow, newest first. |
+| GET | `/v1/posts/explore?cursor=&limit=` | Public posts of the community. |
+| GET | `/v1/users/{id}/posts?cursor=&limit=` | The member's posts the user can see. |
+| POST | `/v1/posts` | Publish a post with text, up to 4 uploaded images and optionally one own `recipeId` or `beanId` (201). |
+| GET | `/v1/posts/{id}` | A post the user can see. |
+| DELETE | `/v1/posts/{id}` | Delete a post the user wrote, with its images (204). |
+| PUT | `/v1/posts/{id}/like` | Like a post. Returns `LikeStateDTO` (idempotent). |
+| DELETE | `/v1/posts/{id}/like` | Remove a like. Returns `LikeStateDTO` (idempotent). |
+| GET | `/v1/posts/{id}/comments?cursor=&limit=` | Comments, oldest first. |
+| POST | `/v1/posts/{id}/comments` | Comment (`{ "body", "parentId"? }`); replies to a reply join its thread (201). |
+| DELETE | `/v1/comments/{id}` | Delete a comment written by the user or on the user's post, with its replies (204). |
 | GET | `/v1/users?q=` | Up to 20 members whose username or name starts with `q` (a leading `@` is ignored). |
 | GET | `/v1/users/{id}` | A member's public profile with counts and follow state (`UserProfileDTO`). |
 | GET | `/v1/users/{id}/recipes?cursor=&limit=` | The member's recipes the user can see. |
@@ -117,6 +132,32 @@ For espresso (`ratioBasis: "beverage"`), send `yieldG` (beverage weight) and omi
 `{ "methodSlug": "espresso", "doseG": 18, "yieldG": 36, "grindSize": "fine", "pressureBar": 9, … }`
 gives `"ratio": 2`.
 
+### Publish a post with photos
+
+Upload each photo first, then send the ids in the order they should appear:
+
+```http
+POST /v1/media
+Content-Type: image/jpeg
+
+<JPEG bytes>
+```
+
+```json
+{ "id": "5f0c…", "url": "/v1/media/5f0c…", "width": 1600, "height": 1200 }
+```
+
+```http
+POST /v1/posts
+Content-Type: application/json
+
+{ "body": "Dialing in a new natural", "mediaIds": ["5f0c…"], "recipeId": "bbbbbbbb-…", "visibility": "public" }
+```
+
+The server derives `kind` (`text`, `recipe` or `bean`) from what the post shares. If the shared
+recipe or bean is not visible to a reader, the post still shows, without it. Image URLs are
+relative to the API base URL and need the access token.
+
 ### Remix a recipe
 
 A remix is a new recipe that starts from someone else's. The app copies the parameters, the
@@ -146,7 +187,9 @@ Every non-2xx response has the same shape:
 | 401 | `unauthorized`, `invalid_credentials` |
 | 404 | `not_found` (also for content the user is not allowed to see, and for members who blocked the user or were blocked) |
 | 409 | `username_taken`, `email_taken`, `bean_in_use`, `conflict` |
-| 422 | `validation_failed` with `fieldErrors`, `cannot_follow_self` |
+| 413 | `payload_too_large` (images over 2 MB) |
+| 415 | `invalid_image` (uploads that are not `image/jpeg`) |
+| 422 | `validation_failed` with `fieldErrors`, `cannot_follow_self`, `invalid_image` |
 | 500 | `internal_error` |
 
 Field error codes: `required`, `out_of_range`, `too_long`, `invalid_format`, `not_allowed`,

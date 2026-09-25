@@ -27,18 +27,35 @@ public struct MemberProfileView: View {
                     }
                     FieldErrorText(model.errorMessage)
                 }
-                recipesSection(profile)
+                Section {
+                    Picker(selection: $model.tab) {
+                        Text("Recipes", bundle: .module).tag(MemberProfileViewModel.Tab.recipes)
+                        Text("Posts", bundle: .module).tag(MemberProfileViewModel.Tab.posts)
+                    } label: {
+                        Text("Show", bundle: .module)
+                    }
+                    .pickerStyle(.segmented)
+                    .listRowBackground(Color.clear)
+                    .listRowInsets(EdgeInsets())
+                }
+                switch model.tab {
+                case .recipes: recipesSection(profile)
+                case .posts: postsSection
+                }
             }
             .refreshable { await model.load() }
         }
         .navigationTitle(Text(verbatim: model.state.value.map { "@\($0.username)" } ?? ""))
         .navigationBarTitleDisplayMode(.inline)
         .task { await model.load() }
+        .onChange(of: model.tab) {
+            Task { await model.loadTab() }
+        }
     }
 
     private func header(_ profile: MemberProfile) -> some View {
         HStack(alignment: .top, spacing: Spacing.l) {
-            AvatarView(name: profile.displayName, size: 64)
+            AvatarView(name: profile.displayName, url: profile.avatarURL, size: 64)
             VStack(alignment: .leading, spacing: Spacing.xs) {
                 Text(profile.displayName).font(.title3.bold())
                 HStack(spacing: Spacing.s) {
@@ -116,6 +133,31 @@ public struct MemberProfileView: View {
                 Text("Recipes", bundle: .module)
                 Spacer()
                 Text(profile.recipeCount, format: .number)
+            }
+        }
+    }
+
+    @ViewBuilder
+    private var postsSection: some View {
+        Section {
+            switch model.posts.state {
+            case .idle, .loading:
+                ProgressView().frame(maxWidth: .infinity)
+            case .failed:
+                Text("Couldn't load the posts.", bundle: .module).foregroundStyle(.secondary)
+            case let .loaded(posts) where posts.isEmpty:
+                Text("No posts to show yet.", bundle: .module).foregroundStyle(.secondary)
+            case let .loaded(posts):
+                ForEach(posts) { post in
+                    NavigationLink(value: AppRoute.post(post.id)) {
+                        PostSummaryRow(post: post)
+                    }
+                }
+                if model.posts.canLoadMore {
+                    ProgressView()
+                        .frame(maxWidth: .infinity)
+                        .task { await model.posts.loadMore() }
+                }
             }
         }
     }

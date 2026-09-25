@@ -1,6 +1,16 @@
 {
   "sourceLanguage": "en",
   "strings": {
+    "Couldn't load the posts.": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No se pudieron cargar las publicaciones."
+          }
+        }
+      }
+    },
     "Couldn't load the recipes.": {
       "localizations": {
         "es": {
@@ -81,6 +91,16 @@
         }
       }
     },
+    "No posts to show yet.": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aún no hay publicaciones para mostrar."
+          }
+        }
+      }
+    },
     "No recipes to show yet.": {
       "localizations": {
         "es": {
@@ -101,6 +121,16 @@
         }
       }
     },
+    "Posts": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Publicaciones"
+          }
+        }
+      }
+    },
     "Recipes": {
       "localizations": {
         "es": {
@@ -117,6 +147,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Busca por nombre de usuario o nombre."
+          }
+        }
+      }
+    },
+    "Show": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mostrar"
           }
         }
       }

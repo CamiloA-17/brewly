@@ -1,12 +1,172 @@
 {
   "sourceLanguage": "en",
   "strings": {
+    "A bean": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Un grano"
+          }
+        }
+      }
+    },
+    "A recipe": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Una receta"
+          }
+        }
+      }
+    },
+    "Add a comment": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Escribe un comentario"
+          }
+        }
+      }
+    },
+    "Bean": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Grano"
+          }
+        }
+      }
+    },
+    "Cancel": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cancelar"
+          }
+        }
+      }
+    },
+    "Cancel reply": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cancelar respuesta"
+          }
+        }
+      }
+    },
+    "Choose photos": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Elegir fotos"
+          }
+        }
+      }
+    },
+    "Comments": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Comentarios"
+          }
+        }
+      }
+    },
+    "Couldn't load the comments.": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No se pudieron cargar los comentarios."
+          }
+        }
+      }
+    },
+    "Delete": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Eliminar"
+          }
+        }
+      }
+    },
+    "Delete post": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Eliminar publicación"
+          }
+        }
+      }
+    },
+    "Delete this post?": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "¿Eliminar esta publicación?"
+          }
+        }
+      }
+    },
+    "Explore": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Explorar"
+          }
+        }
+      }
+    },
+    "Feed": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Publicaciones"
+          }
+        }
+      }
+    },
     "Find people": {
       "localizations": {
         "es": {
           "stringUnit": {
             "state": "translated",
             "value": "Buscar personas"
+          }
+        }
+      }
+    },
+    "Follow people or share your first post.": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sigue a otras personas o comparte tu primera publicación."
+          }
+        }
+      }
+    },
+    "Following": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Siguiendo"
           }
         }
       }
@@ -21,22 +181,182 @@
         }
       }
     },
-    "Soon you'll see posts, recipes and tips from the people you follow.": {
+    "New post": {
       "localizations": {
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Pronto verás publicaciones, recetas y consejos de las personas que sigues."
+            "value": "Nueva publicación"
           }
         }
       }
     },
-    "Your feed is coming soon": {
+    "No comments yet. Start the conversation.": {
       "localizations": {
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Tu feed llegará pronto"
+            "value": "Aún no hay comentarios. Empieza la conversación."
+          }
+        }
+      }
+    },
+    "No posts yet": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aún no hay publicaciones"
+          }
+        }
+      }
+    },
+    "Nothing": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nada"
+          }
+        }
+      }
+    },
+    "Photos": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Fotos"
+          }
+        }
+      }
+    },
+    "Post": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Publicación"
+          }
+        }
+      }
+    },
+    "Public posts from the community will show up here.": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aquí aparecerán las publicaciones públicas de la comunidad."
+          }
+        }
+      }
+    },
+    "Publish": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Publicar"
+          }
+        }
+      }
+    },
+    "Recipe": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Receta"
+          }
+        }
+      }
+    },
+    "Remove photo": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Quitar foto"
+          }
+        }
+      }
+    },
+    "Reply": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Responder"
+          }
+        }
+      }
+    },
+    "Replying to @%@": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Respondiendo a @%@"
+          }
+        }
+      }
+    },
+    "Send": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Enviar"
+          }
+        }
+      }
+    },
+    "Share": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Compartir"
+          }
+        }
+      }
+    },
+    "Up to %lld photos.": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hasta %lld fotos."
+          }
+        }
+      }
+    },
+    "What are you brewing?": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "¿Qué estás preparando?"
+          }
+        }
+      }
+    },
+    "Who can see it": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Quién puede verla"
+          }
+        }
+      }
+    },
+    "Your feed is empty": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tu feed está vacío"
           }
         }
       }

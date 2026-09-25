@@ -4,6 +4,7 @@ import BrewlyData
 import BrewlyDesignSystem
 import BrewlyDomain
 import BrewlyNetworking
+import FeedFeature
 import Foundation
 import MethodsFeature
 import PeopleFeature
@@ -24,6 +25,8 @@ public final class AppContainer {
     let recipes: any RecipeRepository
     let saves: any RecipeSavesRepository
     let people: any PeopleRepository
+    let posts: any PostRepository
+    let imageLoader: any ImageLoader
 
     public init(apiBaseURL: URL, tokenStore: any TokenStore = KeychainTokenStore()) {
         let publicClient = APIClient(baseURL: apiBaseURL)
@@ -40,6 +43,12 @@ public final class AppContainer {
         recipes = recipeRepository
         saves = recipeRepository
         people = APIPeopleRepository(client: client)
+        posts = APIPostRepository(client: client)
+        imageLoader = APIImageLoader(client: client)
+    }
+
+    func feedDependencies(currentUserID: UUID) -> FeedDependencies {
+        FeedDependencies(posts: posts, recipes: recipes, beans: beans, catalog: catalog, currentUserID: currentUserID)
     }
 
     var authDependencies: AuthDependencies {
@@ -71,7 +80,7 @@ public final class AppContainer {
     }
 
     var peopleDependencies: PeopleDependencies {
-        PeopleDependencies(people: people, catalog: catalog)
+        PeopleDependencies(people: people, posts: posts, catalog: catalog)
     }
 
     /// The screen each `AppRoute` opens, shared by every tab.
@@ -82,6 +91,8 @@ public final class AppContainer {
                 AnyView(MemberProfileView(memberID: id, dependencies: peopleDependencies))
             case let .recipe(id):
                 AnyView(RecipeDetailView(recipeID: id, dependencies: recipesDependencies(currentUserID: currentUserID)))
+            case let .post(id):
+                AnyView(PostDetailView(postID: id, dependencies: feedDependencies(currentUserID: currentUserID)))
             case .memberSearch:
                 AnyView(MemberSearchView(dependencies: peopleDependencies))
             case let .followers(memberID):

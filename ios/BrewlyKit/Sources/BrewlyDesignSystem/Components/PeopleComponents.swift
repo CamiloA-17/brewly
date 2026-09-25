@@ -4,20 +4,30 @@ import SwiftUI
 /// A member's picture, or their initials on a crema circle.
 public struct AvatarView: View {
     private let name: String
+    private let url: URL?
     private let size: CGFloat
 
-    public init(name: String, size: CGFloat = 40) {
+    public init(name: String, url: URL? = nil, size: CGFloat = 40) {
         self.name = name
+        self.url = url
         self.size = size
     }
 
     public var body: some View {
-        Text(initials)
-            .font(.system(size: size * 0.4, weight: .semibold, design: .rounded))
-            .foregroundStyle(Color.brewlyEspresso)
-            .frame(width: size, height: size)
-            .background(Color.brewlyCrema, in: Circle())
-            .accessibilityHidden(true)
+        Group {
+            if let url {
+                RemoteImage(url: url)
+            } else {
+                Text(initials)
+                    .font(.system(size: size * 0.4, weight: .semibold, design: .rounded))
+                    .foregroundStyle(Color.brewlyEspresso)
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+                    .background(Color.brewlyCrema)
+            }
+        }
+        .frame(width: size, height: size)
+        .clipShape(Circle())
+        .accessibilityHidden(true)
     }
 
     private var initials: String {
@@ -36,7 +46,7 @@ public struct MemberRow: View {
 
     public var body: some View {
         HStack(spacing: Spacing.m) {
-            AvatarView(name: member.displayName)
+            AvatarView(name: member.displayName, url: member.avatarURL)
             VStack(alignment: .leading, spacing: 2) {
                 Text(member.displayName).font(.headline)
                 Text(verbatim: "@\(member.username)").font(.subheadline).foregroundStyle(.secondary)
