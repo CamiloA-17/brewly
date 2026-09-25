@@ -20,7 +20,7 @@ settings:
     SWIFT_VERSION: "6.0"
     MARKETING_VERSION: "0.1.0"
     CURRENT_PROJECT_VERSION: "1"
-    # Set your Apple Developer Team ID to run on a device.
+    # Your Team ID goes in Config/Local.xcconfig (ignored by git), not here.
     DEVELOPMENT_TEAM: ""
 
 packages:
@@ -33,6 +33,11 @@ targets:
     platform: iOS
     sources:
       - path: Brewly
+    # Config/Brewly.xcconfig sets the Debug API address and includes the
+    # optional, git-ignored Config/Local.xcconfig for per-developer values.
+    configFiles:
+      Debug: Config/Brewly.xcconfig
+      Release: Config/Brewly.xcconfig
     dependencies:
       - package: BrewlyKit
         product: AppFeature
@@ -52,14 +57,14 @@ targets:
           NSAllowsLocalNetworking: true
     settings:
       base:
-        PRODUCT_BUNDLE_IDENTIFIER: app.brewly.ios
+        PRODUCT_BUNDLE_IDENTIFIER: $(BREWLY_BUNDLE_IDENTIFIER)
         ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
         ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME: AccentColor
         TARGETED_DEVICE_FAMILY: "1"
         ENABLE_PREVIEWS: YES
       configs:
-        Debug:
-          BREWLY_API_BASE_URL: http://localhost:8080
+        # Target settings win over the .xcconfig, so Local.xcconfig can never
+        # point a Release build at another server.
         Release:
           BREWLY_API_BASE_URL: https://api.brewly.app
 

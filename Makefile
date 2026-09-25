@@ -9,7 +9,7 @@ DBMATE_NO_DUMP_SCHEMA ?= true
 DBMATE ?= dbmate
 
 .PHONY: help db-up db-down db-migrate db-rollback db-reset db-seed db-test \
-        shared-test server-run server-test ios-project ios-test
+        shared-test server-run server-test ios-config ios-project ios-test
 
 help: ## Show available targets
 	@grep -E '^[a-zA-Z_-]+:.*?## ' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*?## "}; {printf "  %-14s %s\n", $$1, $$2}'
@@ -44,6 +44,14 @@ server-run: ## Run the API on http://localhost:8080
 
 server-test: ## Test the API (integration tests need TEST_DATABASE_URL and JWT_SECRET)
 	swift test --package-path server
+
+ios-config: ## Create ios/Config/Local.xcconfig (Team ID, API address) if it does not exist
+	@if [ -f ios/Config/Local.xcconfig ]; then \
+		echo "ios/Config/Local.xcconfig already exists"; \
+	else \
+		cp ios/Config/Local.xcconfig.example ios/Config/Local.xcconfig; \
+		echo "Created ios/Config/Local.xcconfig: set DEVELOPMENT_TEAM and, for a device, BREWLY_API_BASE_URL"; \
+	fi
 
 ios-project: ## Generate ios/Brewly.xcodeproj with XcodeGen
 	cd ios && xcodegen generate

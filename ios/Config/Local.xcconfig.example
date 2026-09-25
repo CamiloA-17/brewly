@@ -1,0 +1,20 @@
+// Local build settings for your Mac. Copy this file to Local.xcconfig
+// (`make ios-config`); Local.xcconfig is ignored by git.
+//
+// After editing it, regenerate the project with `make ios-project`, or just
+// build again if the project already exists.
+
+// Your Apple Developer Team ID, required to run on a physical iPhone. A free
+// Personal Team works: Xcode → Settings → Accounts shows its ID.
+DEVELOPMENT_TEAM =
+
+// API used by Debug builds. The simulator can reach your Mac at localhost; an
+// iPhone needs your Mac's LAN address (`ipconfig getifaddr en0`) or its
+// Bonjour name (System Settings → General → Sharing), on the same Wi-Fi.
+// Release builds always use the production API and ignore this value.
+// `//` starts a comment in .xcconfig files, so keep the http:/$()/ form.
+// BREWLY_API_BASE_URL = http:/$()/192.168.1.20:8080
+
+// If Xcode says the bundle identifier is not available for your team, use one
+// of your own.
+// BREWLY_BUNDLE_IDENTIFIER = com.example.brewly

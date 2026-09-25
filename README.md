@@ -58,13 +58,18 @@ make server-run
 curl http://localhost:8080/health
 
 # 3. iOS app
+make ios-config       # optional: Team ID and API address for a device
 make ios-project      # generates ios/Brewly.xcodeproj
 open ios/Brewly.xcodeproj
 ```
 
 Run the **Brewly** scheme on an iOS simulator. Debug builds talk to `http://localhost:8080`
-(`BREWLY_API_BASE_URL` in [`ios/project.yml`](ios/project.yml)). To run on a device, set your
-`DEVELOPMENT_TEAM` and point the base URL to your Mac's LAN address.
+(`BREWLY_API_BASE_URL` in [`ios/Config/Brewly.xcconfig`](ios/Config/Brewly.xcconfig)).
+
+To run on an iPhone, run `make ios-config` and edit the generated `ios/Config/Local.xcconfig`,
+which git ignores: set `DEVELOPMENT_TEAM` (a free Personal Team works) and point
+`BREWLY_API_BASE_URL` to your Mac's LAN address (`ipconfig getifaddr en0`). The iPhone and the Mac
+must be on the same Wi-Fi, with the API running (`make server-run` listens on every interface).
 
 ## Tests
 
