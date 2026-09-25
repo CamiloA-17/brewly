@@ -11,7 +11,7 @@ private let espresso = BrewMethod(
     slug: "espresso", name: "Espresso", category: .espresso, ratioBasis: .beverage,
     defaultRatio: 2, defaultGrindSize: .fine, defaultWaterTempC: 93
 )
-private let bean = Bean(id: UUID(), ownerID: UUID(), name: "Geisha Washed")
+private let sampleBean = Bean(id: UUID(), ownerID: UUID(), name: "Geisha Washed")
 
 struct StubCatalogRepository: CatalogRepository {
     func catalog(forceRefresh: Bool) async throws -> Catalog {
@@ -20,10 +20,10 @@ struct StubCatalogRepository: CatalogRepository {
 }
 
 struct StubBeanRepository: BeanRepository {
-    func myBeans(includeArchived: Bool) async throws -> [Bean] { [bean] }
-    func bean(id: UUID) async throws -> Bean { bean }
-    func create(_ draft: BeanDraft) async throws -> Bean { bean }
-    func update(id: UUID, _ draft: BeanDraft) async throws -> Bean { bean }
+    func myBeans(includeArchived: Bool) async throws -> [Bean] { [sampleBean] }
+    func bean(id: UUID) async throws -> Bean { sampleBean }
+    func create(_ draft: BeanDraft) async throws -> Bean { sampleBean }
+    func update(id: UUID, _ draft: BeanDraft) async throws -> Bean { sampleBean }
     func delete(id: UUID) async throws {}
 }
 
@@ -46,7 +46,7 @@ actor RecordingRecipeRepository: RecipeRepository {
         return Recipe(
             id: UUID(),
             author: UserSummary(id: UUID(), username: "ana.barista", displayName: "Ana"),
-            bean: BeanSummary(id: input.beanID, name: bean.name),
+            bean: BeanSummary(id: input.beanID, name: sampleBean.name),
             methodSlug: input.methodSlug,
             title: input.draft.title,
             doseG: input.draft.doseG ?? 0,
@@ -78,7 +78,7 @@ struct RecipeFormViewModelTests {
     func load() async {
         let model = makeModel(recipes: RecordingRecipeRepository())
         await model.load()
-        #expect(model.draft.beanID == bean.id)
+        #expect(model.draft.beanID == sampleBean.id)
         #expect(model.methodsSortedForPicker.map(\.slug) == ["espresso", "v60"])
     }
 
