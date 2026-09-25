@@ -30,13 +30,13 @@ private let leo = UserSummary(id: UUID(), username: "leo.roaster", displayName: 
 @Suite("NotificationsViewModel")
 struct NotificationsViewModelTests {
     @Test("Opening the list marks everything read but keeps showing what was new")
-    func marksRead() async {
+    func marksRead() async throws {
         let repository = FakeNotificationRepository(items: [AppNotification(id: UUID(), kind: .follow, actor: leo)])
         let model = NotificationsViewModel(dependencies: NotificationsDependencies(notifications: repository))
         await model.load()
         #expect(await repository.markedRead == 1)
         #expect(model.paginator.state.value?.first?.isRead == false)
-        #expect(await repository.unreadCount() == 0)
+        #expect(try await repository.unreadCount() == 0)
     }
 
     @Test("Nothing is marked when everything was read")
