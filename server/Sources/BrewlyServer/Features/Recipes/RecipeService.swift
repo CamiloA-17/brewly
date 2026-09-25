@@ -7,7 +7,7 @@ struct RecipeService: Sendable {
     let recipes: any RecipeRepository
     let catalog: any CatalogRepository
 
-    func list(scope: RecipeListScope, viewerID: UUID, cursor: String?, limit: Int) async throws -> Page<RecipeSummaryDTO> {
+    func list(scope: RecipeListScope, viewerID: UUID, cursor: String?, limit: Int) async throws -> BrewlyAPI.Page<RecipeSummaryDTO> {
         var pageCursor: PageCursor?
         if let cursor {
             guard let decoded = PageCursor(encoded: cursor) else {

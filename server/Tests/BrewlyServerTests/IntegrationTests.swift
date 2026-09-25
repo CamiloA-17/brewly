@@ -103,7 +103,7 @@ final class IntegrationTests: XCTestCase {
         XCTAssertEqual(recipe.steps.map(\.position), [1, 2])
         XCTAssertEqual(recipe.bean.id, bean.id)
 
-        let mine: Page<RecipeSummaryDTO> = try await send(.GET, "v1/me/recipes", token: ana.accessToken)
+        let mine: BrewlyAPI.Page<RecipeSummaryDTO> = try await send(.GET, "v1/me/recipes", token: ana.accessToken)
         XCTAssertEqual(mine.items.map(\.id), [recipe.id])
 
         var edit = Self.v60(beanID: bean.id)
@@ -166,7 +166,7 @@ final class IntegrationTests: XCTestCase {
                                           body: Self.v60(beanID: bean.id), status: .unprocessableEntity)
         XCTAssertEqual(error.fieldErrors?.map(\.field), ["beanId"])
 
-        let explore: Page<RecipeSummaryDTO> = try await send(.GET, "v1/recipes?method=v60&country=co", token: leo.accessToken)
+        let explore: BrewlyAPI.Page<RecipeSummaryDTO> = try await send(.GET, "v1/recipes?method=v60&country=co", token: leo.accessToken)
         XCTAssertEqual(explore.items.map(\.id), [shared.id])
     }
 
@@ -178,10 +178,10 @@ final class IntegrationTests: XCTestCase {
             let recipe: RecipeDTO = try await send(.POST, "v1/recipes", token: ana.accessToken, body: Self.v60(beanID: bean.id))
             created.append(recipe.id)
         }
-        let first: Page<RecipeSummaryDTO> = try await send(.GET, "v1/recipes?limit=2", token: ana.accessToken)
+        let first: BrewlyAPI.Page<RecipeSummaryDTO> = try await send(.GET, "v1/recipes?limit=2", token: ana.accessToken)
         XCTAssertEqual(first.items.count, 2)
         let cursor = try XCTUnwrap(first.nextCursor)
-        let second: Page<RecipeSummaryDTO> = try await send(.GET, "v1/recipes?limit=2&cursor=\(cursor)", token: ana.accessToken)
+        let second: BrewlyAPI.Page<RecipeSummaryDTO> = try await send(.GET, "v1/recipes?limit=2&cursor=\(cursor)", token: ana.accessToken)
         XCTAssertEqual(second.items.count, 1)
         XCTAssertNil(second.nextCursor)
         XCTAssertEqual(Set((first.items + second.items).map(\.id)), Set(created))

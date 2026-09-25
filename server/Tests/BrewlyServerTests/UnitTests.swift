@@ -116,7 +116,7 @@ struct StubCatalogRepository: CatalogRepository {
 }
 
 struct UnreachableRecipeRepository: RecipeRepository {
-    func list(scope: RecipeListScope, viewerID: UUID, after cursor: PageCursor?, limit: Int) async throws -> Page<RecipeSummaryDTO> {
+    func list(scope: RecipeListScope, viewerID: UUID, after cursor: PageCursor?, limit: Int) async throws -> BrewlyAPI.Page<RecipeSummaryDTO> {
         fatalError("Not used in unit tests")
     }
     func find(id: UUID, viewerID: UUID) async throws -> RecipeDTO? { fatalError("Not used in unit tests") }

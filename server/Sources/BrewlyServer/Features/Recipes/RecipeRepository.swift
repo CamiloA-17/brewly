@@ -12,7 +12,7 @@ enum RecipeListScope: Sendable {
 }
 
 protocol RecipeRepository: Sendable {
-    func list(scope: RecipeListScope, viewerID: UUID, after cursor: PageCursor?, limit: Int) async throws -> Page<RecipeSummaryDTO>
+    func list(scope: RecipeListScope, viewerID: UUID, after cursor: PageCursor?, limit: Int) async throws -> BrewlyAPI.Page<RecipeSummaryDTO>
     /// The recipe if `viewerID` is allowed to see it.
     func find(id: UUID, viewerID: UUID) async throws -> RecipeDTO?
     func create(authorID: UUID, _ recipe: UpsertRecipeRequest) async throws -> RecipeDTO
@@ -206,7 +206,7 @@ struct PostgresRecipeRepository: RecipeRepository {
 
     // MARK: - Queries
 
-    func list(scope: RecipeListScope, viewerID: UUID, after cursor: PageCursor?, limit: Int) async throws -> Page<RecipeSummaryDTO> {
+    func list(scope: RecipeListScope, viewerID: UUID, after cursor: PageCursor?, limit: Int) async throws -> BrewlyAPI.Page<RecipeSummaryDTO> {
         let cursorTime = cursor?.createdAt
         let cursorID = cursor?.id
         let fetchLimit = limit + 1
@@ -244,7 +244,7 @@ struct PostgresRecipeRepository: RecipeRepository {
         let nextCursor = rows.count > limit
             ? pageRows.last.map { PageCursor(createdAt: $0.cursorCreatedAt, id: $0.id).encoded() }
             : nil
-        return Page(items: pageRows.map(\.dto), nextCursor: nextCursor)
+        return BrewlyAPI.Page(items: pageRows.map(\.dto), nextCursor: nextCursor)
     }
 
     func find(id: UUID, viewerID: UUID) async throws -> RecipeDTO? {
