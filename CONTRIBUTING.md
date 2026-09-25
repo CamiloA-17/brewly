@@ -60,6 +60,9 @@ Example: `feat(ios): prefill recipe parameters from the brew method`
 
 ## Running the checks locally
 
+The database checks need Docker and the `psql` client (`brew install libpq`, then add
+`$(brew --prefix libpq)/bin` to your `PATH`). They pass on an empty or a seeded database.
+
 ```bash
 make db-up && make db-test
 make shared-test

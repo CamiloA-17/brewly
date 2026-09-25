@@ -46,10 +46,19 @@ SELECT pg_temp.expect_equal((SELECT count(*) FROM coffee_beans WHERE owner_id = 
                             0::bigint, 'beans deleted with account');
 SELECT pg_temp.expect_equal((SELECT count(*) FROM recipes WHERE author_id = '00000000-0000-0000-0000-00000000000a'),
                             0::bigint, 'recipes deleted with account');
-SELECT pg_temp.expect_equal((SELECT count(*) FROM recipe_steps), 0::bigint, 'steps deleted with account');
-SELECT pg_temp.expect_equal((SELECT count(*) FROM recipe_saves), 0::bigint, 'saves deleted with account');
-SELECT pg_temp.expect_equal((SELECT count(*) FROM follows), 0::bigint, 'follows deleted with account');
-SELECT pg_temp.expect_equal((SELECT count(*) FROM bean_varietals), 0::bigint, 'bean varietals deleted with account');
-SELECT pg_temp.expect_equal((SELECT count(*) FROM users), 2::bigint, 'other users untouched');
+-- Counts are scoped to the fixture rows so the tests also pass on a seeded database.
+SELECT pg_temp.expect_equal((SELECT count(*) FROM recipe_steps WHERE recipe_id = '00000000-0000-0000-0000-0000000000c1'),
+                            0::bigint, 'steps deleted with account');
+SELECT pg_temp.expect_equal((SELECT count(*) FROM recipe_saves WHERE recipe_id = '00000000-0000-0000-0000-0000000000c1'),
+                            0::bigint, 'saves deleted with account');
+SELECT pg_temp.expect_equal((SELECT count(*) FROM follows
+                             WHERE '00000000-0000-0000-0000-00000000000a' IN (follower_id, followed_id)),
+                            0::bigint, 'follows deleted with account');
+SELECT pg_temp.expect_equal((SELECT count(*) FROM bean_varietals WHERE bean_id = '00000000-0000-0000-0000-0000000000b1'),
+                            0::bigint, 'bean varietals deleted with account');
+SELECT pg_temp.expect_equal((SELECT count(*) FROM users WHERE id IN ('00000000-0000-0000-0000-00000000000a',
+                                                                     '00000000-0000-0000-0000-00000000000b',
+                                                                     '00000000-0000-0000-0000-00000000000e')),
+                            2::bigint, 'other users untouched');
 
 ROLLBACK;

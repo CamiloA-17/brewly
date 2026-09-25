@@ -36,8 +36,15 @@ results (TDS and extraction yield). Recipes, beans and posts are shared with the
 
 ## Getting started
 
-Requirements: Docker, Xcode 16 or later (Xcode 26 recommended), [dbmate](https://github.com/amacneil/dbmate)
-and [XcodeGen](https://github.com/yonaskolb/XcodeGen) (`brew install dbmate xcodegen`).
+Requirements: Docker, Xcode 16 or later (Xcode 26 recommended), [dbmate](https://github.com/amacneil/dbmate),
+[XcodeGen](https://github.com/yonaskolb/XcodeGen) and the `psql` client, used by `make db-seed` and
+`make db-test`. PostgreSQL itself runs in Docker; only the client is needed on your Mac:
+
+```bash
+brew install dbmate xcodegen libpq
+# libpq is keg-only, so add psql to your PATH:
+echo 'export PATH="$(brew --prefix libpq)/bin:$PATH"' >> ~/.zshrc && source ~/.zshrc
+```
 
 ```bash
 cp .env.example .env

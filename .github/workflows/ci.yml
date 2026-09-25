@@ -47,6 +47,8 @@ jobs:
           dbmate up
       - name: Load development seed
         run: psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -f database/seeds/dev_seed.sql
+      - name: Run SQL tests against seeded data
+        run: database/tests/run.sh
 
   shared:
     name: Shared package (Linux)
