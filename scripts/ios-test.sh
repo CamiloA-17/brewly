@@ -19,10 +19,9 @@ sys.exit("No iPhone simulator available")
 ')
 
 echo "Using simulator ${SIMULATOR_ID}"
-xcodebuild -list
 
 xcodebuild test \
-    -scheme BrewlyKit-Package \
+    -scheme BrewlyKit \
     -destination "id=${SIMULATOR_ID}" \
     -skipPackagePluginValidation \
     -quiet
