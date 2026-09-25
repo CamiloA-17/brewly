@@ -2,46 +2,47 @@ import BrewlyDesignSystem
 import BrewlyDomain
 import SwiftUI
 
-struct RecipeDetailView: View {
+/// A recipe with every parameter. Other members' recipes can be saved and remixed.
+public struct RecipeDetailView: View {
     @State private var model: RecipeDetailViewModel
     @State private var isEditing = false
+    @State private var isRemixing = false
     @State private var isConfirmingDelete = false
     @Environment(\.dismiss) private var dismiss
 
-    init(recipeID: UUID, dependencies: RecipesDependencies) {
+    public init(recipeID: UUID, dependencies: RecipesDependencies) {
         _model = State(initialValue: RecipeDetailViewModel(recipeID: recipeID, dependencies: dependencies))
     }
 
-    var body: some View {
+    public var body: some View {
         AsyncContentView(model.state, retry: model.load) { recipe in
             content(recipe)
         }
         .navigationTitle(model.state.value?.title ?? "")
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
-            if model.isOwner {
-                Menu {
-                    Button {
-                        isEditing = true
-                    } label: {
-                        Label {
-                            Text("Edit", bundle: .module)
-                        } icon: {
-                            Image(systemName: "pencil")
+            if let recipe = model.state.value {
+                if !model.isOwner {
+                    ToolbarItem(placement: .primaryAction) {
+                        Button {
+                            Task { await model.toggleSave() }
+                        } label: {
+                            Label {
+                                recipe.isSaved ? Text("Unsave", bundle: .module) : Text("Save", bundle: .module)
+                            } icon: {
+                                Image(systemName: recipe.isSaved ? "bookmark.fill" : "bookmark")
+                            }
                         }
                     }
-                    Button(role: .destructive) {
-                        isConfirmingDelete = true
-                    } label: {
-                        Label {
-                            Text("Delete recipe", bundle: .module)
-                        } icon: {
-                            Image(systemName: "trash")
-                        }
-                    }
-                } label: {
-                    Image(systemName: "ellipsis.circle")
                 }
+                ToolbarItem(placement: .primaryAction) {
+                    actionsMenu
+                }
+            }
+        }
+        .sheet(isPresented: $isRemixing) {
+            if let recipe = model.state.value {
+                RecipeFormView(recipe: nil, remixOf: recipe, dependencies: model.dependencies) { _ in }
             }
         }
         .sheet(isPresented: $isEditing) {
@@ -67,12 +68,48 @@ struct RecipeDetailView: View {
         .task { await model.load() }
     }
 
+    private var actionsMenu: some View {
+        Menu {
+            Button {
+                isRemixing = true
+            } label: {
+                Label {
+                    Text("Remix", bundle: .module)
+                } icon: {
+                    Image(systemName: "arrow.triangle.branch")
+                }
+            }
+            if model.isOwner {
+                Button {
+                    isEditing = true
+                } label: {
+                    Label {
+                        Text("Edit", bundle: .module)
+                    } icon: {
+                        Image(systemName: "pencil")
+                    }
+                }
+                Button(role: .destructive) {
+                    isConfirmingDelete = true
+                } label: {
+                    Label {
+                        Text("Delete recipe", bundle: .module)
+                    } icon: {
+                        Image(systemName: "trash")
+                    }
+                }
+            }
+        } label: {
+            Image(systemName: "ellipsis.circle")
+        }
+    }
+
     private func content(_ recipe: Recipe) -> some View {
         List {
             Section {
                 VStack(alignment: .leading, spacing: Spacing.s) {
                     Text(recipe.title).font(.title2.bold())
-                    Text(verbatim: "\(model.method?.localizedName ?? recipe.methodSlug) · @\(recipe.author.username)")
+                    Text(model.method?.localizedName ?? recipe.methodSlug)
                         .foregroundStyle(.secondary)
                     if let description = recipe.description {
                         Text(description)
@@ -84,6 +121,22 @@ struct RecipeDetailView: View {
                         waterTempC: recipe.waterTempC,
                         totalTimeS: recipe.totalTimeS
                     )
+                    Text(statsText(recipe))
+                        .font(.footnote)
+                        .foregroundStyle(.secondary)
+                }
+                NavigationLink(value: AppRoute.member(recipe.author.id)) {
+                    MemberRow(member: recipe.author)
+                }
+                if let original = recipe.forkedFrom {
+                    NavigationLink(value: AppRoute.recipe(original.id)) {
+                        Label {
+                            Text("Remix of \(original.title) by @\(original.author.username)", bundle: .module)
+                        } icon: {
+                            Image(systemName: "arrow.triangle.branch")
+                        }
+                        .font(.subheadline)
+                    }
                 }
             }
 
@@ -160,6 +213,12 @@ struct RecipeDetailView: View {
                 Text(title, bundle: .module)
             }
         }
+    }
+
+    private func statsText(_ recipe: Recipe) -> String {
+        let saves = String(localized: "\(recipe.saveCount) saves", bundle: .module)
+        let remixes = String(localized: "\(recipe.forkCount) remixes", bundle: .module)
+        return "\(saves) · \(remixes)"
     }
 
     private func bloomText(_ recipe: Recipe) -> String? {

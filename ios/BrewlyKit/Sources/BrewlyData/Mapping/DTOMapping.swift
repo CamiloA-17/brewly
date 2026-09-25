@@ -97,6 +97,9 @@ extension Recipe {
             ),
             methodSlug: dto.methodSlug,
             forkedFromID: dto.forkedFromId,
+            forkedFrom: dto.forkedFrom.map {
+                RecipeReference(id: $0.id, title: $0.title, author: UserSummary($0.author))
+            },
             title: dto.title,
             description: dto.description,
             doseG: dto.doseG,
@@ -125,9 +128,44 @@ extension Recipe {
                            waterTargetG: $0.waterTargetG, instruction: $0.instruction)
             },
             visibility: dto.visibility,
+            saveCount: dto.saveCount,
+            forkCount: dto.forkCount,
+            isSaved: dto.isSaved,
             createdAt: dto.createdAt,
             updatedAt: dto.updatedAt
         )
+    }
+}
+
+extension SaveState {
+    init(_ dto: SaveStateDTO) {
+        self.init(isSaved: dto.isSaved, saveCount: dto.saveCount)
+    }
+}
+
+extension MemberProfile {
+    init(_ dto: UserProfileDTO) {
+        self.init(
+            id: dto.id,
+            username: dto.username,
+            displayName: dto.displayName,
+            bio: dto.bio,
+            avatarURL: dto.avatarURL.flatMap(URL.init(string:)),
+            location: dto.location,
+            createdAt: dto.createdAt,
+            followerCount: dto.followerCount,
+            followingCount: dto.followingCount,
+            recipeCount: dto.recipeCount,
+            isFollowing: dto.isFollowing,
+            followsYou: dto.followsYou,
+            isMe: dto.isMe
+        )
+    }
+}
+
+extension FollowState {
+    init(_ dto: FollowStateDTO) {
+        self.init(isFollowing: dto.isFollowing, followerCount: dto.followerCount)
     }
 }
 
@@ -185,6 +223,7 @@ extension UpsertRecipeRequest {
         let draft = input.draft
         self.init(
             beanId: input.beanID,
+            forkedFromId: draft.forkedFromID,
             methodSlug: input.methodSlug,
             title: draft.title.trimmingWhitespace,
             description: draft.description.nilIfBlank,

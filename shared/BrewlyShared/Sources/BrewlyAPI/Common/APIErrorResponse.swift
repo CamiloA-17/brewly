@@ -43,6 +43,7 @@ public enum APIErrorCode {
     public static let usernameTaken = "username_taken"
     public static let emailTaken = "email_taken"
     public static let beanInUse = "bean_in_use"
+    public static let cannotFollowSelf = "cannot_follow_self"
     public static let badRequest = "bad_request"
     public static let internalError = "internal_error"
 }

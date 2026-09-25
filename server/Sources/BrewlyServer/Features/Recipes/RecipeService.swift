@@ -8,14 +8,7 @@ struct RecipeService: Sendable {
     let catalog: any CatalogRepository
 
     func list(scope: RecipeListScope, viewerID: UUID, cursor: String?, limit: Int) async throws -> BrewlyAPI.Page<RecipeSummaryDTO> {
-        var pageCursor: PageCursor?
-        if let cursor {
-            guard let decoded = PageCursor(encoded: cursor) else {
-                throw AppError(status: .badRequest, code: APIErrorCode.badRequest, message: "Invalid cursor.")
-            }
-            pageCursor = decoded
-        }
-        return try await recipes.list(scope: scope, viewerID: viewerID, after: pageCursor, limit: limit)
+        try await recipes.list(scope: scope, viewerID: viewerID, after: try PageCursor.decodeParameter(cursor), limit: limit)
     }
 
     func get(id: UUID, viewerID: UUID) async throws -> RecipeDTO {
@@ -25,6 +18,10 @@ struct RecipeService: Sendable {
 
     func create(authorID: UUID, _ request: UpsertRecipeRequest) async throws -> RecipeDTO {
         let recipe = try await validated(request)
+        // A remix must start from a recipe the author can see.
+        if let originalID = recipe.forkedFromId, try await recipes.find(id: originalID, viewerID: authorID) == nil {
+            throw AppError.unknownReference(field: "forkedFromId")
+        }
         return try await mappingReferenceErrors { try await recipes.create(authorID: authorID, recipe) }
     }
 
@@ -37,6 +34,15 @@ struct RecipeService: Sendable {
 
     func delete(id: UUID, authorID: UUID) async throws {
         guard try await recipes.delete(id: id, authorID: authorID) else { throw AppError.notFound("Recipe") }
+    }
+
+    func save(id: UUID, userID: UUID) async throws -> SaveStateDTO {
+        guard let state = try await recipes.save(id: id, userID: userID) else { throw AppError.notFound("Recipe") }
+        return state
+    }
+
+    func unsave(id: UUID, userID: UUID) async throws -> SaveStateDTO {
+        try await recipes.unsave(id: id, userID: userID)
     }
 
     /// Checks the recipe against its brew method and normalizes optional text.
@@ -70,6 +76,7 @@ struct RecipeService: Sendable {
         } catch let error as PSQLError where error.isForeignKeyViolation {
             let field = switch error.constraintName {
             case "recipes_bean_owned_by_author": "beanId"
+            case "recipes_forked_from_id_fkey": "forkedFromId"
             case "recipes_method_slug_fkey": "methodSlug"
             case "recipes_grinder_slug_fkey": "grinderSlug"
             case "recipe_flavor_notes_flavor_note_slug_fkey": "flavorNoteSlugs"

@@ -12,4 +12,5 @@ func routes(_ app: Application) throws {
     try authenticated.register(collection: CatalogController())
     try authenticated.register(collection: BeanController())
     try authenticated.register(collection: RecipeController())
+    try authenticated.register(collection: PeopleController())
 }

@@ -88,5 +88,6 @@ struct MainTabView: View {
                     }
                 }
         }
+        .environment(\.routeDestinations, container.routeDestinations(currentUserID: user.id))
     }
 }

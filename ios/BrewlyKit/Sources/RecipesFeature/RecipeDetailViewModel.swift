@@ -43,6 +43,28 @@ final class RecipeDetailViewModel {
         state = .loaded(recipe)
     }
 
+    /// Saves or unsaves the recipe, updating the screen right away and reverting on failure.
+    func toggleSave() async {
+        guard var recipe = state.value else { return }
+        let original = recipe
+        let saving = !recipe.isSaved
+        recipe.isSaved = saving
+        recipe.saveCount = max(0, recipe.saveCount + (saving ? 1 : -1))
+        state = .loaded(recipe)
+        do {
+            let saved = saving
+                ? try await dependencies.saves.save(recipeID: recipeID)
+                : try await dependencies.saves.unsave(recipeID: recipeID)
+            recipe.isSaved = saved.isSaved
+            recipe.saveCount = saved.saveCount
+            state = .loaded(recipe)
+            errorMessage = nil
+        } catch {
+            state = .loaded(original)
+            errorMessage = error.brewlyMessage
+        }
+    }
+
     /// Returns `true` when the recipe was deleted.
     func delete() async -> Bool {
         do {

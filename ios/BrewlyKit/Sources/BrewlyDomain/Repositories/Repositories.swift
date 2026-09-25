@@ -49,3 +49,22 @@ public protocol RecipeRepository: Sendable {
     func update(id: UUID, _ input: RecipeInput) async throws -> Recipe
     func delete(id: UUID) async throws
 }
+
+/// Recipes the signed-in user saved to brew later.
+public protocol RecipeSavesRepository: Sendable {
+    func savedRecipes(cursor: String?) async throws -> PagedResult<RecipeSummary>
+    func save(recipeID: UUID) async throws -> SaveState
+    func unsave(recipeID: UUID) async throws -> SaveState
+}
+
+/// Other members: search, profiles, their recipes and the follow graph.
+public protocol PeopleRepository: Sendable {
+    /// Members whose username or name starts with `query`.
+    func search(_ query: String) async throws -> [UserSummary]
+    func profile(id: UUID) async throws -> MemberProfile
+    func recipes(of memberID: UUID, cursor: String?) async throws -> PagedResult<RecipeSummary>
+    func followers(of memberID: UUID, cursor: String?) async throws -> PagedResult<UserSummary>
+    func following(of memberID: UUID, cursor: String?) async throws -> PagedResult<UserSummary>
+    func follow(_ memberID: UUID) async throws -> FollowState
+    func unfollow(_ memberID: UUID) async throws -> FollowState
+}

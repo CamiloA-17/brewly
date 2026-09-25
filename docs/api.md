@@ -38,10 +38,20 @@ and the server always agree on the contract.
 | DELETE | `/v1/beans/{id}` | Delete a bean; `409 bean_in_use` when recipes use it. |
 | GET | `/v1/me/recipes?cursor=&limit=` | The user's recipes, newest first. |
 | GET | `/v1/recipes?method=&country=&varietal=&cursor=&limit=` | Explore public recipes. |
-| POST | `/v1/recipes` | Create a recipe (201). |
+| POST | `/v1/recipes` | Create a recipe (201). Set `forkedFromId` to remix a recipe the user can see. |
 | GET | `/v1/recipes/{id}` | A recipe the user can see, with steps. |
 | PUT | `/v1/recipes/{id}` | Replace a recipe the user wrote. |
 | DELETE | `/v1/recipes/{id}` | Delete a recipe (204). |
+| PUT | `/v1/recipes/{id}/save` | Save a recipe the user can see. Returns `SaveStateDTO` (idempotent). |
+| DELETE | `/v1/recipes/{id}/save` | Remove a saved recipe. Returns `SaveStateDTO` (idempotent). |
+| GET | `/v1/me/saved-recipes?cursor=&limit=` | Saved recipes, newest save first. |
+| GET | `/v1/users?q=` | Up to 20 members whose username or name starts with `q` (a leading `@` is ignored). |
+| GET | `/v1/users/{id}` | A member's public profile with counts and follow state (`UserProfileDTO`). |
+| GET | `/v1/users/{id}/recipes?cursor=&limit=` | The member's recipes the user can see. |
+| GET | `/v1/users/{id}/followers?cursor=&limit=` | People who follow the member, newest first. |
+| GET | `/v1/users/{id}/following?cursor=&limit=` | People the member follows, newest first. |
+| PUT | `/v1/users/{id}/follow` | Follow a member. Returns `FollowStateDTO` (idempotent). |
+| DELETE | `/v1/users/{id}/follow` | Unfollow a member. Returns `FollowStateDTO` (idempotent). |
 
 ## Examples
 
@@ -107,6 +117,14 @@ For espresso (`ratioBasis: "beverage"`), send `yieldG` (beverage weight) and omi
 `{ "methodSlug": "espresso", "doseG": 18, "yieldG": 36, "grindSize": "fine", "pressureBar": 9, … }`
 gives `"ratio": 2`.
 
+### Remix a recipe
+
+A remix is a new recipe that starts from someone else's. The app copies the parameters, the
+brewer picks one of their own beans, and the request carries the original's id:
+`{ "forkedFromId": "bbbbbbbb-…", "beanId": "<own bean>", "methodSlug": "v60", … }`.
+The response includes `forkedFrom` (id, title and author of the original) while the brewer can
+still see it; the original's `forkCount` goes up by one. Deleting the original keeps the remix.
+
 ## Errors
 
 Every non-2xx response has the same shape:
@@ -126,9 +144,9 @@ Every non-2xx response has the same shape:
 |---|---|
 | 400 | `bad_request` (malformed JSON, invalid cursor) |
 | 401 | `unauthorized`, `invalid_credentials` |
-| 404 | `not_found` (also for content the user is not allowed to see) |
+| 404 | `not_found` (also for content the user is not allowed to see, and for members who blocked the user or were blocked) |
 | 409 | `username_taken`, `email_taken`, `bean_in_use`, `conflict` |
-| 422 | `validation_failed` with `fieldErrors` |
+| 422 | `validation_failed` with `fieldErrors`, `cannot_follow_self` |
 | 500 | `internal_error` |
 
 Field error codes: `required`, `out_of_range`, `too_long`, `invalid_format`, `not_allowed`,

@@ -18,6 +18,18 @@ public struct FeedView: View {
                 Text("Soon you'll see posts, recipes and tips from the people you follow.", bundle: .module)
             }
             .navigationTitle(Text("Home", bundle: .module))
+            .toolbar {
+                ToolbarItem(placement: .primaryAction) {
+                    NavigationLink(value: AppRoute.memberSearch) {
+                        Label {
+                            Text("Find people", bundle: .module)
+                        } icon: {
+                            Image(systemName: "magnifyingglass")
+                        }
+                    }
+                }
+            }
+            .appRouteDestinations()
         }
     }
 }

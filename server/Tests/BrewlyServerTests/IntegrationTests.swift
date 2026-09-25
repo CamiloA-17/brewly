@@ -201,6 +201,137 @@ final class IntegrationTests: XCTestCase {
         XCTAssertEqual(try remaining?.decode(column: "count", as: Int.self), 0)
     }
 
+    // MARK: - People, follows, saves and remixes
+
+    func testProfilesAndFollows() async throws {
+        let ana = try await register("ana.barista")
+        let leo = try await register("leo.roaster")
+        let eve = try await register("eve.brews")
+        let bean: BeanDTO = try await send(.POST, "v1/beans", token: ana.accessToken, body: Self.geisha)
+        var followersOnly = Self.v60(beanID: bean.id)
+        followersOnly.visibility = .followers
+        let _: RecipeDTO = try await send(.POST, "v1/recipes", token: ana.accessToken, body: followersOnly)
+
+        let before: UserProfileDTO = try await send(.GET, "v1/users/\(ana.user.id)", token: leo.accessToken)
+        XCTAssertEqual(before.recipeCount, 0)
+        XCTAssertFalse(before.isFollowing)
+        XCTAssertFalse(before.isMe)
+
+        // Following twice is idempotent.
+        let followed: FollowStateDTO = try await send(.PUT, "v1/users/\(ana.user.id)/follow", token: leo.accessToken)
+        XCTAssertEqual(followed, FollowStateDTO(isFollowing: true, followerCount: 1))
+        let again: FollowStateDTO = try await send(.PUT, "v1/users/\(ana.user.id)/follow", token: leo.accessToken)
+        XCTAssertEqual(again.followerCount, 1)
+        let _: FollowStateDTO = try await send(.PUT, "v1/users/\(ana.user.id)/follow", token: eve.accessToken)
+
+        // Followers-only recipes become visible to followers.
+        let after: UserProfileDTO = try await send(.GET, "v1/users/\(ana.user.id)", token: leo.accessToken)
+        XCTAssertEqual(after.recipeCount, 1)
+        XCTAssertEqual(after.followerCount, 2)
+        XCTAssertTrue(after.isFollowing)
+        let recipes: BrewlyAPI.Page<RecipeSummaryDTO> = try await send(
+            .GET, "v1/users/\(ana.user.id)/recipes", token: leo.accessToken)
+        XCTAssertEqual(recipes.items.count, 1)
+
+        let leoSeenByAna: UserProfileDTO = try await send(.GET, "v1/users/\(leo.user.id)", token: ana.accessToken)
+        XCTAssertTrue(leoSeenByAna.followsYou)
+        let mine: UserProfileDTO = try await send(.GET, "v1/users/\(ana.user.id)", token: ana.accessToken)
+        XCTAssertTrue(mine.isMe)
+
+        // Followers are listed newest first and paginated.
+        let firstPage: BrewlyAPI.Page<UserSummaryDTO> = try await send(
+            .GET, "v1/users/\(ana.user.id)/followers?limit=1", token: leo.accessToken)
+        XCTAssertEqual(firstPage.items.map(\.id), [eve.user.id])
+        let cursor = try XCTUnwrap(firstPage.nextCursor)
+        let secondPage: BrewlyAPI.Page<UserSummaryDTO> = try await send(
+            .GET, "v1/users/\(ana.user.id)/followers?limit=1&cursor=\(cursor)", token: leo.accessToken)
+        XCTAssertEqual(secondPage.items.map(\.id), [leo.user.id])
+        XCTAssertNil(secondPage.nextCursor)
+        let following: BrewlyAPI.Page<UserSummaryDTO> = try await send(
+            .GET, "v1/users/\(leo.user.id)/following", token: ana.accessToken)
+        XCTAssertEqual(following.items.map(\.id), [ana.user.id])
+
+        let unfollowed: FollowStateDTO = try await send(.DELETE, "v1/users/\(ana.user.id)/follow", token: leo.accessToken)
+        XCTAssertEqual(unfollowed, FollowStateDTO(isFollowing: false, followerCount: 1))
+
+        try await expectError(.PUT, "v1/users/\(leo.user.id)/follow", token: leo.accessToken,
+                              status: .unprocessableEntity, code: APIErrorCode.cannotFollowSelf)
+        try await expectError(.GET, "v1/users/\(UUID())", token: leo.accessToken, status: .notFound)
+    }
+
+    func testSearchAndBlocksHideMembers() async throws {
+        let ana = try await register("ana.barista")
+        let leo = try await register("leo.roaster")
+        let _ = try await register("anabel_m")
+
+        let results: [UserSummaryDTO] = try await send(.GET, "v1/users?q=%40ANA", token: leo.accessToken)
+        XCTAssertEqual(results.map(\.username), ["ana.barista", "anabel_m"])
+        // "_" is not a wildcard.
+        let literal: [UserSummaryDTO] = try await send(.GET, "v1/users?q=ana_", token: leo.accessToken)
+        XCTAssertTrue(literal.isEmpty)
+
+        // Blocking is not in the API yet; a block hides members from each other everywhere.
+        try await app.db.sql.raw("""
+            INSERT INTO user_blocks (blocker_id, blocked_id) VALUES (\(bind: ana.user.id), \(bind: leo.user.id))
+            """).run()
+        try await expectError(.GET, "v1/users/\(ana.user.id)", token: leo.accessToken, status: .notFound)
+        try await expectError(.PUT, "v1/users/\(ana.user.id)/follow", token: leo.accessToken, status: .notFound)
+        let afterBlock: [UserSummaryDTO] = try await send(.GET, "v1/users?q=ana", token: leo.accessToken)
+        XCTAssertEqual(afterBlock.map(\.username), ["anabel_m"])
+    }
+
+    func testSavesAndRemixes() async throws {
+        let ana = try await register("ana.barista")
+        let leo = try await register("leo.roaster")
+        let anaBean: BeanDTO = try await send(.POST, "v1/beans", token: ana.accessToken, body: Self.geisha)
+        let leoBean: BeanDTO = try await send(.POST, "v1/beans", token: leo.accessToken, body: Self.geisha)
+        let original: RecipeDTO = try await send(.POST, "v1/recipes", token: ana.accessToken, body: Self.v60(beanID: anaBean.id))
+        var privateRecipe = Self.v60(beanID: anaBean.id)
+        privateRecipe.visibility = .private
+        let hidden: RecipeDTO = try await send(.POST, "v1/recipes", token: ana.accessToken, body: privateRecipe)
+
+        // Saving is idempotent and only works on visible recipes.
+        let saved: SaveStateDTO = try await send(.PUT, "v1/recipes/\(original.id)/save", token: leo.accessToken)
+        XCTAssertEqual(saved, SaveStateDTO(isSaved: true, saveCount: 1))
+        let savedAgain: SaveStateDTO = try await send(.PUT, "v1/recipes/\(original.id)/save", token: leo.accessToken)
+        XCTAssertEqual(savedAgain.saveCount, 1)
+        try await expectError(.PUT, "v1/recipes/\(hidden.id)/save", token: leo.accessToken, status: .notFound)
+
+        let savedList: BrewlyAPI.Page<RecipeSummaryDTO> = try await send(.GET, "v1/me/saved-recipes", token: leo.accessToken)
+        XCTAssertEqual(savedList.items.map(\.id), [original.id])
+
+        // A remix uses the remixer's own bean and links to the original.
+        var remixRequest = Self.v60(beanID: leoBean.id)
+        remixRequest.forkedFromId = original.id
+        remixRequest.title = "Floral V60, finer"
+        let remix: RecipeDTO = try await send(.POST, "v1/recipes", token: leo.accessToken, body: remixRequest)
+        XCTAssertEqual(remix.forkedFromId, original.id)
+        XCTAssertEqual(remix.forkedFrom?.title, original.title)
+        XCTAssertEqual(remix.forkedFrom?.author.id, ana.user.id)
+
+        let seenByLeo: RecipeDTO = try await send(.GET, "v1/recipes/\(original.id)", token: leo.accessToken)
+        XCTAssertEqual(seenByLeo.saveCount, 1)
+        XCTAssertEqual(seenByLeo.forkCount, 1)
+        XCTAssertTrue(seenByLeo.isSaved)
+        let seenByAna: RecipeDTO = try await send(.GET, "v1/recipes/\(original.id)", token: ana.accessToken)
+        XCTAssertFalse(seenByAna.isSaved)
+
+        // Recipes the remixer can't see can't be remixed.
+        remixRequest.forkedFromId = hidden.id
+        let error = try await expectError(.POST, "v1/recipes", token: leo.accessToken,
+                                          body: remixRequest, status: .unprocessableEntity)
+        XCTAssertEqual(error.fieldErrors?.map(\.field), ["forkedFromId"])
+
+        let unsaved: SaveStateDTO = try await send(.DELETE, "v1/recipes/\(original.id)/save", token: leo.accessToken)
+        XCTAssertEqual(unsaved, SaveStateDTO(isSaved: false, saveCount: 0))
+
+        // Deleting the original keeps the remix, without the link.
+        try await expectStatus(.DELETE, "v1/recipes/\(original.id)", token: ana.accessToken, status: .noContent)
+        let orphan: RecipeDTO = try await send(.GET, "v1/recipes/\(remix.id)", token: leo.accessToken)
+        XCTAssertNil(orphan.forkedFromId)
+        XCTAssertNil(orphan.forkedFrom)
+    }
+
     // MARK: - Fixtures
 
     private static let geisha = UpsertBeanRequest(

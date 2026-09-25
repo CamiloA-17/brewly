@@ -100,6 +100,48 @@ public enum Endpoints {
         Endpoint(.delete, "v1/recipes/\(id.uuidString)")
     }
 
+    public static func savedRecipes(cursor: String?) -> Endpoint<Page<RecipeSummaryDTO>> {
+        Endpoint(.get, "v1/me/saved-recipes", queryItems: queryItems(["cursor": cursor]))
+    }
+
+    public static func saveRecipe(id: UUID) -> Endpoint<SaveStateDTO> {
+        Endpoint(.put, "v1/recipes/\(id.uuidString)/save")
+    }
+
+    public static func unsaveRecipe(id: UUID) -> Endpoint<SaveStateDTO> {
+        Endpoint(.delete, "v1/recipes/\(id.uuidString)/save")
+    }
+
+    // MARK: People
+
+    public static func searchUsers(query: String) -> Endpoint<[UserSummaryDTO]> {
+        Endpoint(.get, "v1/users", queryItems: queryItems(["q": query]))
+    }
+
+    public static func userProfile(id: UUID) -> Endpoint<UserProfileDTO> {
+        Endpoint(.get, "v1/users/\(id.uuidString)")
+    }
+
+    public static func userRecipes(id: UUID, cursor: String?) -> Endpoint<Page<RecipeSummaryDTO>> {
+        Endpoint(.get, "v1/users/\(id.uuidString)/recipes", queryItems: queryItems(["cursor": cursor]))
+    }
+
+    public static func followers(of id: UUID, cursor: String?) -> Endpoint<Page<UserSummaryDTO>> {
+        Endpoint(.get, "v1/users/\(id.uuidString)/followers", queryItems: queryItems(["cursor": cursor]))
+    }
+
+    public static func following(of id: UUID, cursor: String?) -> Endpoint<Page<UserSummaryDTO>> {
+        Endpoint(.get, "v1/users/\(id.uuidString)/following", queryItems: queryItems(["cursor": cursor]))
+    }
+
+    public static func follow(id: UUID) -> Endpoint<FollowStateDTO> {
+        Endpoint(.put, "v1/users/\(id.uuidString)/follow")
+    }
+
+    public static func unfollow(id: UUID) -> Endpoint<FollowStateDTO> {
+        Endpoint(.delete, "v1/users/\(id.uuidString)/follow")
+    }
+
     private static func queryItems(_ values: KeyValuePairs<String, String?>) -> [URLQueryItem] {
         values.compactMap { name, value in value.map { URLQueryItem(name: name, value: $0) } }
     }

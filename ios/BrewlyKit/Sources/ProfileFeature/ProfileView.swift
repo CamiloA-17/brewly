@@ -6,10 +6,12 @@ import SwiftUI
 public struct ProfileDependencies: Sendable {
     public var profile: any ProfileRepository
     public var auth: any AuthRepository
+    public var people: any PeopleRepository
 
-    public init(profile: any ProfileRepository, auth: any AuthRepository) {
+    public init(profile: any ProfileRepository, auth: any AuthRepository, people: any PeopleRepository) {
         self.profile = profile
         self.auth = auth
+        self.people = people
     }
 }
 
@@ -17,6 +19,8 @@ public struct ProfileDependencies: Sendable {
 @Observable
 final class ProfileViewModel {
     private(set) var state: LoadState<UserProfile> = .idle
+    /// Follower counts, as other members see them.
+    private(set) var publicProfile: MemberProfile?
     private(set) var errorMessage: String?
     private(set) var violations: [RuleViolation] = []
     var displayName = ""
@@ -32,7 +36,9 @@ final class ProfileViewModel {
 
     func load() async {
         do {
-            state = .loaded(try await dependencies.profile.currentUser())
+            let user = try await dependencies.profile.currentUser()
+            state = .loaded(user)
+            publicProfile = try? await dependencies.people.profile(id: user.id)
         } catch {
             if state.value == nil {
                 state = .failed(error as? DomainError ?? .unexpected(String(describing: error)))
@@ -112,6 +118,15 @@ public struct ProfileView: View {
                             }
                         }
                         .padding(.vertical, Spacing.xs)
+                        if let counts = model.publicProfile {
+                            FollowCountLinks(
+                                memberID: user.id,
+                                followers: counts.followerCount,
+                                following: counts.followingCount,
+                                followersTitle: Text("Followers", bundle: .module),
+                                followingTitle: Text("Following", bundle: .module)
+                            )
+                        }
                         Button {
                             model.beginEditing()
                             isEditing = true
@@ -152,6 +167,7 @@ public struct ProfileView: View {
                 }
             }
             .navigationTitle(Text("Profile", bundle: .module))
+            .appRouteDestinations()
             .sheet(isPresented: $isEditing) {
                 editSheet
             }

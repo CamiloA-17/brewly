@@ -88,6 +88,21 @@ INSERT INTO recipe_flavor_notes (recipe_id, flavor_note_slug) VALUES
     ('bbbbbbbb-0000-4000-8000-000000000002', 'milk_chocolate')
 ON CONFLICT DO NOTHING;
 
+-- Leo remixed Ana's V60 with his own bean, and saved the original.
+INSERT INTO recipes
+    (id, author_id, bean_id, forked_from_id, method_slug, title, description, dose_g, water_g, grind_size,
+     water_temp_c, total_time_s, filter_type, rating, visibility)
+VALUES
+    ('bbbbbbbb-0000-4000-8000-000000000003', '22222222-2222-4222-8222-222222222222',
+     'aaaaaaaa-0000-4000-8000-000000000002', 'bbbbbbbb-0000-4000-8000-000000000001', 'v60',
+     'Floral V60, hotter', 'Same pours, 96 °C for a denser natural.', 15, 250, 'medium_fine',
+     96, 200, 'paper', 4, 'public')
+ON CONFLICT (id) DO NOTHING;
+
+INSERT INTO recipe_saves (user_id, recipe_id) VALUES
+    ('22222222-2222-4222-8222-222222222222', 'bbbbbbbb-0000-4000-8000-000000000001')
+ON CONFLICT DO NOTHING;
+
 INSERT INTO posts (id, author_id, kind, body, recipe_id) VALUES
     ('cccccccc-0000-4000-8000-000000000001', '11111111-1111-4111-8111-111111111111', 'recipe',
      'My go-to recipe for washed Geishas.', 'bbbbbbbb-0000-4000-8000-000000000001')

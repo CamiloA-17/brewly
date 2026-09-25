@@ -1,3 +1,4 @@
+import BrewlyAPI
 import Foundation
 
 /// Opaque keyset-pagination cursor over `(created_at, id)`, both in descending order.
@@ -34,5 +35,14 @@ struct PageCursor: Codable, Equatable, Sendable {
     init(createdAt: String, id: UUID) {
         self.createdAt = createdAt
         self.id = id
+    }
+
+    /// Decodes the `cursor` query parameter; a malformed cursor is a 400.
+    static func decodeParameter(_ encoded: String?) throws -> PageCursor? {
+        guard let encoded else { return nil }
+        guard let cursor = PageCursor(encoded: encoded) else {
+            throw AppError(status: .badRequest, code: APIErrorCode.badRequest, message: "Invalid cursor.")
+        }
+        return cursor
     }
 }
