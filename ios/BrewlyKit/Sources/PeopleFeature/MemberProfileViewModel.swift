@@ -6,11 +6,18 @@ import Observation
 @MainActor
 @Observable
 final class MemberProfileViewModel {
+    enum Tab: Hashable {
+        case recipes
+        case posts
+    }
+
+    var tab: Tab = .recipes
     private(set) var state: LoadState<MemberProfile> = .idle
     private(set) var catalog: Catalog = .empty
     private(set) var errorMessage: String?
     private(set) var isUpdatingFollow = false
     let recipes: Paginator<RecipeSummary>
+    let posts: Paginator<Post>
 
     let memberID: UUID
     private let dependencies: PeopleDependencies
@@ -19,7 +26,9 @@ final class MemberProfileViewModel {
         self.memberID = memberID
         self.dependencies = dependencies
         let people = dependencies.people
+        let postRepository = dependencies.posts
         recipes = Paginator { cursor in try await people.recipes(of: memberID, cursor: cursor) }
+        posts = Paginator { cursor in try await postRepository.posts(of: memberID, cursor: cursor) }
     }
 
     func load() async {
@@ -36,7 +45,15 @@ final class MemberProfileViewModel {
             }
             return
         }
-        await recipes.load()
+        await loadTab()
+    }
+
+    /// Loads the list of the selected tab.
+    func loadTab() async {
+        switch tab {
+        case .recipes: await recipes.load()
+        case .posts: await posts.load()
+        }
     }
 
     /// Follows or unfollows the member, updating the screen right away and reverting on failure.
@@ -62,7 +79,7 @@ final class MemberProfileViewModel {
             errorMessage = error.brewlyMessage
             return
         }
-        // Following can reveal followers-only recipes.
-        await recipes.load()
+        // Following can reveal followers-only recipes and posts.
+        await loadTab()
     }
 }

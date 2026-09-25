@@ -13,4 +13,6 @@ func routes(_ app: Application) throws {
     try authenticated.register(collection: BeanController())
     try authenticated.register(collection: RecipeController())
     try authenticated.register(collection: PeopleController())
+    try authenticated.register(collection: MediaController())
+    try authenticated.register(collection: PostController())
 }

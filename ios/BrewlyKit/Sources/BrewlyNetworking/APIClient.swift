@@ -44,7 +44,10 @@ public final class APIClient: Sendable {
         if let token {
             request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
         }
-        if let body = endpoint.body {
+        if let rawBody = endpoint.rawBody {
+            request.setValue(rawBody.contentType, forHTTPHeaderField: "Content-Type")
+            request.httpBody = rawBody.data
+        } else if let body = endpoint.body {
             request.setValue("application/json", forHTTPHeaderField: "Content-Type")
             request.httpBody = try BrewlyJSON.makeEncoder().encode(body)
         }
@@ -68,6 +71,9 @@ public final class APIClient: Sendable {
         case 200..<300:
             if Response.self == EmptyResponse.self, let empty = EmptyResponse() as? Response {
                 return empty
+            }
+            if let raw = data as? Response {
+                return raw
             }
             do {
                 return try BrewlyJSON.makeDecoder().decode(Response.self, from: data)

@@ -126,3 +126,12 @@ public struct FollowStateDTO: Codable, Sendable, Equatable {
         self.followerCount = followerCount
     }
 }
+
+/// Body of `PUT /me/avatar`. Upload the image first with `POST /media`.
+public struct UpdateAvatarRequest: Codable, Sendable, Equatable {
+    public var mediaId: UUID
+
+    public init(mediaId: UUID) {
+        self.mediaId = mediaId
+    }
+}

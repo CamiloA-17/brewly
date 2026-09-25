@@ -7,6 +7,20 @@ struct StubCatalogRepository: CatalogRepository {
     func catalog(forceRefresh: Bool) async throws -> Catalog { .empty }
 }
 
+struct EmptyPostRepository: PostRepository {
+    func feed(cursor: String?) async throws -> PagedResult<Post> { PagedResult(items: [], nextCursor: nil) }
+    func explore(cursor: String?) async throws -> PagedResult<Post> { PagedResult(items: [], nextCursor: nil) }
+    func posts(of memberID: UUID, cursor: String?) async throws -> PagedResult<Post> { PagedResult(items: [], nextCursor: nil) }
+    func post(id: UUID) async throws -> Post { throw DomainError.notFound }
+    func create(_ draft: PostDraft) async throws -> Post { throw DomainError.notFound }
+    func delete(id: UUID) async throws {}
+    func like(postID: UUID) async throws -> LikeState { LikeState(isLiked: true, likeCount: 1) }
+    func unlike(postID: UUID) async throws -> LikeState { LikeState(isLiked: false, likeCount: 0) }
+    func comments(postID: UUID, cursor: String?) async throws -> PagedResult<Comment> { PagedResult(items: [], nextCursor: nil) }
+    func addComment(postID: UUID, body: String, parentID: UUID?) async throws -> Comment { throw DomainError.notFound }
+    func deleteComment(id: UUID) async throws {}
+}
+
 /// In-memory people graph seen by one viewer.
 actor FakePeopleRepository: PeopleRepository {
     var member: MemberProfile
@@ -63,7 +77,7 @@ struct MemberProfileViewModelTests {
     private func makeModel(_ people: FakePeopleRepository) -> MemberProfileViewModel {
         MemberProfileViewModel(
             memberID: leo.id,
-            dependencies: PeopleDependencies(people: people, catalog: StubCatalogRepository())
+            dependencies: PeopleDependencies(people: people, posts: EmptyPostRepository(), catalog: StubCatalogRepository())
         )
     }
 
@@ -102,6 +116,16 @@ struct MemberProfileViewModelTests {
         #expect(model.state.value?.isFollowing == false)
         #expect(model.state.value?.followerCount == 4)
         #expect(model.errorMessage != nil)
+    }
+
+    @Test("The posts tab loads the member's posts")
+    func postsTab() async {
+        let model = makeModel(FakePeopleRepository(profile: leo))
+        await model.load()
+        #expect(model.posts.state.value == nil)
+        model.tab = .posts
+        await model.loadTab()
+        #expect(model.posts.state.value?.isEmpty == true)
     }
 
     @Test("Your own profile has no follow button action")

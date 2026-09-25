@@ -332,6 +332,155 @@ final class IntegrationTests: XCTestCase {
         XCTAssertNil(orphan.forkedFrom)
     }
 
+    // MARK: - Media, posts, likes and comments
+
+    func testPhotoPostsFeedAndMediaAccess() async throws {
+        let ana = try await register("ana.barista")
+        let leo = try await register("leo.roaster")
+        let eve = try await register("eve.brews")
+        let _: FollowStateDTO = try await send(.PUT, "v1/users/\(ana.user.id)/follow", token: leo.accessToken)
+
+        let photo = try await upload(tinyJPEG(width: 800, height: 600), token: ana.accessToken)
+        XCTAssertEqual(photo.width, 800)
+        XCTAssertEqual(photo.url, "/v1/media/\(photo.id.uuidString.lowercased())")
+        try await expectStatus(.GET, "v1/media/\(photo.id)", token: ana.accessToken, status: .ok)
+        // Nobody else can see an image until it is in a post they can see.
+        try await expectError(.GET, "v1/media/\(photo.id)", token: leo.accessToken, status: .notFound)
+
+        let post: PostDTO = try await send(.POST, "v1/posts", token: ana.accessToken,
+            body: CreatePostRequest(mediaIds: [photo.id], visibility: .followers))
+        XCTAssertEqual(post.kind, .text)
+        XCTAssertEqual(post.media.map(\.id), [photo.id])
+
+        try await expectStatus(.GET, "v1/media/\(photo.id)", token: leo.accessToken, status: .ok)
+        try await expectError(.GET, "v1/media/\(photo.id)", token: eve.accessToken, status: .notFound)
+        try await expectError(.GET, "v1/posts/\(post.id)", token: eve.accessToken, status: .notFound)
+
+        let leoFeed: BrewlyAPI.Page<PostDTO> = try await send(.GET, "v1/feed", token: leo.accessToken)
+        XCTAssertEqual(leoFeed.items.map(\.id), [post.id])
+        let eveFeed: BrewlyAPI.Page<PostDTO> = try await send(.GET, "v1/feed", token: eve.accessToken)
+        XCTAssertTrue(eveFeed.items.isEmpty)
+        let explore: BrewlyAPI.Page<PostDTO> = try await send(.GET, "v1/posts/explore", token: eve.accessToken)
+        XCTAssertTrue(explore.items.isEmpty)
+        let anaPosts: BrewlyAPI.Page<PostDTO> = try await send(.GET, "v1/users/\(ana.user.id)/posts", token: leo.accessToken)
+        XCTAssertEqual(anaPosts.items.count, 1)
+
+        // An image can only be in one post, and only its owner can attach it.
+        try await expectError(.POST, "v1/posts", token: ana.accessToken,
+            body: CreatePostRequest(body: "Again", mediaIds: [photo.id]), status: .unprocessableEntity)
+        let error = try await expectError(.POST, "v1/posts", token: leo.accessToken,
+            body: CreatePostRequest(body: "Not mine", mediaIds: [photo.id]), status: .unprocessableEntity)
+        XCTAssertEqual(error.fieldErrors?.map(\.field), ["mediaIds"])
+
+        // Deleting the post deletes its images.
+        try await expectStatus(.DELETE, "v1/posts/\(post.id)", token: ana.accessToken, status: .noContent)
+        try await expectError(.GET, "v1/media/\(photo.id)", token: ana.accessToken, status: .notFound)
+    }
+
+    func testSharingRecipesLikesAndComments() async throws {
+        let ana = try await register("ana.barista")
+        let leo = try await register("leo.roaster")
+        let bean: BeanDTO = try await send(.POST, "v1/beans", token: ana.accessToken, body: Self.geisha)
+        var privateRecipe = Self.v60(beanID: bean.id)
+        privateRecipe.visibility = .private
+        let recipe: RecipeDTO = try await send(.POST, "v1/recipes", token: ana.accessToken, body: privateRecipe)
+
+        // Leo can't share Ana's recipe.
+        let notMine = try await expectError(.POST, "v1/posts", token: leo.accessToken,
+            body: CreatePostRequest(recipeId: recipe.id), status: .unprocessableEntity)
+        XCTAssertEqual(notMine.fieldErrors?.map(\.field), ["recipeId"])
+
+        let post: PostDTO = try await send(.POST, "v1/posts", token: ana.accessToken,
+            body: CreatePostRequest(body: "  Morning cup  ", recipeId: recipe.id))
+        XCTAssertEqual(post.kind, .recipe)
+        XCTAssertEqual(post.body, "Morning cup")
+        XCTAssertEqual(post.recipe?.id, recipe.id)
+        // The post is public but the recipe is private: others see the post without it.
+        let seenByLeo: PostDTO = try await send(.GET, "v1/posts/\(post.id)", token: leo.accessToken)
+        XCTAssertNil(seenByLeo.recipe)
+
+        let liked: LikeStateDTO = try await send(.PUT, "v1/posts/\(post.id)/like", token: leo.accessToken)
+        XCTAssertEqual(liked, LikeStateDTO(isLiked: true, likeCount: 1))
+        let likedAgain: LikeStateDTO = try await send(.PUT, "v1/posts/\(post.id)/like", token: leo.accessToken)
+        XCTAssertEqual(likedAgain.likeCount, 1)
+
+        let comment: CommentDTO = try await send(.POST, "v1/posts/\(post.id)/comments", token: leo.accessToken,
+            body: CreateCommentRequest(body: "What grinder?"))
+        let reply: CommentDTO = try await send(.POST, "v1/posts/\(post.id)/comments", token: ana.accessToken,
+            body: CreateCommentRequest(body: "Comandante", parentId: comment.id))
+        // Replies to replies stay one level deep.
+        let nested: CommentDTO = try await send(.POST, "v1/posts/\(post.id)/comments", token: leo.accessToken,
+            body: CreateCommentRequest(body: "Thanks!", parentId: reply.id))
+        XCTAssertEqual(reply.parentId, comment.id)
+        XCTAssertEqual(nested.parentId, comment.id)
+        try await expectError(.POST, "v1/posts/\(post.id)/comments", token: leo.accessToken,
+            body: CreateCommentRequest(body: "   "), status: .unprocessableEntity)
+
+        let firstPage: BrewlyAPI.Page<CommentDTO> = try await send(
+            .GET, "v1/posts/\(post.id)/comments?limit=2", token: ana.accessToken)
+        XCTAssertEqual(firstPage.items.map(\.id), [comment.id, reply.id])
+        XCTAssertTrue(firstPage.items.allSatisfy(\.canDelete))
+        let cursor = try XCTUnwrap(firstPage.nextCursor)
+        let secondPage: BrewlyAPI.Page<CommentDTO> = try await send(
+            .GET, "v1/posts/\(post.id)/comments?limit=2&cursor=\(cursor)", token: ana.accessToken)
+        XCTAssertEqual(secondPage.items.map(\.id), [nested.id])
+
+        let withCounts: PostDTO = try await send(.GET, "v1/posts/\(post.id)", token: leo.accessToken)
+        XCTAssertEqual(withCounts.likeCount, 1)
+        XCTAssertEqual(withCounts.commentCount, 3)
+        XCTAssertTrue(withCounts.isLiked)
+
+        // Leo can't delete Ana's reply; Ana can delete any comment on her post, with its replies.
+        try await expectError(.DELETE, "v1/comments/\(reply.id)", token: leo.accessToken, status: .notFound)
+        try await expectStatus(.DELETE, "v1/comments/\(comment.id)", token: ana.accessToken, status: .noContent)
+        let afterDelete: BrewlyAPI.Page<CommentDTO> = try await send(
+            .GET, "v1/posts/\(post.id)/comments", token: ana.accessToken)
+        XCTAssertTrue(afterDelete.items.isEmpty)
+
+        let unliked: LikeStateDTO = try await send(.DELETE, "v1/posts/\(post.id)/like", token: leo.accessToken)
+        XCTAssertEqual(unliked, LikeStateDTO(isLiked: false, likeCount: 0))
+    }
+
+    func testAvatar() async throws {
+        let ana = try await register("ana.barista")
+        let leo = try await register("leo.roaster")
+        let first = try await upload(tinyJPEG(width: 400, height: 400), token: ana.accessToken)
+        let updated: CurrentUserDTO = try await send(.PUT, "v1/me/avatar", token: ana.accessToken,
+            body: UpdateAvatarRequest(mediaId: first.id))
+        XCTAssertEqual(updated.avatarURL, first.url)
+        // Avatars are visible to everyone.
+        try await expectStatus(.GET, "v1/media/\(first.id)", token: leo.accessToken, status: .ok)
+
+        // Replacing the avatar deletes the previous image; others' images can't be used.
+        let second = try await upload(tinyJPEG(width: 400, height: 400), token: ana.accessToken)
+        let _: CurrentUserDTO = try await send(.PUT, "v1/me/avatar", token: ana.accessToken,
+            body: UpdateAvatarRequest(mediaId: second.id))
+        try await expectError(.GET, "v1/media/\(first.id)", token: ana.accessToken, status: .notFound)
+        try await expectError(.PUT, "v1/me/avatar", token: leo.accessToken,
+            body: UpdateAvatarRequest(mediaId: second.id), status: .unprocessableEntity)
+
+        let removed: CurrentUserDTO = try await send(.DELETE, "v1/me/avatar", token: ana.accessToken)
+        XCTAssertNil(removed.avatarURL)
+    }
+
+    func testUploadsMustBeJPEG() async throws {
+        let ana = try await register("ana.barista")
+        try await app.test(.POST, "v1/media", beforeRequest: { req in
+            req.headers.bearerAuthorization = BearerAuthorization(token: ana.accessToken)
+            req.headers.contentType = .jpeg
+            req.body = ByteBuffer(bytes: [0x89, 0x50, 0x4E, 0x47])
+        }, afterResponse: { res in
+            XCTAssertEqual(res.status, .unprocessableEntity)
+        })
+        try await app.test(.POST, "v1/media", beforeRequest: { req in
+            req.headers.bearerAuthorization = BearerAuthorization(token: ana.accessToken)
+            req.headers.contentType = .png
+            req.body = ByteBuffer(bytes: Array(tinyJPEG(width: 10, height: 10)))
+        }, afterResponse: { res in
+            XCTAssertEqual(res.status, .unsupportedMediaType)
+        })
+    }
+
     // MARK: - Fixtures
 
     private static let geisha = UpsertBeanRequest(
@@ -382,6 +531,19 @@ final class IntegrationTests: XCTestCase {
         try await send(.POST, "v1/auth/register", body: RegisterRequest(
             email: "\(username)@example.com", password: "test-password", username: username, displayName: username
         ))
+    }
+
+    private func upload(_ jpeg: Data, token: String, file: StaticString = #filePath, line: UInt = #line) async throws -> MediaDTO {
+        var media: MediaDTO?
+        try await app.test(.POST, "v1/media", beforeRequest: { req in
+            req.headers.bearerAuthorization = BearerAuthorization(token: token)
+            req.headers.contentType = .jpeg
+            req.body = ByteBuffer(bytes: Array(jpeg))
+        }, afterResponse: { res in
+            XCTAssertEqual(res.status, .created, res.body.string, file: file, line: line)
+            media = try res.content.decode(MediaDTO.self, using: BrewlyJSON.makeDecoder())
+        })
+        return try XCTUnwrap(media, file: file, line: line)
     }
 
     private func send<Output: Decodable>(

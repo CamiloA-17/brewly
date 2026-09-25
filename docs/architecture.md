@@ -93,6 +93,9 @@ flowchart TD
   follows the device setting by default; Profile → Appearance lets the user force light or dark.
   The choice is stored per device (`@AppStorage`) and applied to the app's windows, so sheets and
   alerts follow it too.
+- **Images.** Photos are resized to 1600 px JPEG in `BrewlyData` before upload. Views show them
+  with `RemoteImage`, which loads through an `ImageLoader` from the environment (the API client
+  adds the access token) and keeps them in memory.
 - **Localization.** English is the development language and every module ships a String Catalog
   with Spanish translations. Catalog items arrive from the API with canonical English names and
   are translated by `BrewlyDesignSystem`; countries are localized from their ISO code.
@@ -109,7 +112,8 @@ flowchart LR
     PG --> DB[("PostgreSQL")]
 ```
 
-- One folder per feature (`Features/Auth`, `Users`, `Catalog`, `Beans`, `Recipes`, `People`).
+- One folder per feature (`Features/Auth`, `Users`, `Catalog`, `Beans`, `Recipes`, `People`,
+  `Media`, `Posts`).
 - **SQL-first.** The schema is owned by the migrations in `database/`; Fluent is used only for
   configuration and connection pooling (no Fluent models or migrations). Repositories write
   explicit SQL so PostgreSQL features (generated columns, composite keys, the
@@ -151,15 +155,17 @@ sequenceDiagram
 - **Database:** managed PostgreSQL 17 (Neon, RDS, Cloud SQL…); run `dbmate up` on every deploy
   before starting the new API version.
 - **Configuration:** `DATABASE_URL`, `JWT_SECRET` (at least 32 characters) and optional token TTLs.
-- **Media (phase 2):** S3-compatible object storage with presigned uploads; the database stores URLs.
+- **Media:** images are stored in PostgreSQL and served by the API at `/v1/media/{id}`
+  ([ADR 0006](adr/0006-media-in-postgresql.md)); moving them to S3-compatible storage later only
+  changes the server.
 
 ## Roadmap
 
 1. **Now: architecture and skeleton.** Schema, shared package, API for auth, catalogs, beans and
    recipes, and the iOS app with navigation and bean/recipe screens.
-2. **Social:** profiles of other users, follow, saving and remixing (forking) recipes *(done)*;
-   feed (followed users + explore), posts with photos, likes, comments and in-app notifications
-   (next), push notifications with APNs.
+2. **Social:** profiles of other users, follow, saving and remixing (forking) recipes, feed
+   (followed users + explore), posts with photos, likes and comments *(done)*; in-app
+   notifications (next), push notifications with APNs.
 3. **Trust and safety:** report and block in the UI (App Store Guideline 1.2), moderation queue.
 4. **More:** Sign in with Apple, search (`pg_trgm`), guided brew timer that plays recipe steps,
    offline cache, more languages.

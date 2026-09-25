@@ -7,6 +7,7 @@ import SwiftUI
 public enum AppRoute: Hashable, Sendable {
     case member(UUID)
     case recipe(UUID)
+    case post(UUID)
     case memberSearch
     case followers(of: UUID)
     case following(of: UUID)

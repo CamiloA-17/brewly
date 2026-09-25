@@ -85,16 +85,7 @@ extension Recipe {
         self.init(
             id: dto.id,
             author: UserSummary(dto.author),
-            bean: BeanSummary(
-                id: dto.bean.id,
-                name: dto.bean.name,
-                roaster: dto.bean.roaster,
-                countryCode: dto.bean.countryCode,
-                farm: dto.bean.farm,
-                processingMethodSlug: dto.bean.processingMethodSlug,
-                varietalSlugs: dto.bean.varietalSlugs,
-                roastLevel: dto.bean.roastLevel
-            ),
+            bean: BeanSummary(dto.bean),
             methodSlug: dto.methodSlug,
             forkedFromID: dto.forkedFromId,
             forkedFrom: dto.forkedFrom.map {
@@ -133,6 +124,67 @@ extension Recipe {
             isSaved: dto.isSaved,
             createdAt: dto.createdAt,
             updatedAt: dto.updatedAt
+        )
+    }
+}
+
+extension MediaItem {
+    init?(_ dto: MediaDTO) {
+        guard let url = URL(string: dto.url) else { return nil }
+        self.init(id: dto.id, url: url, width: dto.width, height: dto.height)
+    }
+}
+
+extension BeanSummary {
+    init(_ dto: BeanSummaryDTO) {
+        self.init(
+            id: dto.id,
+            name: dto.name,
+            roaster: dto.roaster,
+            countryCode: dto.countryCode,
+            farm: dto.farm,
+            processingMethodSlug: dto.processingMethodSlug,
+            varietalSlugs: dto.varietalSlugs,
+            roastLevel: dto.roastLevel
+        )
+    }
+}
+
+extension Post {
+    init(_ dto: PostDTO) {
+        self.init(
+            id: dto.id,
+            author: UserSummary(dto.author),
+            kind: dto.kind,
+            body: dto.body,
+            recipe: dto.recipe.map(RecipeSummary.init),
+            bean: dto.bean.map(BeanSummary.init),
+            media: dto.media.compactMap(MediaItem.init),
+            visibility: dto.visibility,
+            likeCount: dto.likeCount,
+            commentCount: dto.commentCount,
+            isLiked: dto.isLiked,
+            createdAt: dto.createdAt
+        )
+    }
+}
+
+extension LikeState {
+    init(_ dto: LikeStateDTO) {
+        self.init(isLiked: dto.isLiked, likeCount: dto.likeCount)
+    }
+}
+
+extension Comment {
+    init(_ dto: CommentDTO) {
+        self.init(
+            id: dto.id,
+            postID: dto.postId,
+            parentID: dto.parentId,
+            author: UserSummary(dto.author),
+            body: dto.body,
+            canDelete: dto.canDelete,
+            createdAt: dto.createdAt
         )
     }
 }
