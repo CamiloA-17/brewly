@@ -369,6 +369,9 @@ struct PostgresRecipeRepository: RecipeRepository {
             else { throw AppError(status: .internalServerError, code: "internal_error", message: "Recipe was not created.") }
             let id = try row.decode(column: "id", as: UUID.self)
             try await Self.replaceChildren(recipeID: id, recipe, sql: sql)
+            if recipe.forkedFromId != nil {
+                try await NotificationWriter.recipeForked(remixID: id, sql: sql)
+            }
             guard let created = try await Self.find(id: id, viewerID: authorID, sql: sql) else {
                 throw AppError.notFound("Recipe")
             }
@@ -419,6 +422,13 @@ struct PostgresRecipeRepository: RecipeRepository {
                 SELECT \(bind: userID), id FROM target
                 ON CONFLICT DO NOTHING
                 RETURNING recipe_id
+            ),
+            notified AS (
+                INSERT INTO notifications (recipient_id, actor_id, kind, recipe_id)
+                SELECT r.author_id, \(bind: userID), 'recipe_save', r.id
+                FROM inserted i JOIN recipes r ON r.id = i.recipe_id
+                WHERE r.author_id <> \(bind: userID)
+                ON CONFLICT DO NOTHING
             )
             SELECT ((SELECT count(*) FROM recipe_saves s WHERE s.recipe_id = t.id)
                     + (SELECT count(*) FROM inserted))::int AS save_count
@@ -431,6 +441,10 @@ struct PostgresRecipeRepository: RecipeRepository {
             WITH deleted AS (
                 DELETE FROM recipe_saves WHERE user_id = \(bind: userID) AND recipe_id = \(bind: id)
                 RETURNING recipe_id
+            ),
+            retracted AS (
+                DELETE FROM notifications
+                WHERE kind = 'recipe_save' AND actor_id = \(bind: userID) AND recipe_id = \(bind: id)
             )
             SELECT ((SELECT count(*) FROM recipe_saves s WHERE s.recipe_id = \(bind: id))
                     - (SELECT count(*) FROM deleted))::int AS save_count

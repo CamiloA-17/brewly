@@ -189,6 +189,24 @@ extension PostComment {
     }
 }
 
+extension AppNotification {
+    init(_ dto: NotificationDTO) {
+        self.init(
+            id: dto.id,
+            kind: dto.kind,
+            actor: UserSummary(dto.actor),
+            postID: dto.postId,
+            postExcerpt: dto.postExcerpt,
+            commentID: dto.commentId,
+            commentExcerpt: dto.commentExcerpt,
+            recipeID: dto.recipeId,
+            recipeTitle: dto.recipeTitle,
+            isRead: dto.isRead,
+            createdAt: dto.createdAt
+        )
+    }
+}
+
 extension SaveState {
     init(_ dto: SaveStateDTO) {
         self.init(isSaved: dto.isSaved, saveCount: dto.saveCount)

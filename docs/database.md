@@ -113,6 +113,7 @@ erDiagram
 | `social` | `follows`, `user_blocks`, `posts`, `post_media`, `post_likes`, `comments` | Social graph and feed content; `can_view_content()` function. |
 | `notifications_moderation` | `notifications`, `reports` | Activity notifications and reports of objectionable content. |
 | `media` | `media` (and changes to `post_media`, `posts`, `users`) | Uploaded JPEG images stored as `bytea`; post photos and avatars reference them. |
+| `notification_delivery` | — | Deduplication and pagination indexes for `notifications`. |
 
 ## Integrity rules
 
@@ -148,6 +149,9 @@ erDiagram
   avatar; `users.avatar_url` is generated from `avatar_media_id`, so it always points to
   `/v1/media/{id}`. Deleting a post deletes its images, and uploads that are never used are
   deleted after a day. See [ADR 0006](adr/0006-media-in-postgresql.md).
+- **Notifications** are written by the API in the same transaction as the action.
+  `notifications_once_idx` makes follows, likes and saves notify once per actor and target, and
+  `notifications_kind_target` checks that each kind points to the right post, comment or recipe.
 - **Remixes.** `recipes.forked_from_id` points to the original recipe and becomes `NULL` when the
   original is deleted, so a remix survives its original.
 

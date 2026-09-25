@@ -119,4 +119,24 @@ INSERT INTO comments (id, post_id, author_id, parent_id, body) VALUES
      '11111111-1111-4111-8111-111111111111', 'dddddddd-0000-4000-8000-000000000001', '24 clicks, then adjust by taste.')
 ON CONFLICT (id) DO NOTHING;
 
+-- What Ana sees in her notifications.
+INSERT INTO notifications (recipient_id, actor_id, kind, post_id, comment_id, recipe_id) VALUES
+    ('11111111-1111-4111-8111-111111111111', '22222222-2222-4222-8222-222222222222', 'follow', NULL, NULL, NULL),
+    ('11111111-1111-4111-8111-111111111111', '22222222-2222-4222-8222-222222222222', 'recipe_save', NULL, NULL,
+     'bbbbbbbb-0000-4000-8000-000000000001'),
+    ('11111111-1111-4111-8111-111111111111', '22222222-2222-4222-8222-222222222222', 'post_like',
+     'cccccccc-0000-4000-8000-000000000001', NULL, NULL)
+ON CONFLICT DO NOTHING;
+
+INSERT INTO notifications (recipient_id, actor_id, kind, post_id, comment_id)
+SELECT '11111111-1111-4111-8111-111111111111', '22222222-2222-4222-8222-222222222222', 'comment',
+       'cccccccc-0000-4000-8000-000000000001', 'dddddddd-0000-4000-8000-000000000001'
+WHERE NOT EXISTS (SELECT 1 FROM notifications WHERE comment_id = 'dddddddd-0000-4000-8000-000000000001');
+
+INSERT INTO notifications (recipient_id, actor_id, kind, recipe_id)
+SELECT '11111111-1111-4111-8111-111111111111', '22222222-2222-4222-8222-222222222222', 'recipe_fork',
+       'bbbbbbbb-0000-4000-8000-000000000003'
+WHERE NOT EXISTS (SELECT 1 FROM notifications
+                  WHERE kind = 'recipe_fork' AND recipe_id = 'bbbbbbbb-0000-4000-8000-000000000003');
+
 COMMIT;

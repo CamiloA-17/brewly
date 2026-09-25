@@ -331,3 +331,26 @@ public struct APIPostRepository: PostRepository {
         }
     }
 }
+
+public struct APINotificationRepository: NotificationRepository {
+    private let client: APIClient
+
+    public init(client: APIClient) {
+        self.client = client
+    }
+
+    public func notifications(cursor: String?) async throws -> PagedResult<AppNotification> {
+        try await mappingErrors {
+            let page = try await client.send(Endpoints.notifications(cursor: cursor))
+            return PagedResult(items: page.items.map(AppNotification.init), nextCursor: page.nextCursor)
+        }
+    }
+
+    public func unreadCount() async throws -> Int {
+        try await mappingErrors { try await client.send(Endpoints.unreadNotificationCount).count }
+    }
+
+    public func markAllRead() async throws {
+        try await mappingErrors { _ = try await client.send(Endpoints.markNotificationsRead) }
+    }
+}

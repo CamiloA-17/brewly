@@ -60,6 +60,9 @@ and the server always agree on the contract.
 | GET | `/v1/posts/{id}/comments?cursor=&limit=` | Comments, oldest first. |
 | POST | `/v1/posts/{id}/comments` | Comment (`{ "body", "parentId"? }`); replies to a reply join its thread (201). |
 | DELETE | `/v1/comments/{id}` | Delete a comment written by the user or on the user's post, with its replies (204). |
+| GET | `/v1/me/notifications?cursor=&limit=` | Follows, likes, comments, replies, saves and remixes by other members, newest first (`NotificationDTO`). |
+| GET | `/v1/me/notifications/unread-count` | `{ "count": … }` for the app's badge. |
+| POST | `/v1/me/notifications/read` | Mark every notification as read (204). |
 | GET | `/v1/users?q=` | Up to 20 members whose username or name starts with `q` (a leading `@` is ignored). |
 | GET | `/v1/users/{id}` | A member's public profile with counts and follow state (`UserProfileDTO`). |
 | GET | `/v1/users/{id}/recipes?cursor=&limit=` | The member's recipes the user can see. |
@@ -157,6 +160,15 @@ Content-Type: application/json
 The server derives `kind` (`text`, `recipe` or `bean`) from what the post shares. If the shared
 recipe or bean is not visible to a reader, the post still shows, without it. Image URLs are
 relative to the API base URL and need the access token.
+
+### Notifications
+
+Notifications are created in the same transaction as the action. Nobody is notified about
+their own actions or by blocked members, and a remix only notifies its original author when
+they can see it. Follows, likes and saves notify once per member and target: undoing them
+removes the notification, and doing them again doesn't notify twice. Deleting a comment removes
+its notifications. `recipeId` is the saved recipe (`recipe_save`) or the new remix
+(`recipe_fork`).
 
 ### Remix a recipe
 

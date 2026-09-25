@@ -144,6 +144,11 @@ struct PostgresPeopleRepository: PeopleRepository {
                 SELECT \(bind: followerID), id FROM target
                 ON CONFLICT DO NOTHING
                 RETURNING followed_id
+            ),
+            notified AS (
+                INSERT INTO notifications (recipient_id, actor_id, kind)
+                SELECT followed_id, \(bind: followerID), 'follow' FROM inserted
+                ON CONFLICT DO NOTHING
             )
             SELECT ((SELECT count(*) FROM follows f WHERE f.followed_id = t.id)
                     + (SELECT count(*) FROM inserted))::int AS follower_count
@@ -159,6 +164,10 @@ struct PostgresPeopleRepository: PeopleRepository {
                 DELETE FROM follows
                 WHERE follower_id = \(bind: followerID) AND followed_id = \(bind: memberID)
                 RETURNING followed_id
+            ),
+            retracted AS (
+                DELETE FROM notifications
+                WHERE kind = 'follow' AND actor_id = \(bind: followerID) AND recipient_id = \(bind: memberID)
             )
             SELECT ((SELECT count(*) FROM follows f WHERE f.followed_id = \(bind: memberID))
                     - (SELECT count(*) FROM deleted))::int AS follower_count

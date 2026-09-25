@@ -50,6 +50,7 @@ let package = Package(
         .target(name: "FeedFeature", dependencies: ["BrewlyDomain", "BrewlyDesignSystem"], resources: [.process("Resources")]),
         .target(name: "ProfileFeature", dependencies: ["BrewlyDomain", "BrewlyDesignSystem"], resources: [.process("Resources")]),
         .target(name: "PeopleFeature", dependencies: ["BrewlyDomain", "BrewlyDesignSystem"], resources: [.process("Resources")]),
+        .target(name: "NotificationsFeature", dependencies: ["BrewlyDomain", "BrewlyDesignSystem"], resources: [.process("Resources")]),
 
         // MARK: Composition root
         .target(
@@ -66,6 +67,7 @@ let package = Package(
                 "FeedFeature",
                 "ProfileFeature",
                 "PeopleFeature",
+                "NotificationsFeature",
             ],
             resources: [.process("Resources")]
         ),
@@ -79,5 +81,6 @@ let package = Package(
         .testTarget(name: "RecipesFeatureTests", dependencies: ["RecipesFeature", "BrewlyDomain"]),
         .testTarget(name: "PeopleFeatureTests", dependencies: ["PeopleFeature", "BrewlyDomain"]),
         .testTarget(name: "FeedFeatureTests", dependencies: ["FeedFeature", "BrewlyDomain"]),
+        .testTarget(name: "NotificationsFeatureTests", dependencies: ["NotificationsFeature", "BrewlyDomain", "BrewlyDesignSystem"]),
     ]
 )
