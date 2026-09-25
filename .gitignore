@@ -60,3 +60,25 @@ fastlane/report.xml
 fastlane/Preview.html
 fastlane/screenshots/**/*.png
 fastlane/test_output
+
+# ---------------------------------------------------------------------------
+# Brewly
+# ---------------------------------------------------------------------------
+
+# macOS
+.DS_Store
+
+# SwiftPM / Xcode local state
+.swiftpm/
+*.xcworkspace/xcuserdata/
+
+# The Xcode project is generated from ios/project.yml with XcodeGen
+ios/Brewly.xcodeproj/
+
+# Local environment
+.env
+.env.*
+!.env.example
+
+# dbmate schema dump (the migrations are the source of truth)
+database/schema.sql

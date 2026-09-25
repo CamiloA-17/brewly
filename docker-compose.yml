@@ -1,0 +1,52 @@
+# Local development stack.
+#
+#   docker compose up -d db migrate      # database + migrations
+#   docker compose --profile api up -d   # also run the API in a container
+
+services:
+  db:
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-brewly}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-brewly}
+      POSTGRES_DB: ${POSTGRES_DB:-brewly_dev}
+    ports:
+      - "5432:5432"
+    volumes:
+      - db-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 2s
+      timeout: 5s
+      retries: 20
+
+  migrate:
+    image: ghcr.io/amacneil/dbmate:2
+    command: ["--wait", "up"]
+    environment:
+      DATABASE_URL: postgres://${POSTGRES_USER:-brewly}:${POSTGRES_PASSWORD:-brewly}@db:5432/${POSTGRES_DB:-brewly_dev}?sslmode=disable
+      DBMATE_MIGRATIONS_DIR: /db/migrations
+      DBMATE_NO_DUMP_SCHEMA: "true"
+    volumes:
+      - ./database:/db:ro
+    depends_on:
+      db:
+        condition: service_healthy
+
+  api:
+    profiles: ["api"]
+    build:
+      context: .
+      dockerfile: server/Dockerfile
+    environment:
+      DATABASE_URL: postgres://${POSTGRES_USER:-brewly}:${POSTGRES_PASSWORD:-brewly}@db:5432/${POSTGRES_DB:-brewly_dev}?sslmode=disable
+      JWT_SECRET: ${JWT_SECRET:-change-me-to-a-long-random-string-of-at-least-32-chars}
+      LOG_LEVEL: ${LOG_LEVEL:-info}
+    ports:
+      - "8080:8080"
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+
+volumes:
+  db-data:
