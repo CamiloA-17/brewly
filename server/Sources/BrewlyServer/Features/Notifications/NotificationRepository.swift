@@ -61,8 +61,8 @@ struct PostgresNotificationRepository: NotificationRepository {
                    n.read_at IS NOT NULL AS is_read,
                    a.id AS actor_id, a.username AS actor_username, a.display_name AS actor_display_name,
                    a.avatar_url AS actor_avatar_url,
-                   n.post_id, left(p.body, \(bind: Self.excerptLength)) AS post_excerpt,
-                   n.comment_id, left(c.body, \(bind: Self.excerptLength)) AS comment_excerpt,
+                   n.post_id, left(p.body, \(unsafeRaw: String(Self.excerptLength))) AS post_excerpt,
+                   n.comment_id, left(c.body, \(unsafeRaw: String(Self.excerptLength))) AS comment_excerpt,
                    n.recipe_id, r.title AS recipe_title
             FROM notifications n
             JOIN users a ON a.id = n.actor_id
