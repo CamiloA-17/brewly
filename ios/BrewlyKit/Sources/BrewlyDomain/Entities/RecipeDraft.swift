@@ -19,6 +19,8 @@ public struct RecipeDraft: Hashable, Sendable {
     }
 
     public var beanID: UUID?
+    /// The recipe this draft remixes. Only sent when creating a recipe.
+    public var forkedFromID: UUID?
     public var methodSlug: String?
     public var title = ""
     public var description = ""
@@ -74,6 +76,21 @@ public struct RecipeDraft: Hashable, Sendable {
             Step(kind: $0.kind, startS: $0.startS, waterTargetG: $0.waterTargetG, instruction: $0.instruction ?? "")
         }
         visibility = recipe.visibility
+    }
+
+    /// A new recipe that starts from someone else's parameters.
+    ///
+    /// The brewer picks one of their own beans, and results (TDS, rating, tasting notes) start
+    /// empty because they belong to each cup.
+    public init(remixOf recipe: Recipe) {
+        self.init(recipe: recipe)
+        beanID = nil
+        forkedFromID = recipe.id
+        tdsPercent = nil
+        rating = nil
+        notes = ""
+        flavorNoteSlugs = []
+        visibility = .public
     }
 
     /// Live brew ratio, computed like the database does.

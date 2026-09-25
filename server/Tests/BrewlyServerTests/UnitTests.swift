@@ -83,6 +83,37 @@ final class BeanServiceTests: XCTestCase {
 
 // MARK: - Helpers
 
+final class PeopleServiceTests: XCTestCase {
+    func testQueryIsTrimmedAndIgnoresLeadingAt() {
+        XCTAssertEqual(PeopleService.normalizedQuery("  @ana  "), "ana")
+        XCTAssertEqual(PeopleService.normalizedQuery(nil), "")
+    }
+
+    func testEmptySearchDoesNotQuery() async throws {
+        let service = PeopleService(people: UnreachablePeopleRepository())
+        let results = try await service.search(query: " @ ", viewerID: UUID())
+        XCTAssertTrue(results.isEmpty)
+    }
+
+    func testCannotFollowYourself() async {
+        let service = PeopleService(people: UnreachablePeopleRepository())
+        let me = UUID()
+        do {
+            _ = try await service.follow(memberID: me, followerID: me)
+            XCTFail("Expected an error")
+        } catch let error as AppError {
+            XCTAssertEqual(error.status, .unprocessableEntity)
+            XCTAssertEqual(error.code, APIErrorCode.cannotFollowSelf)
+        } catch {
+            XCTFail("Unexpected error: \(error)")
+        }
+    }
+
+    func testLikeWildcardsAreEscaped() {
+        XCTAssertEqual(PostgresPeopleRepository.escapedForLike("a_b%c\\"), "a\\_b\\%c\\\\")
+    }
+}
+
 func assertValidationError(
     fields: Set<String>,
     file: StaticString = #filePath,
@@ -125,6 +156,8 @@ struct UnreachableRecipeRepository: RecipeRepository {
         fatalError("Not used in unit tests")
     }
     func delete(id: UUID, authorID: UUID) async throws -> Bool { fatalError("Not used in unit tests") }
+    func save(id: UUID, userID: UUID) async throws -> SaveStateDTO? { fatalError("Not used in unit tests") }
+    func unsave(id: UUID, userID: UUID) async throws -> SaveStateDTO { fatalError("Not used in unit tests") }
 }
 
 struct UnreachableBeanRepository: BeanRepository {
@@ -135,4 +168,17 @@ struct UnreachableBeanRepository: BeanRepository {
         fatalError("Not used in unit tests")
     }
     func delete(id: UUID, ownerID: UUID) async throws -> Bool { fatalError("Not used in unit tests") }
+}
+
+struct UnreachablePeopleRepository: PeopleRepository {
+    func profile(id: UUID, viewerID: UUID) async throws -> UserProfileDTO? { fatalError("Not used in unit tests") }
+    func search(prefix: String, viewerID: UUID, limit: Int) async throws -> [UserSummaryDTO] {
+        fatalError("Not used in unit tests")
+    }
+    func follows(of memberID: UUID, kind: FollowListKind, viewerID: UUID, after cursor: PageCursor?, limit: Int)
+        async throws -> BrewlyAPI.Page<UserSummaryDTO> {
+        fatalError("Not used in unit tests")
+    }
+    func follow(memberID: UUID, followerID: UUID) async throws -> FollowStateDTO? { fatalError("Not used in unit tests") }
+    func unfollow(memberID: UUID, followerID: UUID) async throws -> FollowStateDTO { fatalError("Not used in unit tests") }
 }

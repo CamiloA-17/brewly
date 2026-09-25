@@ -1,6 +1,86 @@
 {
   "sourceLanguage": "en",
   "strings": {
+    "%lld remixes": {
+      "localizations": {
+        "en": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld remix"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld remixes"
+                }
+              }
+            }
+          }
+        },
+        "es": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld remix"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld remixes"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "%lld saves": {
+      "localizations": {
+        "en": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld save"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld saves"
+                }
+              }
+            }
+          }
+        },
+        "es": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld guardado"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld guardados"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "Add a bean first": {
       "localizations": {
         "es": {
@@ -441,6 +521,16 @@
         }
       }
     },
+    "No saved recipes": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No tienes recetas guardadas"
+          }
+        }
+      }
+    },
     "Not specified": {
       "localizations": {
         "es": {
@@ -561,6 +651,36 @@
         }
       }
     },
+    "Remix": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Remix"
+          }
+        }
+      }
+    },
+    "Remix of %@ by @%@": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Remix de %1$@ por @%2$@"
+          }
+        }
+      }
+    },
+    "Remix recipe": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hacer remix"
+          }
+        }
+      }
+    },
     "Results": {
       "localizations": {
         "es": {
@@ -587,6 +707,26 @@
           "stringUnit": {
             "state": "translated",
             "value": "Guardar"
+          }
+        }
+      }
+    },
+    "Save recipes from the community to brew them later.": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Guarda recetas de la comunidad para prepararlas después."
+          }
+        }
+      }
+    },
+    "Saved": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Guardadas"
           }
         }
       }
@@ -687,6 +827,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Tiempo total (s)"
+          }
+        }
+      }
+    },
+    "Unsave": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Quitar de guardadas"
           }
         }
       }

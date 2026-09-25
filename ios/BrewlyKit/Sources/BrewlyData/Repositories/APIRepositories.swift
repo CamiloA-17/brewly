@@ -171,3 +171,65 @@ public struct APIRecipeRepository: RecipeRepository {
         try await mappingErrors { _ = try await client.send(Endpoints.deleteRecipe(id: id)) }
     }
 }
+
+extension APIRecipeRepository: RecipeSavesRepository {
+    public func savedRecipes(cursor: String?) async throws -> PagedResult<RecipeSummary> {
+        try await mappingErrors {
+            let page = try await client.send(Endpoints.savedRecipes(cursor: cursor))
+            return PagedResult(items: page.items.map(RecipeSummary.init), nextCursor: page.nextCursor)
+        }
+    }
+
+    public func save(recipeID: UUID) async throws -> SaveState {
+        try await mappingErrors { SaveState(try await client.send(Endpoints.saveRecipe(id: recipeID))) }
+    }
+
+    public func unsave(recipeID: UUID) async throws -> SaveState {
+        try await mappingErrors { SaveState(try await client.send(Endpoints.unsaveRecipe(id: recipeID))) }
+    }
+}
+
+public struct APIPeopleRepository: PeopleRepository {
+    private let client: APIClient
+
+    public init(client: APIClient) {
+        self.client = client
+    }
+
+    public func search(_ query: String) async throws -> [UserSummary] {
+        try await mappingErrors { try await client.send(Endpoints.searchUsers(query: query)).map(UserSummary.init) }
+    }
+
+    public func profile(id: UUID) async throws -> MemberProfile {
+        try await mappingErrors { MemberProfile(try await client.send(Endpoints.userProfile(id: id))) }
+    }
+
+    public func recipes(of memberID: UUID, cursor: String?) async throws -> PagedResult<RecipeSummary> {
+        try await mappingErrors {
+            let page = try await client.send(Endpoints.userRecipes(id: memberID, cursor: cursor))
+            return PagedResult(items: page.items.map(RecipeSummary.init), nextCursor: page.nextCursor)
+        }
+    }
+
+    public func followers(of memberID: UUID, cursor: String?) async throws -> PagedResult<UserSummary> {
+        try await mappingErrors {
+            let page = try await client.send(Endpoints.followers(of: memberID, cursor: cursor))
+            return PagedResult(items: page.items.map(UserSummary.init), nextCursor: page.nextCursor)
+        }
+    }
+
+    public func following(of memberID: UUID, cursor: String?) async throws -> PagedResult<UserSummary> {
+        try await mappingErrors {
+            let page = try await client.send(Endpoints.following(of: memberID, cursor: cursor))
+            return PagedResult(items: page.items.map(UserSummary.init), nextCursor: page.nextCursor)
+        }
+    }
+
+    public func follow(_ memberID: UUID) async throws -> FollowState {
+        try await mappingErrors { FollowState(try await client.send(Endpoints.follow(id: memberID))) }
+    }
+
+    public func unfollow(_ memberID: UUID) async throws -> FollowState {
+        try await mappingErrors { FollowState(try await client.send(Endpoints.unfollow(id: memberID))) }
+    }
+}

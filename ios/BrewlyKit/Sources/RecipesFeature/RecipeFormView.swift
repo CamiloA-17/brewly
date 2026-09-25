@@ -8,8 +8,13 @@ struct RecipeFormView: View {
     @Environment(\.dismiss) private var dismiss
     private let onSaved: @MainActor (Recipe) -> Void
 
-    init(recipe: Recipe?, dependencies: RecipesDependencies, onSaved: @escaping @MainActor (Recipe) -> Void) {
-        _model = State(initialValue: RecipeFormViewModel(recipe: recipe, dependencies: dependencies))
+    init(
+        recipe: Recipe?,
+        remixOf original: Recipe? = nil,
+        dependencies: RecipesDependencies,
+        onSaved: @escaping @MainActor (Recipe) -> Void
+    ) {
+        _model = State(initialValue: RecipeFormViewModel(recipe: recipe, remixOf: original, dependencies: dependencies))
         self.onSaved = onSaved
     }
 
@@ -32,7 +37,7 @@ struct RecipeFormView: View {
                     form
                 }
             }
-            .navigationTitle(model.isEditing ? Text("Edit recipe", bundle: .module) : Text("New recipe", bundle: .module))
+            .navigationTitle(title)
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
@@ -62,6 +67,12 @@ struct RecipeFormView: View {
             }
             .task { await model.load() }
         }
+    }
+
+    private var title: Text {
+        if model.isEditing { return Text("Edit recipe", bundle: .module) }
+        if model.isRemix { return Text("Remix recipe", bundle: .module) }
+        return Text("New recipe", bundle: .module)
     }
 
     private var form: some View {

@@ -4,12 +4,15 @@ import Vapor
 struct RecipeController: RouteCollection {
     func boot(routes: any RoutesBuilder) throws {
         routes.get("me", "recipes", use: myRecipes)
+        routes.get("me", "saved-recipes", use: savedRecipes)
         let recipes = routes.grouped("recipes")
         recipes.get(use: explore)
         recipes.post(use: create)
         recipes.get(":recipeID", use: show)
         recipes.put(":recipeID", use: update)
         recipes.delete(":recipeID", use: delete)
+        recipes.put(":recipeID", "save", use: save)
+        recipes.delete(":recipeID", "save", use: unsave)
     }
 
     /// `GET /me/recipes?cursor=&limit=`
@@ -18,6 +21,15 @@ struct RecipeController: RouteCollection {
         let userID = try req.userID
         let page = try await service(req).list(
             scope: .authoredBy(userID), viewerID: userID, cursor: req.query[String.self, at: "cursor"], limit: req.pageLimit
+        )
+        return try .json(page)
+    }
+
+    /// `GET /me/saved-recipes?cursor=&limit=`: newest save first.
+    @Sendable
+    func savedRecipes(req: Request) async throws -> Response {
+        let page = try await service(req).list(
+            scope: .savedByViewer, viewerID: try req.userID, cursor: req.query[String.self, at: "cursor"], limit: req.pageLimit
         )
         return try .json(page)
     }
@@ -60,6 +72,20 @@ struct RecipeController: RouteCollection {
         let id = try req.uuidParameter("recipeID", resource: "Recipe")
         try await service(req).delete(id: id, authorID: try req.userID)
         return .noContent
+    }
+
+    /// `PUT /recipes/{id}/save`: idempotent.
+    @Sendable
+    func save(req: Request) async throws -> Response {
+        let id = try req.uuidParameter("recipeID", resource: "Recipe")
+        return try .json(try await service(req).save(id: id, userID: try req.userID))
+    }
+
+    /// `DELETE /recipes/{id}/save`: idempotent.
+    @Sendable
+    func unsave(req: Request) async throws -> Response {
+        let id = try req.uuidParameter("recipeID", resource: "Recipe")
+        return try .json(try await service(req).unsave(id: id, userID: try req.userID))
     }
 
     private func service(_ req: Request) -> RecipeService {

@@ -136,6 +136,12 @@ erDiagram
 - **Catalog keys.** Catalogs use stable slugs (`v60`, `washed`, `geisha`) or ISO codes as primary
   keys, so references are identical in every environment and readable in queries.
 
+- **Counts are computed when read.** Follower, save, remix and recipe counts are `count(*)`
+  subqueries over indexed keys (for example the `follows` primary key and
+  `recipe_saves_recipe_idx`), so there are no counter columns to keep in sync.
+- **Remixes.** `recipes.forked_from_id` points to the original recipe and becomes `NULL` when the
+  original is deleted, so a remix survives its original.
+
 ## Conventions
 
 - Tables are plural `snake_case`; columns carry units (`dose_g`, `water_temp_c`, `bloom_time_s`).

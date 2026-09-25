@@ -1,92 +1,42 @@
 {
   "sourceLanguage": "en",
   "strings": {
-    "Account": {
+    "Couldn't load the recipes.": {
       "localizations": {
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Cuenta"
+            "value": "No se pudieron cargar las recetas."
           }
         }
       }
     },
-    "Bio": {
+    "Find people": {
       "localizations": {
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Biografía"
+            "value": "Buscar personas"
           }
         }
       }
     },
-    "Cancel": {
+    "Follow": {
       "localizations": {
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Cancelar"
+            "value": "Seguir"
           }
         }
       }
     },
-    "Delete account": {
+    "Follow back": {
       "localizations": {
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Eliminar cuenta"
-          }
-        }
-      }
-    },
-    "Delete account and all my data": {
-      "localizations": {
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Eliminar mi cuenta y todos mis datos"
-          }
-        }
-      }
-    },
-    "Delete your account?": {
-      "localizations": {
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "¿Eliminar tu cuenta?"
-          }
-        }
-      }
-    },
-    "Display name": {
-      "localizations": {
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Nombre visible"
-          }
-        }
-      }
-    },
-    "Edit profile": {
-      "localizations": {
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Editar perfil"
-          }
-        }
-      }
-    },
-    "Email": {
-      "localizations": {
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Correo electrónico"
+            "value": "Seguir también"
           }
         }
       }
@@ -111,52 +61,72 @@
         }
       }
     },
-    "Location": {
+    "Follows you": {
       "localizations": {
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Ubicación"
+            "value": "Te sigue"
           }
         }
       }
     },
-    "Profile": {
+    "No followers yet": {
       "localizations": {
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Perfil"
+            "value": "Aún no tiene seguidores"
           }
         }
       }
     },
-    "Save": {
+    "No recipes to show yet.": {
       "localizations": {
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Guardar"
+            "value": "Aún no hay recetas para mostrar."
           }
         }
       }
     },
-    "Sign out": {
+    "Not following anyone yet": {
       "localizations": {
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Cerrar sesión"
+            "value": "Aún no sigue a nadie"
           }
         }
       }
     },
-    "Your beans, recipes and posts will be permanently deleted.": {
+    "Recipes": {
       "localizations": {
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Tus granos, recetas y publicaciones se eliminarán de forma permanente."
+            "value": "Recetas"
+          }
+        }
+      }
+    },
+    "Search by username or name.": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Busca por nombre de usuario o nombre."
+          }
+        }
+      }
+    },
+    "Username or name": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Usuario o nombre"
           }
         }
       }

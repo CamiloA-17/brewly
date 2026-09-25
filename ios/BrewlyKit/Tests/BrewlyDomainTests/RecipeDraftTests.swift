@@ -13,6 +13,26 @@ struct RecipeDraftTests {
         defaultRatio: 2, defaultGrindSize: .fine, defaultWaterTempC: 93
     )
 
+    @Test("A remix keeps the parameters and clears the bean and the results")
+    func remix() {
+        let original = Recipe(
+            id: UUID(),
+            author: UserSummary(id: UUID(), username: "leo.roaster", displayName: "Leo"),
+            bean: BeanSummary(id: UUID(), name: "Leo's bean"),
+            methodSlug: "v60", title: "Floral V60", doseG: 15, waterG: 250, ratio: 16.7,
+            grindSize: .mediumFine, waterTempC: 93, tdsPercent: 1.4, rating: 5, notes: "Juicy",
+            flavorNoteSlugs: ["jasmine"], steps: [RecipeStep(position: 1, kind: .bloom, startS: 0, waterTargetG: 45)],
+            visibility: .followers
+        )
+        let draft = RecipeDraft(remixOf: original)
+        #expect(draft.forkedFromID == original.id)
+        #expect(draft.beanID == nil)
+        #expect(draft.doseG == 15 && draft.waterG == 250 && draft.waterTempC == 93)
+        #expect(draft.steps.count == 1)
+        #expect(draft.tdsPercent == nil && draft.rating == nil && draft.notes.isEmpty && draft.flavorNoteSlugs.isEmpty)
+        #expect(draft.visibility == .public)
+    }
+
     @Test("Method defaults fill empty parameters")
     func appliesDefaults() {
         var draft = RecipeDraft()

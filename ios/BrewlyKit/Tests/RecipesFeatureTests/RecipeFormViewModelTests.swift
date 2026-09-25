@@ -32,6 +32,29 @@ struct StubUserMethodsRepository: UserMethodsRepository {
     func setUsing(_ isUsing: Bool, methodSlug: String) async throws {}
 }
 
+/// Saves succeed unless `failing` is set; the count starts at `initialCount`.
+actor StubSavesRepository: RecipeSavesRepository {
+    var failing = false
+    private var count: Int
+
+    init(initialCount: Int = 0, failing: Bool = false) {
+        count = initialCount
+        self.failing = failing
+    }
+
+    func savedRecipes(cursor: String?) async throws -> PagedResult<RecipeSummary> { PagedResult(items: [], nextCursor: nil) }
+    func save(recipeID: UUID) async throws -> SaveState {
+        if failing { throw DomainError.offline }
+        count += 1
+        return SaveState(isSaved: true, saveCount: count)
+    }
+    func unsave(recipeID: UUID) async throws -> SaveState {
+        if failing { throw DomainError.offline }
+        count -= 1
+        return SaveState(isSaved: false, saveCount: count)
+    }
+}
+
 actor RecordingRecipeRepository: RecipeRepository {
     private(set) var created: [RecipeInput] = []
 
@@ -39,7 +62,13 @@ actor RecordingRecipeRepository: RecipeRepository {
     func explore(filter: RecipeFilter, cursor: String?) async throws -> PagedResult<RecipeSummary> {
         PagedResult(items: [], nextCursor: nil)
     }
-    func recipe(id: UUID) async throws -> Recipe { throw DomainError.notFound }
+    var stored: Recipe?
+
+    func store(_ recipe: Recipe) { stored = recipe }
+    func recipe(id: UUID) async throws -> Recipe {
+        guard let stored else { throw DomainError.notFound }
+        return stored
+    }
 
     func create(_ input: RecipeInput) async throws -> Recipe {
         created.append(input)
@@ -65,6 +94,7 @@ struct RecipeFormViewModelTests {
     private func makeModel(recipes: RecordingRecipeRepository) -> RecipeFormViewModel {
         let dependencies = RecipesDependencies(
             recipes: recipes,
+            saves: StubSavesRepository(),
             beans: StubBeanRepository(),
             catalog: StubCatalogRepository(),
             userMethods: StubUserMethodsRepository(),
@@ -72,6 +102,34 @@ struct RecipeFormViewModelTests {
             currentUserID: UUID()
         )
         return RecipeFormViewModel(recipe: nil, dependencies: dependencies)
+    }
+
+    @Test("A remix sends the original's id and waits for one of the user's beans")
+    func remix() async {
+        let recipes = RecordingRecipeRepository()
+        let original = Recipe(
+            id: UUID(),
+            author: UserSummary(id: UUID(), username: "leo.roaster", displayName: "Leo"),
+            bean: BeanSummary(id: UUID(), name: "Leo's bean"),
+            methodSlug: "v60", title: "Floral V60", doseG: 15, waterG: 250, ratio: 16.7,
+            grindSize: .mediumFine, rating: 5
+        )
+        let dependencies = RecipesDependencies(
+            recipes: recipes, saves: StubSavesRepository(), beans: StubBeanRepository(),
+            catalog: StubCatalogRepository(), userMethods: StubUserMethodsRepository(),
+            saveRecipe: SaveRecipeUseCase(recipes: recipes), currentUserID: UUID()
+        )
+        let model = RecipeFormViewModel(recipe: nil, remixOf: original, dependencies: dependencies)
+        #expect(model.isRemix)
+        #expect(model.draft.beanID == nil)
+        #expect(model.draft.rating == nil)
+
+        await model.load()
+        #expect(model.draft.beanID == sampleBean.id)
+        _ = await model.save()
+        let input = await recipes.created.first
+        #expect(input?.draft.forkedFromID == original.id)
+        #expect(input?.beanID == sampleBean.id)
     }
 
     @Test("Loading selects the first bean and lists the user's methods first")
@@ -123,5 +181,47 @@ struct RecipeFormViewModelTests {
         #expect(saved == nil)
         #expect(Set(model.violations.map(\.field)) == ["methodSlug", "doseG"])
         #expect(await recipes.created.isEmpty)
+    }
+}
+
+@MainActor
+@Suite("RecipeDetailViewModel")
+struct RecipeDetailViewModelTests {
+    private func makeModel(saves: StubSavesRepository) async -> RecipeDetailViewModel {
+        let recipes = RecordingRecipeRepository()
+        let recipe = Recipe(
+            id: UUID(),
+            author: UserSummary(id: UUID(), username: "leo.roaster", displayName: "Leo"),
+            bean: BeanSummary(id: UUID(), name: "Leo's bean"),
+            methodSlug: "v60", title: "Floral V60", doseG: 15, ratio: 16,
+            grindSize: .mediumFine, saveCount: 2
+        )
+        await recipes.store(recipe)
+        let dependencies = RecipesDependencies(
+            recipes: recipes, saves: saves, beans: StubBeanRepository(),
+            catalog: StubCatalogRepository(), userMethods: StubUserMethodsRepository(),
+            saveRecipe: SaveRecipeUseCase(recipes: recipes), currentUserID: UUID()
+        )
+        let model = RecipeDetailViewModel(recipeID: recipe.id, dependencies: dependencies)
+        await model.load()
+        return model
+    }
+
+    @Test("Saving updates the recipe with the server's count")
+    func save() async {
+        let model = await makeModel(saves: StubSavesRepository(initialCount: 2))
+        #expect(model.isOwner == false)
+        await model.toggleSave()
+        #expect(model.state.value?.isSaved == true)
+        #expect(model.state.value?.saveCount == 3)
+    }
+
+    @Test("A failed save reverts the change and shows an error")
+    func failedSave() async {
+        let model = await makeModel(saves: StubSavesRepository(initialCount: 2, failing: true))
+        await model.toggleSave()
+        #expect(model.state.value?.isSaved == false)
+        #expect(model.state.value?.saveCount == 2)
+        #expect(model.errorMessage != nil)
     }
 }

@@ -42,6 +42,8 @@ public struct RecipeDTO: Codable, Sendable, Equatable, Hashable {
     public var bean: BeanSummaryDTO
     public var methodSlug: String
     public var forkedFromId: UUID?
+    /// The original recipe of a remix; `nil` when it is gone or the viewer can't see it.
+    public var forkedFrom: RecipeReferenceDTO?
     public var title: String
     public var description: String?
     public var doseG: Double
@@ -69,6 +71,12 @@ public struct RecipeDTO: Codable, Sendable, Equatable, Hashable {
     public var flavorNoteSlugs: [String]
     public var steps: [RecipeStepDTO]
     public var visibility: Visibility
+    /// How many people saved the recipe.
+    public var saveCount: Int
+    /// How many remixes were made from the recipe.
+    public var forkCount: Int
+    /// Whether the viewer saved the recipe.
+    public var isSaved: Bool
     public var createdAt: Date
     public var updatedAt: Date
 
@@ -78,6 +86,7 @@ public struct RecipeDTO: Codable, Sendable, Equatable, Hashable {
         bean: BeanSummaryDTO,
         methodSlug: String,
         forkedFromId: UUID? = nil,
+        forkedFrom: RecipeReferenceDTO? = nil,
         title: String,
         description: String? = nil,
         doseG: Double,
@@ -103,6 +112,9 @@ public struct RecipeDTO: Codable, Sendable, Equatable, Hashable {
         flavorNoteSlugs: [String] = [],
         steps: [RecipeStepDTO] = [],
         visibility: Visibility = .public,
+        saveCount: Int = 0,
+        forkCount: Int = 0,
+        isSaved: Bool = false,
         createdAt: Date,
         updatedAt: Date
     ) {
@@ -111,6 +123,7 @@ public struct RecipeDTO: Codable, Sendable, Equatable, Hashable {
         self.bean = bean
         self.methodSlug = methodSlug
         self.forkedFromId = forkedFromId
+        self.forkedFrom = forkedFrom
         self.title = title
         self.description = description
         self.doseG = doseG
@@ -136,8 +149,35 @@ public struct RecipeDTO: Codable, Sendable, Equatable, Hashable {
         self.flavorNoteSlugs = flavorNoteSlugs
         self.steps = steps
         self.visibility = visibility
+        self.saveCount = saveCount
+        self.forkCount = forkCount
+        self.isSaved = isSaved
         self.createdAt = createdAt
         self.updatedAt = updatedAt
+    }
+}
+
+/// A link to another recipe, e.g. the original of a remix.
+public struct RecipeReferenceDTO: Codable, Sendable, Equatable, Hashable {
+    public var id: UUID
+    public var title: String
+    public var author: UserSummaryDTO
+
+    public init(id: UUID, title: String, author: UserSummaryDTO) {
+        self.id = id
+        self.title = title
+        self.author = author
+    }
+}
+
+/// Response of `PUT` and `DELETE /recipes/{id}/save`.
+public struct SaveStateDTO: Codable, Sendable, Equatable {
+    public var isSaved: Bool
+    public var saveCount: Int
+
+    public init(isSaved: Bool, saveCount: Int) {
+        self.isSaved = isSaved
+        self.saveCount = saveCount
     }
 }
 
@@ -191,6 +231,8 @@ public struct RecipeSummaryDTO: Codable, Sendable, Equatable, Hashable {
 /// Body of `POST /recipes` and `PUT /recipes/{id}`.
 public struct UpsertRecipeRequest: Codable, Sendable, Equatable {
     public var beanId: UUID
+    /// The recipe this one remixes. Only read on create; the viewer must be able to see it.
+    public var forkedFromId: UUID?
     public var methodSlug: String
     public var title: String
     public var description: String?
@@ -218,6 +260,7 @@ public struct UpsertRecipeRequest: Codable, Sendable, Equatable {
 
     public init(
         beanId: UUID,
+        forkedFromId: UUID? = nil,
         methodSlug: String,
         title: String,
         description: String? = nil,
@@ -244,6 +287,7 @@ public struct UpsertRecipeRequest: Codable, Sendable, Equatable {
         visibility: Visibility = .public
     ) {
         self.beanId = beanId
+        self.forkedFromId = forkedFromId
         self.methodSlug = methodSlug
         self.title = title
         self.description = description

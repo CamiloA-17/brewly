@@ -52,6 +52,23 @@ struct DTOCodingTests {
         #expect(bean.createdAt == Date(timeIntervalSince1970: 1_790_330_400))
     }
 
+    @Test("Remix fields are optional in requests and default to zero in counts")
+    func socialFields() throws {
+        let request = UpsertRecipeRequest(
+            beanId: UUID(), forkedFromId: UUID(), methodSlug: "v60", title: "Remix", doseG: 15, waterG: 250,
+            grindSize: .medium
+        )
+        let json = try #require(String(data: BrewlyJSON.makeEncoder().encode(request), encoding: .utf8))
+        #expect(json.contains("forkedFromId"))
+
+        let profile = UserProfileDTO(id: UUID(), username: "leo.roaster", displayName: "Leo", createdAt: Date())
+        let decoded = try BrewlyJSON.makeDecoder().decode(
+            UserProfileDTO.self, from: BrewlyJSON.makeEncoder().encode(profile)
+        )
+        #expect(decoded.summary == UserSummaryDTO(id: profile.id, username: "leo.roaster", displayName: "Leo"))
+        #expect(decoded.followerCount == 0 && !decoded.isFollowing && !decoded.isMe)
+    }
+
     @Test("Field errors are built from rule violations")
     func fieldErrors() {
         let error = APIErrorResponse.FieldError(RuleViolation(field: "doseG", kind: .outOfRange(min: 0.1, max: 1000)))

@@ -56,7 +56,7 @@ XcodeGen (`ios/project.yml`) only contains `BrewlyApp.swift` and assets.
 ```mermaid
 flowchart TD
     subgraph Presentation
-        Features["Feature modules<br/>Auth · Beans · Recipes · Methods · Feed · Profile<br/>SwiftUI views + @Observable view models"]
+        Features["Feature modules<br/>Auth · Beans · Recipes · Methods · Feed · Profile · People<br/>SwiftUI views + @Observable view models"]
         DS["BrewlyDesignSystem<br/>theme · components · localization"]
     end
     Domain["BrewlyDomain<br/>entities · repository protocols · use cases"]
@@ -78,6 +78,10 @@ flowchart TD
 - **Dependency rule.** Features know only `BrewlyDomain` and `BrewlyDesignSystem`. They receive
   repository protocols and use cases through a `…Dependencies` struct built by `AppContainer`, so
   every view model can be tested with fakes.
+- **Navigation between features.** Features never import each other. A screen links to another
+  feature's screen with an `AppRoute` (`.member(id)`, `.recipe(id)`, `.followers(of:)`…) defined in
+  `BrewlyDesignSystem`; `AppFeature` decides which view each route opens and injects it through the
+  environment, and every tab's `NavigationStack` registers it with `.appRouteDestinations()`.
 - **View models** are `@MainActor @Observable` classes; screens render a `LoadState` with
   `AsyncContentView`.
 - **Use cases** exist where there are rules (`SaveRecipeUseCase`, `SaveBeanUseCase`,
@@ -105,7 +109,7 @@ flowchart LR
     PG --> DB[("PostgreSQL")]
 ```
 
-- One folder per feature (`Features/Auth`, `Users`, `Catalog`, `Beans`, `Recipes`).
+- One folder per feature (`Features/Auth`, `Users`, `Catalog`, `Beans`, `Recipes`, `People`).
 - **SQL-first.** The schema is owned by the migrations in `database/`; Fluent is used only for
   configuration and connection pooling (no Fluent models or migrations). Repositories write
   explicit SQL so PostgreSQL features (generated columns, composite keys, the
@@ -153,8 +157,9 @@ sequenceDiagram
 
 1. **Now: architecture and skeleton.** Schema, shared package, API for auth, catalogs, beans and
    recipes, and the iOS app with navigation and bean/recipe screens.
-2. **Social:** profiles of other users, follow, feed (followed users + explore), posts with photos,
-   likes, comments, saving and remixing (forking) recipes, notifications with APNs.
+2. **Social:** profiles of other users, follow, saving and remixing (forking) recipes *(done)*;
+   feed (followed users + explore), posts with photos, likes, comments and in-app notifications
+   (next), push notifications with APNs.
 3. **Trust and safety:** report and block in the UI (App Store Guideline 1.2), moderation queue.
 4. **More:** Sign in with Apple, search (`pg_trgm`), guided brew timer that plays recipe steps,
    offline cache, more languages.
