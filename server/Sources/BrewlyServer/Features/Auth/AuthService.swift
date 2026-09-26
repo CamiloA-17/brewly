@@ -11,19 +11,27 @@ struct AuthService: Sendable {
 
     func register(_ body: RegisterRequest) async throws -> AuthResponse {
         let violations = AccountRules.validateSignUp(
-            email: body.email, password: body.password, username: body.username, displayName: body.displayName
+            email: body.email, password: body.password, username: body.username, displayName: body.displayName,
+            firstName: body.firstName, lastName: body.lastName, birthDate: body.birthDate,
+            acceptedTerms: body.acceptedTerms
         )
-        guard violations.isEmpty else { throw AppError.validation(violations) }
+        guard violations.isEmpty, let birthDate = body.birthDate else { throw AppError.validation(violations) }
 
+        let firstName = body.firstName.trimmingWhitespace
+        let lastName = body.lastName.trimmingWhitespace
         let passwordHash = try await passwords.hash(body.password)
         let userID: UUID
         do {
-            userID = try await auth.createPasswordUser(
+            userID = try await auth.createPasswordUser(NewPasswordUser(
                 email: AccountRules.normalize(body.email),
                 username: AccountRules.normalize(body.username),
-                displayName: body.displayName.trimmingWhitespace,
+                displayName: body.displayName.nilIfBlank
+                    ?? AccountRules.defaultDisplayName(firstName: firstName, lastName: lastName),
+                firstName: firstName,
+                lastName: lastName,
+                birthDate: birthDate,
                 passwordHash: passwordHash
-            )
+            ))
         } catch let error as PSQLError where error.isUniqueViolation {
             if error.constraintName == "users_username_key" {
                 throw AppError.conflict(code: APIErrorCode.usernameTaken, message: "That username is already taken.")

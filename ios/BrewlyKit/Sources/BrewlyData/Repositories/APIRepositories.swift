@@ -21,10 +21,12 @@ public struct APIAuthRepository: AuthRepository {
         }
     }
 
-    public func signUp(email: String, password: String, username: String, displayName: String) async throws -> UserProfile {
+    public func signUp(_ account: NewAccount) async throws -> UserProfile {
         try await mappingErrors {
             let auth = try await publicClient.send(Endpoints.register(RegisterRequest(
-                email: email, password: password, username: username, displayName: displayName
+                email: account.email, password: account.password, username: account.username,
+                firstName: account.firstName, lastName: account.lastName, birthDate: account.birthDate,
+                acceptedTerms: account.acceptedTerms
             )))
             await session.start(with: auth)
             return UserProfile(auth.user)
@@ -53,10 +55,23 @@ public struct APIProfileRepository: ProfileRepository {
         try await mappingErrors { UserProfile(try await client.send(Endpoints.me)) }
     }
 
-    public func updateProfile(displayName: String, bio: String?, location: String?) async throws -> UserProfile {
+    public func updateProfile(_ changes: ProfileChanges) async throws -> UserProfile {
         try await mappingErrors {
-            let request = UpdateProfileRequest(displayName: displayName, bio: bio, location: location)
+            let request = UpdateProfileRequest(
+                displayName: changes.displayName, firstName: changes.firstName, lastName: changes.lastName,
+                birthDate: changes.birthDate, bio: changes.bio, countryCode: changes.countryCode, city: changes.city
+            )
             return UserProfile(try await client.send(Endpoints.updateMe(request)))
+        }
+    }
+
+    public func completeOnboarding(_ details: PersonalDetails) async throws -> UserProfile {
+        try await mappingErrors {
+            let request = CompleteOnboardingRequest(
+                firstName: details.firstName, lastName: details.lastName, birthDate: details.birthDate,
+                acceptedTerms: details.acceptedTerms
+            )
+            return UserProfile(try await client.send(Endpoints.completeOnboarding(request)))
         }
     }
 

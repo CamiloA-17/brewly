@@ -20,12 +20,13 @@ and the server always agree on the contract.
 | Method | Path | Description |
 |---|---|---|
 | GET | `/health` | Liveness and database check. |
-| POST | `/v1/auth/register` | Create an account. Returns `AuthResponse` (201). |
+| POST | `/v1/auth/register` | Create an account with first and last name, birth date (13 or older) and accepted terms. Returns `AuthResponse` (201). |
 | POST | `/v1/auth/login` | Sign in with email and password. Returns `AuthResponse`. |
 | POST | `/v1/auth/refresh` | Exchange a refresh token for a new token pair. |
 | POST | `/v1/auth/logout` | Revoke a refresh token (204). |
-| GET | `/v1/me` | The signed-in user's profile. |
-| PATCH | `/v1/me` | Update display name, bio and location. |
+| GET | `/v1/me` | The signed-in user's profile, with the private details (name, birth date). |
+| PATCH | `/v1/me` | Update display name, bio, country, city (optional) and the private details. |
+| PUT | `/v1/me/onboarding` | Fill in the private details of an account that has none (`needsOnboarding`). Returns `CurrentUserDTO`. |
 | DELETE | `/v1/me` | Delete the account and all its data (204). |
 | GET | `/v1/me/methods` | Slugs of the brew methods the user uses. |
 | PUT | `/v1/me/methods/{slug}` | Mark a brew method as used (204, idempotent). |
@@ -88,9 +89,21 @@ Content-Type: application/json
   "accessTokenExpiresAt": "2026-09-25T10:15:00Z",
   "refreshToken": "3yQ0…",
   "refreshTokenExpiresAt": "2026-10-25T10:00:00Z",
-  "user": { "id": "1111…", "username": "ana.barista", "displayName": "Ana", "email": "ana@example.com", "createdAt": "2026-09-01T00:00:00Z" }
+  "user": {
+    "id": "1111…", "username": "ana.barista", "displayName": "Ana Demo", "email": "ana@example.com",
+    "firstName": "Ana", "lastName": "Demo", "birthDate": "1995-04-12", "countryCode": "CO", "city": "Bogotá",
+    "needsOnboarding": false, "createdAt": "2026-09-01T00:00:00Z"
+  }
 }
 ```
+
+Sign-up body: `email`, `password`, `username`, `firstName`, `lastName`, `birthDate` (`YYYY-MM-DD`),
+`acceptedTerms` (must be `true`) and an optional `displayName`, which defaults to "First Last".
+Members younger than 13 get a `too_young` field error on `birthDate`.
+
+First name, last name and birth date are private: they are only returned by `/v1/me`. Public
+profiles (`GET /v1/users/{id}`) show `countryCode` and `city`. When `needsOnboarding` is `true`
+the app asks for the missing details with `PUT /v1/me/onboarding` before anything else.
 
 Refresh tokens are single use: `POST /v1/auth/refresh` returns a new pair and invalidates the old
 refresh token. Reusing it revokes every session of the user.

@@ -13,7 +13,12 @@ extension UserProfile {
             email: dto.email,
             bio: dto.bio,
             avatarURL: dto.avatarURL.flatMap(URL.init(string:)),
-            location: dto.location,
+            firstName: dto.firstName,
+            lastName: dto.lastName,
+            birthDate: dto.birthDate,
+            countryCode: dto.countryCode,
+            city: dto.city,
+            needsOnboarding: dto.needsOnboarding,
             createdAt: dto.createdAt
         )
     }
@@ -221,7 +226,8 @@ extension MemberProfile {
             displayName: dto.displayName,
             bio: dto.bio,
             avatarURL: dto.avatarURL.flatMap(URL.init(string:)),
-            location: dto.location,
+            countryCode: dto.countryCode,
+            city: dto.city,
             createdAt: dto.createdAt,
             followerCount: dto.followerCount,
             followingCount: dto.followingCount,

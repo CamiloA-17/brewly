@@ -1,3 +1,4 @@
+import BrewlyAPI
 import FluentKit
 import SQLKit
 import Vapor
@@ -16,10 +17,22 @@ struct PasswordCredentials: Sendable {
     var passwordHash: String
 }
 
+/// A validated email sign-up. The terms are accepted and onboarding is complete.
+struct NewPasswordUser: Sendable {
+    var email: String
+    var username: String
+    var displayName: String
+    var firstName: String
+    var lastName: String
+    var birthDate: CalendarDate
+    var passwordHash: String
+}
+
 protocol AuthRepository: Sendable {
     /// Creates the user and its password identity atomically. Returns the new user id.
-    func createPasswordUser(email: String, username: String, displayName: String, passwordHash: String) async throws -> UUID
+    func createPasswordUser(_ user: NewPasswordUser) async throws -> UUID
     func passwordCredentials(email: String) async throws -> PasswordCredentials?
+    /// Stores a new session and records the user as seen now.
     func storeRefreshToken(userID: UUID, tokenHash: String, expiresAt: Date) async throws
     func consumeRefreshToken(tokenHash: String) async throws -> RefreshTokenLookup
     func revokeRefreshToken(tokenHash: String) async throws
@@ -29,18 +42,21 @@ protocol AuthRepository: Sendable {
 struct PostgresAuthRepository: AuthRepository {
     let database: any Database
 
-    func createPasswordUser(email: String, username: String, displayName: String, passwordHash: String) async throws -> UUID {
+    func createPasswordUser(_ user: NewPasswordUser) async throws -> UUID {
         try await database.transaction { tx in
             guard let row = try await tx.sql.raw("""
-                INSERT INTO users (username, display_name, email)
-                VALUES (\(bind: username), \(bind: displayName), \(bind: email))
+                INSERT INTO users (username, display_name, email, first_name, last_name, birth_date,
+                                   terms_accepted_at, onboarding_completed_at)
+                VALUES (\(bind: user.username), \(bind: user.displayName), \(bind: user.email),
+                        \(bind: user.firstName), \(bind: user.lastName), \(bind: user.birthDate.isoString)::date,
+                        now(), now())
                 RETURNING id
                 """).first()
             else { throw AppError(status: .internalServerError, code: "internal_error", message: "User was not created.") }
             let userID = try row.decode(column: "id", as: UUID.self)
             try await tx.sql.raw("""
                 INSERT INTO auth_identities (user_id, provider, subject, password_hash)
-                VALUES (\(bind: userID), 'password', \(bind: email), \(bind: passwordHash))
+                VALUES (\(bind: userID), 'password', \(bind: user.email), \(bind: user.passwordHash))
                 """).run()
             return userID
         }
@@ -60,8 +76,11 @@ struct PostgresAuthRepository: AuthRepository {
 
     func storeRefreshToken(userID: UUID, tokenHash: String, expiresAt: Date) async throws {
         try await database.sql.raw("""
-            INSERT INTO refresh_tokens (user_id, token_hash, expires_at)
-            VALUES (\(bind: userID), \(bind: tokenHash), \(bind: expiresAt))
+            WITH session AS (
+                INSERT INTO refresh_tokens (user_id, token_hash, expires_at)
+                VALUES (\(bind: userID), \(bind: tokenHash), \(bind: expiresAt))
+            )
+            UPDATE users SET last_seen_at = now() WHERE id = \(bind: userID)
             """).run()
     }
 

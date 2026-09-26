@@ -1,6 +1,16 @@
 {
   "sourceLanguage": "en",
   "strings": {
+    "Add": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Agregar"
+          }
+        }
+      }
+    },
     "An account with that email already exists.": {
       "localizations": {
         "es": {
@@ -17,6 +27,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Arábica"
+          }
+        }
+      }
+    },
+    "Birth date": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Fecha de nacimiento"
           }
         }
       }
@@ -87,6 +107,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Comentarios"
+          }
+        }
+      }
+    },
+    "Country": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "País"
           }
         }
       }
@@ -377,6 +407,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "No aplica para este método de preparación."
+          }
+        }
+      }
+    },
+    "Not set": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sin especificar"
           }
         }
       }
@@ -677,6 +717,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "No encontramos lo que buscabas."
+          }
+        }
+      }
+    },
+    "You must be at least %lld years old.": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Debes tener al menos %lld años."
           }
         }
       }

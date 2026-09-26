@@ -1,13 +1,15 @@
 import BrewlyDomain
 import Observation
 
-/// Decides whether the user sees the sign-in screen or the app.
+/// Decides whether the user sees the sign-in screen, onboarding or the app.
 @MainActor
 @Observable
 final class AppViewModel {
     enum Phase: Equatable {
         case launching
         case signedOut
+        /// Signed in, but the account is missing its private details.
+        case onboarding(UserProfile)
         case signedIn(UserProfile)
     }
 
@@ -27,7 +29,7 @@ final class AppViewModel {
             return
         }
         do {
-            phase = .signedIn(try await container.profile.currentUser())
+            didSignIn(try await container.profile.currentUser())
         } catch DomainError.offline {
             // Keep the user signed in offline? Without a profile we can't build the UI yet.
             phase = .signedOut
@@ -38,10 +40,15 @@ final class AppViewModel {
     }
 
     func didSignIn(_ user: UserProfile) {
-        phase = .signedIn(user)
+        phase = user.needsOnboarding ? .onboarding(user) : .signedIn(user)
     }
 
     func didSignOut() {
+        phase = .signedOut
+    }
+
+    func signOut() async {
+        await container.auth.signOut()
         phase = .signedOut
     }
 

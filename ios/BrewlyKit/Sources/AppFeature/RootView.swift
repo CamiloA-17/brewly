@@ -27,6 +27,12 @@ public struct RootView: View {
                 AuthView(dependencies: container.authDependencies) { user in
                     model.didSignIn(user)
                 }
+            case let .onboarding(user):
+                OnboardingView(user: user, dependencies: container.authDependencies) { completed in
+                    model.didSignIn(completed)
+                } onSignOut: {
+                    Task { await model.signOut() }
+                }
             case let .signedIn(user):
                 MainTabView(container: container, user: user) {
                     model.didSignOut()
