@@ -1,12 +1,32 @@
 {
   "sourceLanguage": "en",
   "strings": {
+    "Acidity": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Acidez"
+          }
+        }
+      }
+    },
     "Add": {
       "localizations": {
         "es": {
           "stringUnit": {
             "state": "translated",
             "value": "Agregar"
+          }
+        }
+      }
+    },
+    "Aftertaste": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Retrogusto"
           }
         }
       }
@@ -41,12 +61,32 @@
         }
       }
     },
+    "Bitterness": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Amargor"
+          }
+        }
+      }
+    },
     "Bloom": {
       "localizations": {
         "es": {
           "stringUnit": {
             "state": "translated",
             "value": "Preinfusión (bloom)"
+          }
+        }
+      }
+    },
+    "Body": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cuerpo"
           }
         }
       }
@@ -671,6 +711,16 @@
         }
       }
     },
+    "Sweetness": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dulzor"
+          }
+        }
+      }
+    },
     "Swirl": {
       "localizations": {
         "es": {
@@ -711,12 +761,12 @@
         }
       }
     },
-    "This bean is used by one or more recipes. Archive it instead.": {
+    "This bean is used by recipes or brews. Archive it instead.": {
       "localizations": {
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Este grano se usa en una o más recetas. Puedes archivarlo en su lugar."
+            "value": "Este grano se usa en recetas o preparaciones. Archívalo en su lugar."
           }
         }
       }

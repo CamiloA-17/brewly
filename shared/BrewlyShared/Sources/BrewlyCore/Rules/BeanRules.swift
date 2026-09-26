@@ -11,6 +11,7 @@ public struct BeanParameters: Hashable, Sendable {
     public var harvestYear: Int?
     public var scaScore: Double?
     public var weightG: Int?
+    public var remainingG: Double?
     public var notes: String?
 
     public init(
@@ -25,6 +26,7 @@ public struct BeanParameters: Hashable, Sendable {
         harvestYear: Int? = nil,
         scaScore: Double? = nil,
         weightG: Int? = nil,
+        remainingG: Double? = nil,
         notes: String? = nil
     ) {
         self.name = name
@@ -38,6 +40,7 @@ public struct BeanParameters: Hashable, Sendable {
         self.harvestYear = harvestYear
         self.scaScore = scaScore
         self.weightG = weightG
+        self.remainingG = remainingG
         self.notes = notes
     }
 }
@@ -50,6 +53,7 @@ public enum BeanRules {
     public static let harvestYearRange: ClosedRange<Int> = 1_900...2_100
     public static let scaScoreRange: ClosedRange<Double> = 0...100
     public static let weightRange: ClosedRange<Int> = 1...100_000
+    public static let remainingRange: ClosedRange<Double> = 0...100_000
 
     /// - Parameter today: the current day, used to reject roast dates in the future.
     public static func validate(_ bean: BeanParameters, today: CalendarDate) -> [RuleViolation] {
@@ -73,6 +77,7 @@ public enum BeanRules {
         check.range(bean.harvestYear, field: "harvestYear", harvestYearRange)
         check.range(bean.scaScore, field: "scaScore", scaScoreRange)
         check.range(bean.weightG, field: "weightG", weightRange)
+        check.range(bean.remainingG, field: "remainingG", remainingRange)
 
         return check.violations
     }

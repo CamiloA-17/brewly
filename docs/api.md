@@ -32,6 +32,11 @@ and the server always agree on the contract.
 | PUT | `/v1/me/methods/{slug}` | Mark a brew method as used (204, idempotent). |
 | DELETE | `/v1/me/methods/{slug}` | Unmark a brew method (204). |
 | GET | `/v1/catalog` | Every global catalog in one response. |
+| GET | `/v1/me/brews?beanId=&methodSlug=&cursor=&limit=` | The user's brew journal (`BrewLogDTO`), most recent brew first. |
+| POST | `/v1/me/brews` | Log a brew (`UpsertBrewLogRequest`, private by default). Subtracts the dose from the bean's `remainingG`. |
+| GET | `/v1/brews/{id}` | A brew, if the viewer can see it (owner, followers or everyone). |
+| PUT | `/v1/brews/{id}` | Replace a brew; the bean's remaining coffee is adjusted. |
+| DELETE | `/v1/brews/{id}` | Delete a brew (204); its dose goes back to the bean. |
 | GET | `/v1/me/equipment` | The user's gear (`EquipmentDTO`), grouped by kind. |
 | POST | `/v1/me/equipment` | Add an item (`UpsertEquipmentRequest`). Making it the default replaces the previous default of its kind. |
 | PUT | `/v1/me/equipment/{id}` | Replace an item, including its grind settings. |

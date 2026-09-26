@@ -64,6 +64,15 @@ public protocol RecipeRepository: Sendable {
     func delete(id: UUID) async throws
 }
 
+/// The brew journal.
+public protocol BrewLogRepository: Sendable {
+    func myBrews(filter: BrewLogFilter, cursor: String?) async throws -> PagedResult<BrewLog>
+    func brew(id: UUID) async throws -> BrewLog
+    /// Uploads `draft.newPhotoData` if any, then creates the brew (or replaces it when `id` is given).
+    func save(_ draft: BrewLogDraft, beanID: UUID, methodSlug: String, id: UUID?) async throws -> BrewLog
+    func delete(id: UUID) async throws
+}
+
 /// Recipes the signed-in user saved to brew later.
 public protocol RecipeSavesRepository: Sendable {
     func savedRecipes(cursor: String?) async throws -> PagedResult<RecipeSummary>

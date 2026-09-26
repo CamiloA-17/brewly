@@ -191,6 +191,16 @@
         }
       }
     },
+    "Brew this recipe": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Preparar esta receta"
+          }
+        }
+      }
+    },
     "Brew water": {
       "localizations": {
         "es": {

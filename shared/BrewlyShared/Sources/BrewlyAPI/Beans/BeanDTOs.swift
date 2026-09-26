@@ -21,6 +21,8 @@ public struct BeanDTO: Codable, Sendable, Equatable, Hashable {
     public var harvestYear: Int?
     public var scaScore: Double?
     public var weightG: Int?
+    /// Coffee left in the bag; brews subtract their dose.
+    public var remainingG: Double?
     public var isDecaf: Bool
     public var notes: String?
     public var photoURL: String?
@@ -48,6 +50,7 @@ public struct BeanDTO: Codable, Sendable, Equatable, Hashable {
         harvestYear: Int? = nil,
         scaScore: Double? = nil,
         weightG: Int? = nil,
+        remainingG: Double? = nil,
         isDecaf: Bool = false,
         notes: String? = nil,
         photoURL: String? = nil,
@@ -74,6 +77,7 @@ public struct BeanDTO: Codable, Sendable, Equatable, Hashable {
         self.harvestYear = harvestYear
         self.scaScore = scaScore
         self.weightG = weightG
+        self.remainingG = remainingG
         self.isDecaf = isDecaf
         self.notes = notes
         self.photoURL = photoURL
@@ -134,6 +138,8 @@ public struct UpsertBeanRequest: Codable, Sendable, Equatable {
     public var harvestYear: Int?
     public var scaScore: Double?
     public var weightG: Int?
+    /// Coffee left in the bag; brews subtract their dose.
+    public var remainingG: Double?
     public var isDecaf: Bool
     public var notes: String?
     public var visibility: Visibility
@@ -156,6 +162,7 @@ public struct UpsertBeanRequest: Codable, Sendable, Equatable {
         harvestYear: Int? = nil,
         scaScore: Double? = nil,
         weightG: Int? = nil,
+        remainingG: Double? = nil,
         isDecaf: Bool = false,
         notes: String? = nil,
         visibility: Visibility = .public,
@@ -177,6 +184,7 @@ public struct UpsertBeanRequest: Codable, Sendable, Equatable {
         self.harvestYear = harvestYear
         self.scaScore = scaScore
         self.weightG = weightG
+        self.remainingG = remainingG
         self.isDecaf = isDecaf
         self.notes = notes
         self.visibility = visibility
@@ -197,6 +205,7 @@ public struct UpsertBeanRequest: Codable, Sendable, Equatable {
             harvestYear: harvestYear,
             scaScore: scaScore,
             weightG: weightG,
+            remainingG: remainingG,
             notes: notes
         )
     }

@@ -221,6 +221,16 @@
         }
       }
     },
+    "My brew methods": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mis métodos de preparación"
+          }
+        }
+      }
+    },
     "My equipment": {
       "localizations": {
         "es": {

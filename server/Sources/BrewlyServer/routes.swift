@@ -17,4 +17,5 @@ func routes(_ app: Application) throws {
     try authenticated.register(collection: PostController())
     try authenticated.register(collection: NotificationController())
     try authenticated.register(collection: EquipmentController())
+    try authenticated.register(collection: BrewLogController())
 }

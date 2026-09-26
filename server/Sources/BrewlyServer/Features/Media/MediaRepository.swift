@@ -6,11 +6,12 @@ import Vapor
 /// Uploaded images, stored in PostgreSQL and served at `/v1/media/{id}`.
 protocol MediaRepository: Sendable {
     func create(ownerID: UUID, jpeg: Data, width: Int, height: Int) async throws -> MediaDTO
-    /// The image bytes if the viewer may see them: their own upload, a visible avatar or a photo of a visible post.
+    /// The image bytes if the viewer may see them: their own upload, a visible avatar or a photo of
+    /// a visible post or brew.
     func data(id: UUID, viewerID: UUID) async throws -> Data?
-    /// Deletes the owner's uploads that were never used in a post or as an avatar.
+    /// Deletes the owner's uploads that were never used in a post, a brew or as an avatar.
     func deleteUnusedUploads(ownerID: UUID, olderThan age: TimeInterval) async throws
-    /// Sets the user's avatar; `false` when the image is not the user's or already belongs to a post.
+    /// Sets the user's avatar; `false` when the image is not the user's or already belongs to a post or brew.
     func setAvatar(userID: UUID, mediaID: UUID?) async throws -> Bool
 }
 
@@ -42,6 +43,9 @@ struct PostgresMediaRepository: MediaRepository {
                            WHERE u.avatar_media_id = m.id AND can_view_content(\(bind: viewerID), u.id, 'public'))
                 OR EXISTS (SELECT 1 FROM post_media pm JOIN posts p ON p.id = pm.post_id
                            WHERE pm.media_id = m.id AND can_view_content(\(bind: viewerID), p.author_id, p.visibility))
+                OR EXISTS (SELECT 1 FROM brew_logs bl
+                           WHERE bl.photo_media_id = m.id
+                             AND can_view_content(\(bind: viewerID), bl.user_id, bl.visibility))
               )
             """).first().map { try $0.decode(column: "data", as: Data.self) }
     }
@@ -53,6 +57,7 @@ struct PostgresMediaRepository: MediaRepository {
               AND m.created_at < now() - make_interval(secs => \(bind: age))
               AND NOT EXISTS (SELECT 1 FROM post_media pm WHERE pm.media_id = m.id)
               AND NOT EXISTS (SELECT 1 FROM users u WHERE u.avatar_media_id = m.id)
+              AND NOT EXISTS (SELECT 1 FROM brew_logs bl WHERE bl.photo_media_id = m.id)
             """).run()
     }
 
@@ -68,7 +73,8 @@ struct PostgresMediaRepository: MediaRepository {
                   AND (\(bind: mediaID)::uuid IS NULL OR EXISTS (
                         SELECT 1 FROM media m
                         WHERE m.id = \(bind: mediaID) AND m.owner_id = \(bind: userID)
-                          AND NOT EXISTS (SELECT 1 FROM post_media pm WHERE pm.media_id = m.id)))
+                          AND NOT EXISTS (SELECT 1 FROM post_media pm WHERE pm.media_id = m.id)
+                          AND NOT EXISTS (SELECT 1 FROM brew_logs bl WHERE bl.photo_media_id = m.id)))
                 RETURNING id
                 """).first()
             guard updated != nil else { return false }
