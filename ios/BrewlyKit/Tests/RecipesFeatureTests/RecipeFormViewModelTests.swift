@@ -32,7 +32,6 @@ struct StubUserMethodsRepository: UserMethodsRepository {
     func setUsing(_ isUsing: Bool, methodSlug: String) async throws {}
 }
 
-/// Saves succeed unless `failing` is set; the count starts at `initialCount`.
 struct StubEquipmentRepository: EquipmentRepository {
     var items: [Equipment] = []
 
@@ -42,6 +41,7 @@ struct StubEquipmentRepository: EquipmentRepository {
     func delete(id: UUID) async throws {}
 }
 
+/// Saves succeed unless `failing` is set; the count starts at `initialCount`.
 actor StubSavesRepository: RecipeSavesRepository {
     var failing = false
     private var count: Int
