@@ -114,6 +114,7 @@ erDiagram
 | `notifications_moderation` | `notifications`, `reports` | Activity notifications and reports of objectionable content. |
 | `media` | `media` (and changes to `post_media`, `posts`, `users`) | Uploaded JPEG images stored as `bytea`; post photos and avatars reference them. |
 | `notification_delivery` | — | Deduplication and pagination indexes for `notifications`. |
+| `profile_details` | — (changes to `users`, `auth_identities`) | Private details (first and last name, birth date), country and city, role, onboarding and activity timestamps; Sign in with Apple fields. |
 
 ## Integrity rules
 
@@ -152,6 +153,15 @@ erDiagram
 - **Notifications** are written by the API in the same transaction as the action.
   `notifications_once_idx` makes follows, likes and saves notify once per actor and target, and
   `notifications_kind_target` checks that each kind points to the right post, comment or recipe.
+- **Personal details.** `users.first_name`, `last_name` and `birth_date` are private (only
+  `/v1/me` returns them). They are nullable because Sign in with Apple may not provide them, but
+  `users_onboarding_complete` requires them, plus `terms_accepted_at`, once
+  `onboarding_completed_at` is set. The minimum age (13) depends on today's date, so
+  `AccountRules` enforces it instead of a CHECK. `country_code` is any ISO 3166-1 alpha-2 code
+  (not a coffee origin from `countries`) and `city` is optional.
+- **Sign in with Apple.** `auth_identities.provider_refresh_token` (encrypted by the API) and
+  `provider_email` are only allowed on `apple` identities; the token is needed to revoke the
+  authorization when the account is deleted.
 - **Remixes.** `recipes.forked_from_id` points to the original recipe and becomes `NULL` when the
   original is deleted, so a remix survives its original.
 
