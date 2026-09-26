@@ -193,6 +193,57 @@ final class IntegrationTests: XCTestCase {
         XCTAssertEqual(remaining.count, 2)
     }
 
+    // MARK: - Brew journal
+
+    func testBrewJournalConsumesBeansAndRespectsVisibility() async throws {
+        let ana = try await register("ana.barista")
+        let leo = try await register("leo.roaster")
+        var bag = Self.geisha
+        bag.weightG = 250
+        let bean: BeanDTO = try await send(.POST, "v1/beans", token: ana.accessToken, body: bag)
+        XCTAssertEqual(bean.remainingG, 250)
+        let recipe: RecipeDTO = try await send(.POST, "v1/recipes", token: ana.accessToken, body: Self.v60(beanID: bean.id))
+
+        var request = UpsertBrewLogRequest(
+            recipeId: recipe.id, beanId: bean.id, methodSlug: "v60", brewedAt: Date(), doseG: 15, waterG: 250,
+            yieldG: 215, grindSetting: "24 clicks", rating: 4, sweetness: 5, tdsPercent: 1.38,
+            flavorNoteSlugs: ["jasmine"], notes: "Floral"
+        )
+        let brew: BrewLogDTO = try await send(.POST, "v1/me/brews", token: ana.accessToken, body: request)
+        XCTAssertEqual(brew.recipe?.id, recipe.id)
+        XCTAssertEqual(brew.ratio, 16.67)
+        XCTAssertEqual(brew.extractionYieldPercent, 19.78)
+        XCTAssertEqual(brew.visibility, .private)
+        var updatedBean: BeanDTO = try await send(.GET, "v1/beans/\(bean.id)", token: ana.accessToken)
+        XCTAssertEqual(updatedBean.remainingG, 235)
+
+        // Editing the dose adjusts the bag; deleting the brew gives the coffee back.
+        request.doseG = 18
+        request.waterG = 300
+        let edited: BrewLogDTO = try await send(.PUT, "v1/brews/\(brew.id)", token: ana.accessToken, body: request)
+        XCTAssertEqual(edited.doseG, 18)
+        updatedBean = try await send(.GET, "v1/beans/\(bean.id)", token: ana.accessToken)
+        XCTAssertEqual(updatedBean.remainingG, 232)
+
+        let journal: BrewlyAPI.Page<BrewLogDTO> = try await send(.GET, "v1/me/brews?beanId=\(bean.id)", token: ana.accessToken)
+        XCTAssertEqual(journal.items.map(\.id), [brew.id])
+
+        // Private brews are hidden from others; a bean with brews can't be deleted.
+        try await expectError(.GET, "v1/brews/\(brew.id)", token: leo.accessToken, status: .notFound)
+        try await expectError(.DELETE, "v1/beans/\(bean.id)", token: ana.accessToken,
+            status: .conflict, code: APIErrorCode.beanInUse)
+
+        // Only the member's own bean.
+        let leoBean: BeanDTO = try await send(.POST, "v1/beans", token: leo.accessToken, body: Self.geisha)
+        request.beanId = leoBean.id
+        try await expectError(.POST, "v1/me/brews", token: ana.accessToken, body: request,
+            status: .unprocessableEntity, code: APIErrorCode.validationFailed)
+
+        try await expectStatus(.DELETE, "v1/brews/\(brew.id)", token: ana.accessToken, status: .noContent)
+        updatedBean = try await send(.GET, "v1/beans/\(bean.id)", token: ana.accessToken)
+        XCTAssertEqual(updatedBean.remainingG, 250)
+    }
+
     // MARK: - Beans and recipes
 
     func testBeanAndRecipeLifecycle() async throws {

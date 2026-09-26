@@ -36,6 +36,7 @@ struct PostgresBeanRepository: BeanRepository {
         var harvestYear: Int?
         var scaScore: Double?
         var weightG: Int?
+        var remainingG: Double?
         var isDecaf: Bool
         var notes: String?
         var photoUrl: String?
@@ -64,6 +65,7 @@ struct PostgresBeanRepository: BeanRepository {
                 harvestYear: harvestYear,
                 scaScore: scaScore,
                 weightG: weightG,
+                remainingG: remainingG,
                 isDecaf: isDecaf,
                 notes: notes,
                 photoURL: photoUrl,
@@ -83,7 +85,8 @@ struct PostgresBeanRepository: BeanRepository {
                coalesce((SELECT array_agg(f.flavor_note_slug ORDER BY f.flavor_note_slug)
                          FROM bean_flavor_notes f WHERE f.bean_id = b.id), '{}') AS flavor_note_slugs,
                b.roast_level::text AS roast_level, to_char(b.roast_date, 'YYYY-MM-DD') AS roast_date,
-               b.harvest_year, b.sca_score::float8 AS sca_score, b.weight_g, b.is_decaf, b.notes, b.photo_url,
+               b.harvest_year, b.sca_score::float8 AS sca_score, b.weight_g,
+               b.remaining_g::float8 AS remaining_g, b.is_decaf, b.notes, b.photo_url,
                b.visibility::text AS visibility, b.archived_at IS NOT NULL AS is_archived,
                b.created_at, b.updated_at
         FROM coffee_beans b
@@ -114,14 +117,15 @@ struct PostgresBeanRepository: BeanRepository {
             guard let row = try await sql.raw("""
                 INSERT INTO coffee_beans
                     (owner_id, name, roaster, country_code, region, farm, producer, altitude_min_m, altitude_max_m,
-                     processing_method_slug, roast_level, roast_date, harvest_year, sca_score, weight_g, is_decaf,
-                     notes, visibility, archived_at)
+                     processing_method_slug, roast_level, roast_date, harvest_year, sca_score, weight_g, remaining_g,
+                     is_decaf, notes, visibility, archived_at)
                 VALUES
                     (\(bind: ownerID), \(bind: bean.name), \(bind: bean.roaster), \(bind: bean.countryCode),
                      \(bind: bean.region), \(bind: bean.farm), \(bind: bean.producer), \(bind: bean.altitudeMinM),
                      \(bind: bean.altitudeMaxM), \(bind: bean.processingMethodSlug), \(bind: bean.roastLevel?.rawValue),
                      \(bind: bean.roastDate?.isoString)::date, \(bind: bean.harvestYear), \(bind: bean.scaScore),
-                     \(bind: bean.weightG), \(bind: bean.isDecaf), \(bind: bean.notes), \(bind: bean.visibility.rawValue),
+                     \(bind: bean.weightG), coalesce(\(bind: bean.remainingG)::numeric, \(bind: bean.weightG)::numeric),
+                     \(bind: bean.isDecaf), \(bind: bean.notes), \(bind: bean.visibility.rawValue),
                      CASE WHEN \(bind: bean.isArchived) THEN now() END)
                 RETURNING id
                 """).first()
@@ -146,7 +150,8 @@ struct PostgresBeanRepository: BeanRepository {
                     processing_method_slug = \(bind: bean.processingMethodSlug),
                     roast_level = \(bind: bean.roastLevel?.rawValue),
                     roast_date = \(bind: bean.roastDate?.isoString)::date, harvest_year = \(bind: bean.harvestYear),
-                    sca_score = \(bind: bean.scaScore), weight_g = \(bind: bean.weightG), is_decaf = \(bind: bean.isDecaf),
+                    sca_score = \(bind: bean.scaScore), weight_g = \(bind: bean.weightG),
+                    remaining_g = \(bind: bean.remainingG), is_decaf = \(bind: bean.isDecaf),
                     notes = \(bind: bean.notes), visibility = \(bind: bean.visibility.rawValue),
                     archived_at = CASE WHEN \(bind: bean.isArchived) THEN coalesce(archived_at, now()) END
                 WHERE id = \(bind: id) AND owner_id = \(bind: ownerID)

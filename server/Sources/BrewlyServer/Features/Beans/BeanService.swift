@@ -34,7 +34,7 @@ struct BeanService: Sendable {
         } catch let error as PSQLError where error.isForeignKeyViolation {
             throw AppError.conflict(
                 code: APIErrorCode.beanInUse,
-                message: "This bean is used by one or more recipes. Archive it instead."
+                message: "This bean is used by recipes or brews. Archive it instead."
             )
         }
         guard deleted else { throw AppError.notFound("Bean") }

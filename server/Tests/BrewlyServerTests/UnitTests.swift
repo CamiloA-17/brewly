@@ -111,6 +111,37 @@ final class EquipmentServiceTests: XCTestCase {
     }
 }
 
+final class BrewLogServiceTests: XCTestCase {
+    private let service = BrewLogService(
+        brews: UnreachableBrewLogRepository(), recipes: UnreachableRecipeRepository(), catalog: StubCatalogRepository()
+    )
+
+    func testEspressoBrewNeedsYieldAndRejectsFutureDates() async {
+        let now = Date()
+        let request = UpsertBrewLogRequest(
+            beanId: UUID(), methodSlug: "espresso", brewedAt: now.addingTimeInterval(3_600), doseG: 18, waterG: 40
+        )
+        do {
+            _ = try await service.validated(request, userID: UUID(), now: now)
+            XCTFail("Expected a validation error")
+        } catch let error as AppError {
+            XCTAssertEqual(Set(error.fieldErrors?.map(\.field) ?? []), ["brewedAt", "yieldG", "waterG"])
+        } catch {
+            XCTFail("Unexpected error: \(error)")
+        }
+    }
+
+    func testNormalizesTextAndFlavorNotes() async throws {
+        let brew = try await service.validated(UpsertBrewLogRequest(
+            beanId: UUID(), methodSlug: "v60", brewedAt: Date(), doseG: 15, waterG: 250, grindSetting: " ",
+            flavorNoteSlugs: ["peach", "jasmine", "peach"], notes: " Sweet "
+        ), userID: UUID())
+        XCTAssertNil(brew.grindSetting)
+        XCTAssertEqual(brew.notes, "Sweet")
+        XCTAssertEqual(brew.flavorNoteSlugs, ["peach", "jasmine"])
+    }
+}
+
 // MARK: - Helpers
 
 final class PeopleServiceTests: XCTestCase {
@@ -259,6 +290,18 @@ struct UnreachableEquipmentRepository: EquipmentRepository {
         fatalError("Not used in unit tests")
     }
     func delete(id: UUID, ownerID: UUID) async throws -> Bool { fatalError("Not used in unit tests") }
+}
+
+struct UnreachableBrewLogRepository: BrewLogRepository {
+    func list(userID: UUID, filter: BrewLogFilter, after cursor: PageCursor?, limit: Int) async throws -> BrewlyAPI.Page<BrewLogDTO> {
+        fatalError("Not used in unit tests")
+    }
+    func find(id: UUID, viewerID: UUID) async throws -> BrewLogDTO? { fatalError("Not used in unit tests") }
+    func create(userID: UUID, _ brew: UpsertBrewLogRequest) async throws -> BrewLogDTO { fatalError("Not used in unit tests") }
+    func update(id: UUID, userID: UUID, _ brew: UpsertBrewLogRequest) async throws -> BrewLogDTO? {
+        fatalError("Not used in unit tests")
+    }
+    func delete(id: UUID, userID: UUID) async throws -> Bool { fatalError("Not used in unit tests") }
 }
 
 struct UnreachablePeopleRepository: PeopleRepository {
