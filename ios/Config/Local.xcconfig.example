@@ -1,0 +1,12 @@
+// Local build settings for your Mac. Copy this file to Local.xcconfig,
+// which is ignored by git, and regenerate the project (make ios-project).
+
+// Your Team ID (Xcode → Settings → Accounts, a free Personal Team works).
+DEVELOPMENT_TEAM =
+
+// For a physical iPhone: your Mac's LAN address (`ipconfig getifaddr en0`),
+// on the same Wi-Fi. Keep the http:/$()/ form.
+// BREWLY_API_BASE_URL = http:/$()/192.168.1.20:8080
+
+// Only if Xcode says app.brewly.ios is not available for your team:
+// BREWLY_BUNDLE_IDENTIFIER = com.example.brewly
