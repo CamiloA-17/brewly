@@ -150,6 +150,49 @@ final class IntegrationTests: XCTestCase {
         XCTAssertEqual(methods.methodSlugs, ["v60"])
     }
 
+    // MARK: - Equipment
+
+    func testEquipmentDefaultsSettingsAndVisibility() async throws {
+        let ana = try await register("ana.barista")
+        let leo = try await register("leo.roaster")
+
+        let c40: EquipmentDTO = try await send(.POST, "v1/me/equipment", token: ana.accessToken,
+            body: UpsertEquipmentRequest(
+                kind: .grinder, grinderSlug: "comandante_c40_mk4", isDefault: true,
+                grindSettings: [GrindSettingInput(methodSlug: "v60", grindSetting: "24 clicks")]
+            ))
+        XCTAssertTrue(c40.isDefault)
+        XCTAssertEqual(c40.grindSettings, [GrindSettingInput(methodSlug: "v60", grindSetting: "24 clicks")])
+
+        // A new default grinder replaces the previous one.
+        let k6: EquipmentDTO = try await send(.POST, "v1/me/equipment", token: ana.accessToken,
+            body: UpsertEquipmentRequest(kind: .grinder, brand: "Kingrinder", model: "K6", isDefault: true))
+        let _: EquipmentDTO = try await send(.POST, "v1/me/equipment", token: ana.accessToken,
+            body: UpsertEquipmentRequest(kind: .kettle, brand: "Fellow", model: "Stagg EKG", isDefault: true))
+        let mine: [EquipmentDTO] = try await send(.GET, "v1/me/equipment", token: ana.accessToken)
+        XCTAssertEqual(mine.filter(\.isDefault).map(\.kind), [.grinder, .kettle])
+        XCTAssertEqual(mine.first { $0.isDefault && $0.kind == .grinder }?.id, k6.id)
+
+        // Unknown catalog references and other members' items.
+        try await expectError(.POST, "v1/me/equipment", token: ana.accessToken,
+            body: UpsertEquipmentRequest(kind: .grinder, grinderSlug: "teapot"),
+            status: .unprocessableEntity, code: APIErrorCode.validationFailed)
+        try await expectError(.PUT, "v1/me/equipment/\(c40.id)", token: leo.accessToken,
+            body: UpsertEquipmentRequest(kind: .grinder, brand: "Stolen"), status: .notFound)
+
+        // Gear is public on the profile, and hidden by blocks.
+        let seen: [EquipmentDTO] = try await send(.GET, "v1/users/\(ana.user.id)/equipment", token: leo.accessToken)
+        XCTAssertEqual(seen.count, 3)
+        try await app.db.sql.raw("""
+            INSERT INTO user_blocks (blocker_id, blocked_id) VALUES (\(bind: ana.user.id), \(bind: leo.user.id))
+            """).run()
+        try await expectError(.GET, "v1/users/\(ana.user.id)/equipment", token: leo.accessToken, status: .notFound)
+
+        try await expectStatus(.DELETE, "v1/me/equipment/\(c40.id)", token: ana.accessToken, status: .noContent)
+        let remaining: [EquipmentDTO] = try await send(.GET, "v1/me/equipment", token: ana.accessToken)
+        XCTAssertEqual(remaining.count, 2)
+    }
+
     // MARK: - Beans and recipes
 
     func testBeanAndRecipeLifecycle() async throws {

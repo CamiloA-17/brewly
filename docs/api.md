@@ -32,6 +32,11 @@ and the server always agree on the contract.
 | PUT | `/v1/me/methods/{slug}` | Mark a brew method as used (204, idempotent). |
 | DELETE | `/v1/me/methods/{slug}` | Unmark a brew method (204). |
 | GET | `/v1/catalog` | Every global catalog in one response. |
+| GET | `/v1/me/equipment` | The user's gear (`EquipmentDTO`), grouped by kind. |
+| POST | `/v1/me/equipment` | Add an item (`UpsertEquipmentRequest`). Making it the default replaces the previous default of its kind. |
+| PUT | `/v1/me/equipment/{id}` | Replace an item, including its grind settings. |
+| DELETE | `/v1/me/equipment/{id}` | Delete an item (204). |
+| GET | `/v1/users/{id}/equipment` | Another member's gear, public like their profile (404 when a block exists). |
 | GET | `/v1/me/beans?includeArchived=false` | The user's beans. |
 | POST | `/v1/beans` | Create a bean (201). |
 | GET | `/v1/beans/{id}` | A bean the user can see. |
