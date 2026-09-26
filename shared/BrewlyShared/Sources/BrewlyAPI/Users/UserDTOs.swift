@@ -15,7 +15,7 @@ public struct UserSummaryDTO: Codable, Sendable, Equatable, Hashable {
     }
 }
 
-/// The signed-in user's own profile (`GET /me`).
+/// The signed-in user's own profile (`GET /me`), including private details.
 public struct CurrentUserDTO: Codable, Sendable, Equatable {
     public var id: UUID
     public var username: String
@@ -23,7 +23,17 @@ public struct CurrentUserDTO: Codable, Sendable, Equatable {
     public var email: String?
     public var bio: String?
     public var avatarURL: String?
-    public var location: String?
+    /// Private.
+    public var firstName: String?
+    /// Private.
+    public var lastName: String?
+    /// Private.
+    public var birthDate: CalendarDate?
+    /// Country of residence (ISO 3166-1 alpha-2).
+    public var countryCode: String?
+    public var city: String?
+    /// The private details are missing: the app shows onboarding before anything else.
+    public var needsOnboarding: Bool
     public var createdAt: Date
 
     public init(
@@ -33,7 +43,12 @@ public struct CurrentUserDTO: Codable, Sendable, Equatable {
         email: String? = nil,
         bio: String? = nil,
         avatarURL: String? = nil,
-        location: String? = nil,
+        firstName: String? = nil,
+        lastName: String? = nil,
+        birthDate: CalendarDate? = nil,
+        countryCode: String? = nil,
+        city: String? = nil,
+        needsOnboarding: Bool = false,
         createdAt: Date
     ) {
         self.id = id
@@ -42,7 +57,12 @@ public struct CurrentUserDTO: Codable, Sendable, Equatable {
         self.email = email
         self.bio = bio
         self.avatarURL = avatarURL
-        self.location = location
+        self.firstName = firstName
+        self.lastName = lastName
+        self.birthDate = birthDate
+        self.countryCode = countryCode
+        self.city = city
+        self.needsOnboarding = needsOnboarding
         self.createdAt = createdAt
     }
 }
@@ -50,13 +70,44 @@ public struct CurrentUserDTO: Codable, Sendable, Equatable {
 /// Body of `PATCH /me`. `nil` clears optional fields.
 public struct UpdateProfileRequest: Codable, Sendable, Equatable {
     public var displayName: String
+    public var firstName: String
+    public var lastName: String
+    public var birthDate: CalendarDate?
     public var bio: String?
-    public var location: String?
+    public var countryCode: String?
+    public var city: String?
 
-    public init(displayName: String, bio: String? = nil, location: String? = nil) {
+    public init(
+        displayName: String,
+        firstName: String,
+        lastName: String,
+        birthDate: CalendarDate?,
+        bio: String? = nil,
+        countryCode: String? = nil,
+        city: String? = nil
+    ) {
         self.displayName = displayName
+        self.firstName = firstName
+        self.lastName = lastName
+        self.birthDate = birthDate
         self.bio = bio
-        self.location = location
+        self.countryCode = countryCode
+        self.city = city
+    }
+}
+
+/// Body of `PUT /me/onboarding`: the private details of an account that does not have them yet.
+public struct CompleteOnboardingRequest: Codable, Sendable, Equatable {
+    public var firstName: String
+    public var lastName: String
+    public var birthDate: CalendarDate?
+    public var acceptedTerms: Bool
+
+    public init(firstName: String, lastName: String, birthDate: CalendarDate?, acceptedTerms: Bool) {
+        self.firstName = firstName
+        self.lastName = lastName
+        self.birthDate = birthDate
+        self.acceptedTerms = acceptedTerms
     }
 }
 
@@ -67,7 +118,8 @@ public struct UserProfileDTO: Codable, Sendable, Equatable {
     public var displayName: String
     public var bio: String?
     public var avatarURL: String?
-    public var location: String?
+    public var countryCode: String?
+    public var city: String?
     public var createdAt: Date
     public var followerCount: Int
     public var followingCount: Int
@@ -86,7 +138,8 @@ public struct UserProfileDTO: Codable, Sendable, Equatable {
         displayName: String,
         bio: String? = nil,
         avatarURL: String? = nil,
-        location: String? = nil,
+        countryCode: String? = nil,
+        city: String? = nil,
         createdAt: Date,
         followerCount: Int = 0,
         followingCount: Int = 0,
@@ -100,7 +153,8 @@ public struct UserProfileDTO: Codable, Sendable, Equatable {
         self.displayName = displayName
         self.bio = bio
         self.avatarURL = avatarURL
-        self.location = location
+        self.countryCode = countryCode
+        self.city = city
         self.createdAt = createdAt
         self.followerCount = followerCount
         self.followingCount = followingCount

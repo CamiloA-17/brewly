@@ -69,6 +69,19 @@ struct DTOCodingTests {
         #expect(decoded.followerCount == 0 && !decoded.isFollowing && !decoded.isMe)
     }
 
+    @Test("Private details round-trip and the birth date is a plain day")
+    func currentUser() throws {
+        let user = CurrentUserDTO(
+            id: UUID(), username: "ana.barista", displayName: "Ana", firstName: "Ana", lastName: "Rojas",
+            birthDate: CalendarDate(year: 1995, month: 4, day: 12), countryCode: "CO", city: "Bogotá",
+            needsOnboarding: false, createdAt: Date(timeIntervalSince1970: 0)
+        )
+        let data = try BrewlyJSON.makeEncoder().encode(user)
+        let json = try #require(String(data: data, encoding: .utf8))
+        #expect(json.contains("\"birthDate\":\"1995-04-12\""))
+        #expect(try BrewlyJSON.makeDecoder().decode(CurrentUserDTO.self, from: data) == user)
+    }
+
     @Test("Field errors are built from rule violations")
     func fieldErrors() {
         let error = APIErrorResponse.FieldError(RuleViolation(field: "doseG", kind: .outOfRange(min: 0.1, max: 1000)))
