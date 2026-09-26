@@ -81,6 +81,7 @@ Server integration tests truncate every table, so they only run against `TEST_DA
 
 ## Documentation
 
+- [AGENTS.md](AGENTS.md): guide for coding agents and contributors - Git workflow, architecture, conventions and known pitfalls.
 - [Architecture](docs/architecture.md): system overview, iOS and server layers, auth flow, roadmap.
 - [Database](docs/database.md): entity-relationship diagram and integrity rules.
 - [API](docs/api.md): endpoints, errors and pagination.
