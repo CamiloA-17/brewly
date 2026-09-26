@@ -100,3 +100,26 @@ struct AccountRulesTests {
         #expect(AccountRules.defaultDisplayName(firstName: " Ana ", lastName: "Rojas") == "Ana Rojas")
     }
 }
+
+@Suite("BeanRules purchase details")
+struct BeanPurchaseRulesTests {
+    private let today = CalendarDate(year: 2026, month: 9, day: 25)!
+
+    @Test("Opened after purchase, price with a currency")
+    func purchase() {
+        let valid = BeanParameters(
+            name: "Geisha", purchaseDate: CalendarDate(year: 2026, month: 9, day: 1),
+            openedDate: CalendarDate(year: 2026, month: 9, day: 5), price: 68_000, currency: "COP", lot: "Lot 12"
+        )
+        #expect(BeanRules.validate(valid, today: today).isEmpty)
+
+        let invalid = BeanParameters(
+            name: "Geisha", purchaseDate: CalendarDate(year: 2026, month: 9, day: 10),
+            openedDate: CalendarDate(year: 2026, month: 9, day: 5), price: 20
+        )
+        let violations = BeanRules.validate(invalid, today: today)
+        #expect(violations.contains(RuleViolation(field: "openedDate", kind: .before(field: "purchaseDate"))))
+        #expect(violations.contains(RuleViolation(field: "currency", kind: .required)))
+        #expect(!BeanRules.isValidCurrency("cop"))
+    }
+}

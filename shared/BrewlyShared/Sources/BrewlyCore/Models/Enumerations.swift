@@ -122,3 +122,18 @@ public enum EquipmentKind: String, Codable, CaseIterable, Hashable, Sendable {
     case espressoMachine = "espresso_machine"
     case other
 }
+
+/// Espresso-based drink a recipe makes (`recipes.drink_type`).
+public enum DrinkType: String, Codable, CaseIterable, Hashable, Sendable {
+    case espresso
+    case ristretto
+    case lungo
+    case americano
+    case cortado
+    case flatWhite = "flat_white"
+    case cappuccino
+    case latte
+    case macchiato
+    case mocha
+    case other
+}

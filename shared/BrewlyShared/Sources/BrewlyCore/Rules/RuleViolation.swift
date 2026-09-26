@@ -22,6 +22,8 @@ public struct RuleViolation: Hashable, Sendable {
         case tooMany(max: Int)
         /// The person is younger than `minimumAge` years.
         case tooYoung(minimumAge: Int)
+        /// The date must not be earlier than the date of another field.
+        case before(field: String)
     }
 
     /// JSON key of the offending request property, e.g. `"doseG"` or `"steps[2].startS"`.
@@ -45,6 +47,7 @@ public struct RuleViolation: Hashable, Sendable {
         case .inFuture: "in_future"
         case .tooMany: "too_many"
         case .tooYoung: "too_young"
+        case .before: "before"
         }
     }
 
@@ -69,6 +72,8 @@ public struct RuleViolation: Hashable, Sendable {
             "Must have at most \(max) items."
         case let .tooYoung(minimumAge):
             "You must be at least \(minimumAge) years old."
+        case let .before(field):
+            "Must not be before \(field)."
         }
     }
 

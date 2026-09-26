@@ -26,6 +26,13 @@ public struct BeanDTO: Codable, Sendable, Equatable, Hashable {
     public var isDecaf: Bool
     public var notes: String?
     public var photoURL: String?
+    public var purchaseDate: CalendarDate?
+    public var openedDate: CalendarDate?
+    public var price: Double?
+    /// ISO 4217 code of `price`.
+    public var currency: String?
+    public var lot: String?
+    public var isFavorite: Bool
     public var visibility: Visibility
     public var isArchived: Bool
     public var createdAt: Date
@@ -54,6 +61,12 @@ public struct BeanDTO: Codable, Sendable, Equatable, Hashable {
         isDecaf: Bool = false,
         notes: String? = nil,
         photoURL: String? = nil,
+        purchaseDate: CalendarDate? = nil,
+        openedDate: CalendarDate? = nil,
+        price: Double? = nil,
+        currency: String? = nil,
+        lot: String? = nil,
+        isFavorite: Bool = false,
         visibility: Visibility = .public,
         isArchived: Bool = false,
         createdAt: Date,
@@ -81,6 +94,12 @@ public struct BeanDTO: Codable, Sendable, Equatable, Hashable {
         self.isDecaf = isDecaf
         self.notes = notes
         self.photoURL = photoURL
+        self.purchaseDate = purchaseDate
+        self.openedDate = openedDate
+        self.price = price
+        self.currency = currency
+        self.lot = lot
+        self.isFavorite = isFavorite
         self.visibility = visibility
         self.isArchived = isArchived
         self.createdAt = createdAt
@@ -142,6 +161,14 @@ public struct UpsertBeanRequest: Codable, Sendable, Equatable {
     public var remainingG: Double?
     public var isDecaf: Bool
     public var notes: String?
+    /// An image uploaded with `POST /media` by the owner.
+    public var photoMediaId: UUID?
+    public var purchaseDate: CalendarDate?
+    public var openedDate: CalendarDate?
+    public var price: Double?
+    public var currency: String?
+    public var lot: String?
+    public var isFavorite: Bool
     public var visibility: Visibility
     public var isArchived: Bool
 
@@ -165,6 +192,13 @@ public struct UpsertBeanRequest: Codable, Sendable, Equatable {
         remainingG: Double? = nil,
         isDecaf: Bool = false,
         notes: String? = nil,
+        photoMediaId: UUID? = nil,
+        purchaseDate: CalendarDate? = nil,
+        openedDate: CalendarDate? = nil,
+        price: Double? = nil,
+        currency: String? = nil,
+        lot: String? = nil,
+        isFavorite: Bool = false,
         visibility: Visibility = .public,
         isArchived: Bool = false
     ) {
@@ -187,6 +221,13 @@ public struct UpsertBeanRequest: Codable, Sendable, Equatable {
         self.remainingG = remainingG
         self.isDecaf = isDecaf
         self.notes = notes
+        self.photoMediaId = photoMediaId
+        self.purchaseDate = purchaseDate
+        self.openedDate = openedDate
+        self.price = price
+        self.currency = currency
+        self.lot = lot
+        self.isFavorite = isFavorite
         self.visibility = visibility
         self.isArchived = isArchived
     }
@@ -206,6 +247,11 @@ public struct UpsertBeanRequest: Codable, Sendable, Equatable {
             scaScore: scaScore,
             weightG: weightG,
             remainingG: remainingG,
+            purchaseDate: purchaseDate,
+            openedDate: openedDate,
+            price: price,
+            currency: currency,
+            lot: lot,
             notes: notes
         )
     }

@@ -27,8 +27,10 @@ public struct RecipeParameters: Hashable, Sendable {
     public var pressureBar: Double?
     public var waterProfile: String?
     public var waterTdsPpm: Int?
-    public var tdsPercent: Double?
-    public var rating: Int?
+    public var servings: Int?
+    public var iceG: Double?
+    public var milkG: Double?
+    public var brewerDetail: String?
     public var notes: String?
     public var steps: [Step]
 
@@ -47,8 +49,10 @@ public struct RecipeParameters: Hashable, Sendable {
         pressureBar: Double? = nil,
         waterProfile: String? = nil,
         waterTdsPpm: Int? = nil,
-        tdsPercent: Double? = nil,
-        rating: Int? = nil,
+        servings: Int? = nil,
+        iceG: Double? = nil,
+        milkG: Double? = nil,
+        brewerDetail: String? = nil,
         notes: String? = nil,
         steps: [Step] = []
     ) {
@@ -66,8 +70,10 @@ public struct RecipeParameters: Hashable, Sendable {
         self.pressureBar = pressureBar
         self.waterProfile = waterProfile
         self.waterTdsPpm = waterTdsPpm
-        self.tdsPercent = tdsPercent
-        self.rating = rating
+        self.servings = servings
+        self.iceG = iceG
+        self.milkG = milkG
+        self.brewerDetail = brewerDetail
         self.notes = notes
         self.steps = steps
     }
@@ -79,6 +85,7 @@ public enum RecipeRules {
     public static let longTextMaxLength = 2_000
     public static let grindSettingMaxLength = 40
     public static let waterProfileMaxLength = 120
+    public static let brewerDetailMaxLength = 80
     public static let stepInstructionMaxLength = 280
     public static let maxSteps = 50
 
@@ -91,7 +98,9 @@ public enum RecipeRules {
     public static let pressureRange: ClosedRange<Double> = 0.1...20
     public static let waterTdsRange: ClosedRange<Int> = 0...1_000
     public static let tdsRange: ClosedRange<Double> = 0.01...25
-    public static let ratingRange: ClosedRange<Int> = 1...5
+    public static let servingsRange: ClosedRange<Int> = 1...20
+    public static let iceRange: ClosedRange<Double> = 0.1...5_000
+    public static let milkRange: ClosedRange<Double> = 0.1...2_000
     public static let grindMicronsRange: ClosedRange<Int> = 50...2_000
 
     /// Returns every broken rule, or an empty array when the recipe is valid.
@@ -106,6 +115,7 @@ public enum RecipeRules {
         check.optionalText(recipe.notes, field: "notes", maxLength: longTextMaxLength)
         check.optionalText(recipe.grindSetting, field: "grindSetting", maxLength: grindSettingMaxLength)
         check.optionalText(recipe.waterProfile, field: "waterProfile", maxLength: waterProfileMaxLength)
+        check.optionalText(recipe.brewerDetail, field: "brewerDetail", maxLength: brewerDetailMaxLength)
 
         check.range(recipe.doseG, field: "doseG", doseRange)
         check.range(recipe.waterG, field: "waterG", liquidRange)
@@ -135,8 +145,9 @@ public enum RecipeRules {
         check.range(recipe.totalTimeS, field: "totalTimeS", totalTimeRange)
         check.range(recipe.pressureBar, field: "pressureBar", pressureRange)
         check.range(recipe.waterTdsPpm, field: "waterTdsPpm", waterTdsRange)
-        check.range(recipe.tdsPercent, field: "tdsPercent", tdsRange)
-        check.range(recipe.rating, field: "rating", ratingRange)
+        check.range(recipe.servings, field: "servings", servingsRange)
+        check.range(recipe.iceG, field: "iceG", iceRange)
+        check.range(recipe.milkG, field: "milkG", milkRange)
 
         if recipe.steps.count > maxSteps {
             check.add("steps", .tooMany(max: maxSteps))

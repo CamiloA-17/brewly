@@ -11,7 +11,7 @@ struct RecipeRulesTests {
     func validFilterRecipe() {
         let recipe = RecipeParameters(
             title: "Morning V60", doseG: 15, waterG: 250, yieldG: 215,
-            waterTempC: 93, bloomWaterG: 45, bloomTimeS: 45, totalTimeS: 180, tdsPercent: 1.38, rating: 5,
+            waterTempC: 93, bloomWaterG: 45, bloomTimeS: 45, totalTimeS: 180, servings: 1, iceG: 80,
             steps: [.init(startS: 0, waterTargetG: 45), .init(startS: 45, waterTargetG: 250)]
         )
         #expect(RecipeRules.validate(recipe, ratioBasis: .water).isEmpty)
@@ -35,10 +35,10 @@ struct RecipeRulesTests {
     @Test("Out-of-range values are reported")
     func ranges() {
         let recipe = RecipeParameters(
-            title: "  ", doseG: 1, waterG: 900, waterTempC: 120, bloomWaterG: 950, rating: 7
+            title: "  ", doseG: 1, waterG: 900, waterTempC: 120, bloomWaterG: 950, servings: 0
         )
         let violations = RecipeRules.validate(recipe, ratioBasis: .water)
-        #expect(fields(violations) == ["title", "ratio", "waterTempC", "bloomWaterG", "rating"])
+        #expect(fields(violations) == ["title", "ratio", "waterTempC", "bloomWaterG", "servings"])
         #expect(violations.contains(RuleViolation(field: "bloomWaterG", kind: .exceeds(field: "waterG"))))
     }
 

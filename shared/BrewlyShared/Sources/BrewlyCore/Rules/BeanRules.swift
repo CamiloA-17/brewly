@@ -12,6 +12,11 @@ public struct BeanParameters: Hashable, Sendable {
     public var scaScore: Double?
     public var weightG: Int?
     public var remainingG: Double?
+    public var purchaseDate: CalendarDate?
+    public var openedDate: CalendarDate?
+    public var price: Double?
+    public var currency: String?
+    public var lot: String?
     public var notes: String?
 
     public init(
@@ -27,6 +32,11 @@ public struct BeanParameters: Hashable, Sendable {
         scaScore: Double? = nil,
         weightG: Int? = nil,
         remainingG: Double? = nil,
+        purchaseDate: CalendarDate? = nil,
+        openedDate: CalendarDate? = nil,
+        price: Double? = nil,
+        currency: String? = nil,
+        lot: String? = nil,
         notes: String? = nil
     ) {
         self.name = name
@@ -41,6 +51,11 @@ public struct BeanParameters: Hashable, Sendable {
         self.scaScore = scaScore
         self.weightG = weightG
         self.remainingG = remainingG
+        self.purchaseDate = purchaseDate
+        self.openedDate = openedDate
+        self.price = price
+        self.currency = currency
+        self.lot = lot
         self.notes = notes
     }
 }
@@ -54,6 +69,8 @@ public enum BeanRules {
     public static let scaScoreRange: ClosedRange<Double> = 0...100
     public static let weightRange: ClosedRange<Int> = 1...100_000
     public static let remainingRange: ClosedRange<Double> = 0...100_000
+    public static let priceRange: ClosedRange<Double> = 0...1_000_000
+    public static let lotMaxLength = 60
 
     /// - Parameter today: the current day, used to reject roast dates in the future.
     public static func validate(_ bean: BeanParameters, today: CalendarDate) -> [RuleViolation] {
@@ -78,7 +95,30 @@ public enum BeanRules {
         check.range(bean.scaScore, field: "scaScore", scaScoreRange)
         check.range(bean.weightG, field: "weightG", weightRange)
         check.range(bean.remainingG, field: "remainingG", remainingRange)
+        check.optionalText(bean.lot, field: "lot", maxLength: lotMaxLength)
+        if let purchaseDate = bean.purchaseDate, purchaseDate > today {
+            check.add("purchaseDate", .inFuture)
+        }
+        if let openedDate = bean.openedDate, openedDate > today {
+            check.add("openedDate", .inFuture)
+        } else if let openedDate = bean.openedDate, let purchaseDate = bean.purchaseDate, openedDate < purchaseDate {
+            check.add("openedDate", .before(field: "purchaseDate"))
+        }
+        check.range(bean.price, field: "price", priceRange)
+        if bean.price != nil {
+            let currency = bean.currency ?? ""
+            if currency.isEmpty {
+                check.add("currency", .required)
+            } else if !isValidCurrency(currency) {
+                check.add("currency", .invalidFormat)
+            }
+        }
 
         return check.violations
+    }
+
+    /// Three uppercase ASCII letters (ISO 4217), e.g. `"COP"`.
+    public static func isValidCurrency(_ code: String) -> Bool {
+        code.unicodeScalars.count == 3 && code.unicodeScalars.allSatisfy { ("A"..."Z").contains($0) }
     }
 }
