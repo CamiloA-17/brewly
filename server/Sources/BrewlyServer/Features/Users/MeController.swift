@@ -7,6 +7,7 @@ struct MeController: RouteCollection {
         let me = routes.grouped("me")
         me.get(use: profile)
         me.patch(use: updateProfile)
+        me.put("onboarding", use: completeOnboarding)
         me.delete(use: deleteAccount)
         me.get("methods", use: methods)
         me.put("methods", ":slug", use: addMethod)
@@ -22,14 +23,42 @@ struct MeController: RouteCollection {
     @Sendable
     func updateProfile(req: Request) async throws -> Response {
         let body = try req.decodeJSON(UpdateProfileRequest.self)
-        let violations = AccountRules.validateProfile(displayName: body.displayName, bio: body.bio, location: body.location)
-        guard violations.isEmpty else { throw AppError.validation(violations) }
+        let countryCode = body.countryCode.nilIfBlank?.uppercased()
+        let violations = AccountRules.validateProfile(
+            displayName: body.displayName, firstName: body.firstName, lastName: body.lastName,
+            birthDate: body.birthDate, bio: body.bio, countryCode: countryCode, city: body.city
+        )
+        guard violations.isEmpty, let birthDate = body.birthDate else { throw AppError.validation(violations) }
 
-        let updated = try await repository(req).updateProfile(
-            id: try req.userID,
+        let updated = try await repository(req).updateProfile(id: try req.userID, ProfileUpdate(
             displayName: body.displayName.trimmingWhitespace,
+            firstName: body.firstName.trimmingWhitespace,
+            lastName: body.lastName.trimmingWhitespace,
+            birthDate: birthDate,
             bio: body.bio.nilIfBlank,
-            location: body.location.nilIfBlank
+            countryCode: countryCode,
+            city: body.city.nilIfBlank
+        ))
+        guard let updated else { throw AppError.unauthorized }
+        return try .json(updated)
+    }
+
+    /// Private details of accounts that do not have them yet (created before they were required,
+    /// or with Sign in with Apple). Also usable to correct them later.
+    @Sendable
+    func completeOnboarding(req: Request) async throws -> Response {
+        let body = try req.decodeJSON(CompleteOnboardingRequest.self)
+        let violations = AccountRules.validateOnboarding(
+            firstName: body.firstName, lastName: body.lastName, birthDate: body.birthDate,
+            acceptedTerms: body.acceptedTerms
+        )
+        guard violations.isEmpty, let birthDate = body.birthDate else { throw AppError.validation(violations) }
+
+        let updated = try await repository(req).completeOnboarding(
+            id: try req.userID,
+            firstName: body.firstName.trimmingWhitespace,
+            lastName: body.lastName.trimmingWhitespace,
+            birthDate: birthDate
         )
         guard let updated else { throw AppError.unauthorized }
         return try .json(updated)

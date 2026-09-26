@@ -36,7 +36,8 @@ struct PostgresPeopleRepository: PeopleRepository {
         var displayName: String
         var bio: String?
         var avatarUrl: String?
-        var location: String?
+        var countryCode: String?
+        var city: String?
         var createdAt: Date
         var followerCount: Int
         var followingCount: Int
@@ -59,7 +60,8 @@ struct PostgresPeopleRepository: PeopleRepository {
 
     func profile(id: UUID, viewerID: UUID) async throws -> UserProfileDTO? {
         guard let row = try await database.sql.raw("""
-            SELECT u.id, u.username, u.display_name, u.bio, u.avatar_url, u.location, u.created_at,
+            SELECT u.id, u.username, u.display_name, u.bio, u.avatar_url, u.country_code::text AS country_code, u.city,
+                   u.created_at,
                    (SELECT count(*) FROM follows f WHERE f.followed_id = u.id)::int AS follower_count,
                    (SELECT count(*) FROM follows f WHERE f.follower_id = u.id)::int AS following_count,
                    (SELECT count(*) FROM recipes r
@@ -80,7 +82,8 @@ struct PostgresPeopleRepository: PeopleRepository {
             displayName: profile.displayName,
             bio: profile.bio,
             avatarURL: profile.avatarUrl,
-            location: profile.location,
+            countryCode: profile.countryCode,
+            city: profile.city,
             createdAt: profile.createdAt,
             followerCount: profile.followerCount,
             followingCount: profile.followingCount,
