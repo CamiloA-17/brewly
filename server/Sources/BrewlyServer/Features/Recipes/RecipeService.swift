@@ -59,6 +59,7 @@ struct RecipeService: Sendable {
         recipe.grinderSlug = request.grinderSlug.nilIfBlank
         recipe.grindSetting = request.grindSetting.nilIfBlank
         recipe.waterProfile = request.waterProfile.nilIfBlank
+        recipe.brewerDetail = request.brewerDetail.nilIfBlank
         recipe.notes = request.notes.nilIfBlank
         recipe.flavorNoteSlugs = request.flavorNoteSlugs.uniqued
         recipe.steps = request.steps.map { step in
@@ -73,6 +74,8 @@ struct RecipeService: Sendable {
     private func mappingReferenceErrors<T>(_ operation: () async throws -> T) async throws -> T {
         do {
             return try await operation()
+        } catch is UnavailableMediaError {
+            throw AppError.unknownReference(field: "coverMediaId")
         } catch let error as PSQLError where error.isForeignKeyViolation {
             let field = switch error.constraintName {
             case "recipes_bean_owned_by_author": "beanId"

@@ -37,7 +37,6 @@ protocol PostRepository: Sendable {
 struct UnknownParentCommentError: Error {}
 
 /// Media ids that are not the author's unused uploads.
-struct UnavailableMediaError: Error {}
 
 struct PostgresPostRepository: PostRepository {
     let database: any Database
@@ -69,7 +68,9 @@ struct PostgresPostRepository: PostRepository {
         var rGrindSize: String?
         var rWaterTempC: Double?
         var rTotalTimeS: Int?
-        var rRating: Int?
+        var rAverageRating: Double?
+        var rBrewCount: Int
+        var rCoverMediaId: UUID?
         var rVisibility: String?
         var rCreatedAt: Date?
         var rBeanName: String?
@@ -99,7 +100,9 @@ struct PostgresPostRepository: PostRepository {
                     grindSize: rGrindSize.flatMap(GrindSize.init(rawValue:)) ?? .medium,
                     waterTempC: rWaterTempC,
                     totalTimeS: rTotalTimeS,
-                    rating: rRating,
+                    averageRating: rAverageRating,
+                    brewCount: rBrewCount,
+                    coverURL: rCoverMediaId.map(PostgresMediaRepository.url(for:)),
                     visibility: rVisibility.flatMap(Visibility.init(rawValue:)) ?? .private,
                     createdAt: rCreatedAt
                 )
@@ -185,7 +188,8 @@ struct PostgresPostRepository: PostRepository {
                          FROM post_media pm JOIN media m ON m.id = pm.media_id WHERE pm.post_id = p.id), '{}') AS media_heights,
                r.id AS r_id, r.title AS r_title, r.method_slug AS r_method_slug, r.dose_g::float8 AS r_dose_g,
                r.ratio::float8 AS r_ratio, r.grind_size::text AS r_grind_size,
-               r.water_temp_c::float8 AS r_water_temp_c, r.total_time_s AS r_total_time_s, r.rating AS r_rating,
+               r.water_temp_c::float8 AS r_water_temp_c, r.total_time_s AS r_total_time_s,
+               \(PostgresRecipeRepository.brewStats("r", prefix: "r_")), r.cover_media_id AS r_cover_media_id,
                r.visibility::text AS r_visibility, r.created_at AS r_created_at, rb.name AS r_bean_name,
                b.id AS b_id, b.name AS b_name, b.roaster AS b_roaster, b.country_code::text AS b_country_code,
                b.farm AS b_farm, b.processing_method_slug AS b_processing_method_slug,
@@ -272,14 +276,13 @@ struct PostgresPostRepository: PostRepository {
             let id = try row.decode(column: "id", as: UUID.self)
 
             if !request.mediaIds.isEmpty {
-                // Only the author's uploads that are not an avatar or a brew photo can be attached.
+                // Only the author's uploads that are not used anywhere else can be attached.
                 let attached = try await sql.raw("""
                     INSERT INTO post_media (post_id, position, media_id)
                     SELECT \(bind: id), x.position::smallint, m.id
                     FROM unnest(\(bind: request.mediaIds)::uuid[]) WITH ORDINALITY AS x(media_id, position)
                     JOIN media m ON m.id = x.media_id AND m.owner_id = \(bind: authorID)
-                    WHERE NOT EXISTS (SELECT 1 FROM users u WHERE u.avatar_media_id = m.id)
-                      AND NOT EXISTS (SELECT 1 FROM brew_logs bl WHERE bl.photo_media_id = m.id)
+                    WHERE NOT media_in_use(m.id)
                     RETURNING media_id
                     """).all()
                 guard attached.count == request.mediaIds.count else { throw UnavailableMediaError() }

@@ -43,7 +43,9 @@ struct PostgresRecipeRepository: RecipeRepository {
         var grindSize: String
         var waterTempC: Double?
         var totalTimeS: Int?
-        var rating: Int?
+        var averageRating: Double?
+        var brewCount: Int
+        var coverMediaId: UUID?
         var visibility: String
         var createdAt: Date
         var cursorCreatedAt: String
@@ -67,7 +69,9 @@ struct PostgresRecipeRepository: RecipeRepository {
                 grindSize: GrindSize(rawValue: grindSize) ?? .medium,
                 waterTempC: waterTempC,
                 totalTimeS: totalTimeS,
-                rating: rating,
+                averageRating: averageRating,
+                brewCount: brewCount,
+                coverURL: coverMediaId.map(PostgresMediaRepository.url(for:)),
                 visibility: Visibility(rawValue: visibility) ?? .private,
                 createdAt: createdAt
             )
@@ -101,9 +105,14 @@ struct PostgresRecipeRepository: RecipeRepository {
         var filterType: String?
         var waterProfile: String?
         var waterTdsPpm: Int?
-        var tdsPercent: Double?
-        var extractionYieldPercent: Double?
-        var rating: Int?
+        var servings: Int?
+        var iceG: Double?
+        var drinkType: String?
+        var milkG: Double?
+        var brewerDetail: String?
+        var coverMediaId: UUID?
+        var averageRating: Double?
+        var brewCount: Int
         var notes: String?
         var visibility: String
         var saveCount: Int
@@ -162,9 +171,14 @@ struct PostgresRecipeRepository: RecipeRepository {
                 filterType: filterType.flatMap(FilterType.init(rawValue:)),
                 waterProfile: waterProfile,
                 waterTdsPpm: waterTdsPpm,
-                tdsPercent: tdsPercent,
-                extractionYieldPercent: extractionYieldPercent,
-                rating: rating,
+                servings: servings,
+                iceG: iceG,
+                drinkType: drinkType.flatMap(DrinkType.init(rawValue:)),
+                milkG: milkG,
+                brewerDetail: brewerDetail,
+                coverURL: coverMediaId.map(PostgresMediaRepository.url(for:)),
+                averageRating: averageRating,
+                brewCount: brewCount,
                 notes: notes,
                 flavorNoteSlugs: flavorNoteSlugs,
                 steps: steps,
@@ -202,16 +216,30 @@ struct PostgresRecipeRepository: RecipeRepository {
 
     // MARK: - SQL fragments
 
+    /// Average rating and count of the brews of `recipe` that the viewer (`viewer v`) can see.
+    /// Shared with the recipe cards of posts.
+    static func brewStats(_ recipe: String, prefix: String = "") -> String {
+        """
+        (SELECT avg(bl.rating)::float8 FROM brew_logs bl
+         WHERE bl.recipe_id = \(recipe).id AND bl.rating IS NOT NULL
+           AND can_view_content(v.viewer_id, bl.user_id, bl.visibility)) AS \(prefix)average_rating,
+        (SELECT count(*) FROM brew_logs bl
+         WHERE bl.recipe_id = \(recipe).id
+           AND can_view_content(v.viewer_id, bl.user_id, bl.visibility))::int AS \(prefix)brew_count
+        """
+    }
+
     /// `cursorColumn` is the timestamp the list is ordered by.
     private static func summarySelect(cursorColumn: String = "r.created_at") -> String {
         """
         SELECT r.id, r.title, r.method_slug, r.dose_g::float8 AS dose_g, r.ratio::float8 AS ratio,
                r.grind_size::text AS grind_size, r.water_temp_c::float8 AS water_temp_c, r.total_time_s,
-               r.rating, r.visibility::text AS visibility, r.created_at,
+               \(brewStats("r")), r.cover_media_id, r.visibility::text AS visibility, r.created_at,
                \(PageCursor.sqlTimestamp(cursorColumn)) AS cursor_created_at,
                b.name AS bean_name, u.id AS author_id, u.username AS author_username,
                u.display_name AS author_display_name, u.avatar_url AS author_avatar_url
         FROM recipes r
+        CROSS JOIN viewer v
         JOIN coffee_beans b ON b.id = r.bean_id
         JOIN users u ON u.id = r.author_id
         """
@@ -227,8 +255,8 @@ struct PostgresRecipeRepository: RecipeRepository {
                r.ratio::float8 AS ratio, r.grind_size::text AS grind_size, r.grinder_slug, r.grind_setting,
                r.grind_microns, r.water_temp_c::float8 AS water_temp_c, r.bloom_water_g::float8 AS bloom_water_g,
                r.bloom_time_s, r.total_time_s, r.pressure_bar::float8 AS pressure_bar, r.filter_type,
-               r.water_profile, r.water_tds_ppm, r.tds_percent::float8 AS tds_percent,
-               r.extraction_yield_percent::float8 AS extraction_yield_percent, r.rating, r.notes,
+               r.water_profile, r.water_tds_ppm, r.servings, r.ice_g::float8 AS ice_g, r.drink_type,
+               r.milk_g::float8 AS milk_g, r.brewer_detail, r.cover_media_id, \(brewStats("r")), r.notes,
                r.visibility::text AS visibility, r.created_at, r.updated_at,
                (SELECT count(*) FROM recipe_saves s WHERE s.recipe_id = r.id)::int AS save_count,
                (SELECT count(*) FROM recipes f WHERE f.forked_from_id = r.id)::int AS fork_count,
@@ -262,6 +290,7 @@ struct PostgresRecipeRepository: RecipeRepository {
         switch scope {
         case let .authoredBy(authorID):
             query = """
+                WITH viewer AS (SELECT \(bind: viewerID)::uuid AS viewer_id)
                 \(unsafeRaw: Self.summarySelect())
                 WHERE r.author_id = \(bind: authorID)
                   AND (\(bind: cursorTime)::timestamptz IS NULL
@@ -271,6 +300,7 @@ struct PostgresRecipeRepository: RecipeRepository {
                 """
         case let .visibleFrom(authorID):
             query = """
+                WITH viewer AS (SELECT \(bind: viewerID)::uuid AS viewer_id)
                 \(unsafeRaw: Self.summarySelect())
                 WHERE r.author_id = \(bind: authorID)
                   AND can_view_content(\(bind: viewerID), r.author_id, r.visibility)
@@ -282,6 +312,7 @@ struct PostgresRecipeRepository: RecipeRepository {
         case .savedByViewer:
             // Saved recipes that are no longer visible (made private, author blocked) are hidden.
             query = """
+                WITH viewer AS (SELECT \(bind: viewerID)::uuid AS viewer_id)
                 \(unsafeRaw: Self.summarySelect(cursorColumn: "s.created_at"))
                 JOIN recipe_saves s ON s.recipe_id = r.id AND s.user_id = \(bind: viewerID)
                 WHERE can_view_content(\(bind: viewerID), r.author_id, r.visibility)
@@ -292,6 +323,7 @@ struct PostgresRecipeRepository: RecipeRepository {
                 """
         case let .explore(methodSlug, countryCode, varietalSlug):
             query = """
+                WITH viewer AS (SELECT \(bind: viewerID)::uuid AS viewer_id)
                 \(unsafeRaw: Self.summarySelect())
                 WHERE r.visibility = 'public'
                   AND can_view_content(\(bind: viewerID), r.author_id, r.visibility)
@@ -349,12 +381,13 @@ struct PostgresRecipeRepository: RecipeRepository {
     func create(authorID: UUID, _ recipe: UpsertRecipeRequest) async throws -> RecipeDTO {
         try await database.transaction { tx in
             let sql = tx.sql
+            try await PostgresMediaRepository.checkUsable(recipe.coverMediaId, ownerID: authorID, current: nil, sql: sql)
             guard let row = try await sql.raw("""
                 INSERT INTO recipes
                     (author_id, bean_id, forked_from_id, method_slug, title, description, dose_g, water_g, yield_g, grind_size,
                      grinder_slug, grind_setting, grind_microns, water_temp_c, bloom_water_g, bloom_time_s,
-                     total_time_s, pressure_bar, filter_type, water_profile, water_tds_ppm, tds_percent, rating,
-                     notes, visibility)
+                     total_time_s, pressure_bar, filter_type, water_profile, water_tds_ppm, servings, ice_g,
+                     drink_type, milk_g, brewer_detail, cover_media_id, notes, visibility)
                 VALUES
                     (\(bind: authorID), \(bind: recipe.beanId), \(bind: recipe.forkedFromId), \(bind: recipe.methodSlug), \(bind: recipe.title),
                      \(bind: recipe.description), \(bind: recipe.doseG), \(bind: recipe.waterG), \(bind: recipe.yieldG),
@@ -362,8 +395,9 @@ struct PostgresRecipeRepository: RecipeRepository {
                      \(bind: recipe.grindMicrons), \(bind: recipe.waterTempC), \(bind: recipe.bloomWaterG),
                      \(bind: recipe.bloomTimeS), \(bind: recipe.totalTimeS), \(bind: recipe.pressureBar),
                      \(bind: recipe.filterType?.rawValue), \(bind: recipe.waterProfile), \(bind: recipe.waterTdsPpm),
-                     \(bind: recipe.tdsPercent), \(bind: recipe.rating), \(bind: recipe.notes),
-                     \(bind: recipe.visibility.rawValue))
+                     \(bind: recipe.servings), \(bind: recipe.iceG), \(bind: recipe.drinkType?.rawValue),
+                     \(bind: recipe.milkG), \(bind: recipe.brewerDetail), \(bind: recipe.coverMediaId),
+                     \(bind: recipe.notes), \(bind: recipe.visibility.rawValue))
                 RETURNING id
                 """).first()
             else { throw AppError(status: .internalServerError, code: "internal_error", message: "Recipe was not created.") }
@@ -382,6 +416,14 @@ struct PostgresRecipeRepository: RecipeRepository {
     func update(id: UUID, authorID: UUID, _ recipe: UpsertRecipeRequest) async throws -> RecipeDTO? {
         try await database.transaction { tx in
             let sql = tx.sql
+            guard let current = try await sql.raw("""
+                SELECT cover_media_id FROM recipes WHERE id = \(bind: id) AND author_id = \(bind: authorID) FOR UPDATE
+                """).first()
+            else { return nil }
+            let previousCover = try current.decode(column: "cover_media_id", as: UUID?.self)
+            try await PostgresMediaRepository.checkUsable(
+                recipe.coverMediaId, ownerID: authorID, current: previousCover, sql: sql
+            )
             let row = try await sql.raw("""
                 UPDATE recipes SET
                     bean_id = \(bind: recipe.beanId), method_slug = \(bind: recipe.methodSlug),
@@ -393,21 +435,30 @@ struct PostgresRecipeRepository: RecipeRepository {
                     bloom_time_s = \(bind: recipe.bloomTimeS), total_time_s = \(bind: recipe.totalTimeS),
                     pressure_bar = \(bind: recipe.pressureBar), filter_type = \(bind: recipe.filterType?.rawValue),
                     water_profile = \(bind: recipe.waterProfile), water_tds_ppm = \(bind: recipe.waterTdsPpm),
-                    tds_percent = \(bind: recipe.tdsPercent), rating = \(bind: recipe.rating),
+                    servings = \(bind: recipe.servings), ice_g = \(bind: recipe.iceG),
+                    drink_type = \(bind: recipe.drinkType?.rawValue), milk_g = \(bind: recipe.milkG),
+                    brewer_detail = \(bind: recipe.brewerDetail), cover_media_id = \(bind: recipe.coverMediaId),
                     notes = \(bind: recipe.notes), visibility = \(bind: recipe.visibility.rawValue)
                 WHERE id = \(bind: id) AND author_id = \(bind: authorID)
                 RETURNING id
                 """).first()
             guard row != nil else { return nil }
             try await Self.replaceChildren(recipeID: id, recipe, sql: sql)
+            try await PostgresMediaRepository.deleteReplaced(previousCover, by: recipe.coverMediaId, sql: sql)
             return try await Self.find(id: id, viewerID: authorID, sql: sql)
         }
     }
 
     func delete(id: UUID, authorID: UUID) async throws -> Bool {
-        try await database.sql.raw("""
-            DELETE FROM recipes WHERE id = \(bind: id) AND author_id = \(bind: authorID) RETURNING id
-            """).first() != nil
+        try await database.transaction { tx in
+            guard let row = try await tx.sql.raw("""
+                DELETE FROM recipes WHERE id = \(bind: id) AND author_id = \(bind: authorID) RETURNING cover_media_id
+                """).first()
+            else { return false }
+            let cover = try row.decode(column: "cover_media_id", as: UUID?.self)
+            try await PostgresMediaRepository.deleteReplaced(cover, by: nil, sql: tx.sql)
+            return true
+        }
     }
 
     func save(id: UUID, userID: UUID) async throws -> SaveStateDTO? {

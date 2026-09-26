@@ -39,7 +39,13 @@ struct PostgresBeanRepository: BeanRepository {
         var remainingG: Double?
         var isDecaf: Bool
         var notes: String?
-        var photoUrl: String?
+        var photoMediaId: UUID?
+        var purchaseDate: String?
+        var openedDate: String?
+        var price: Double?
+        var currency: String?
+        var lot: String?
+        var isFavorite: Bool
         var visibility: String
         var isArchived: Bool
         var createdAt: Date
@@ -68,7 +74,13 @@ struct PostgresBeanRepository: BeanRepository {
                 remainingG: remainingG,
                 isDecaf: isDecaf,
                 notes: notes,
-                photoURL: photoUrl,
+                photoURL: photoMediaId.map(PostgresMediaRepository.url(for:)),
+                purchaseDate: purchaseDate.flatMap(CalendarDate.init(isoString:)),
+                openedDate: openedDate.flatMap(CalendarDate.init(isoString:)),
+                price: price,
+                currency: currency,
+                lot: lot,
+                isFavorite: isFavorite,
                 visibility: Visibility(rawValue: visibility) ?? .private,
                 isArchived: isArchived,
                 createdAt: createdAt,
@@ -86,7 +98,10 @@ struct PostgresBeanRepository: BeanRepository {
                          FROM bean_flavor_notes f WHERE f.bean_id = b.id), '{}') AS flavor_note_slugs,
                b.roast_level::text AS roast_level, to_char(b.roast_date, 'YYYY-MM-DD') AS roast_date,
                b.harvest_year, b.sca_score::float8 AS sca_score, b.weight_g,
-               b.remaining_g::float8 AS remaining_g, b.is_decaf, b.notes, b.photo_url,
+               b.remaining_g::float8 AS remaining_g, b.is_decaf, b.notes, b.photo_media_id,
+               to_char(b.purchase_date, 'YYYY-MM-DD') AS purchase_date,
+               to_char(b.opened_date, 'YYYY-MM-DD') AS opened_date, b.price::float8 AS price,
+               b.currency::text AS currency, b.lot, b.is_favorite,
                b.visibility::text AS visibility, b.archived_at IS NOT NULL AS is_archived,
                b.created_at, b.updated_at
         FROM coffee_beans b
@@ -96,7 +111,7 @@ struct PostgresBeanRepository: BeanRepository {
         try await database.sql.raw("""
             \(unsafeRaw: Self.select)
             WHERE b.owner_id = \(bind: ownerID) AND (\(bind: includeArchived) OR b.archived_at IS NULL)
-            ORDER BY b.archived_at IS NOT NULL, b.created_at DESC, b.id DESC
+            ORDER BY b.archived_at IS NOT NULL, b.is_favorite DESC, b.created_at DESC, b.id DESC
             """).all().map { try $0.decodeSnakeCase(BeanRow.self).dto }
     }
 
@@ -114,18 +129,23 @@ struct PostgresBeanRepository: BeanRepository {
     func create(ownerID: UUID, _ bean: UpsertBeanRequest) async throws -> BeanDTO {
         try await database.transaction { tx in
             let sql = tx.sql
+            try await PostgresMediaRepository.checkUsable(bean.photoMediaId, ownerID: ownerID, current: nil, sql: sql)
             guard let row = try await sql.raw("""
                 INSERT INTO coffee_beans
                     (owner_id, name, roaster, country_code, region, farm, producer, altitude_min_m, altitude_max_m,
                      processing_method_slug, roast_level, roast_date, harvest_year, sca_score, weight_g, remaining_g,
-                     is_decaf, notes, visibility, archived_at)
+                     is_decaf, notes, photo_media_id, purchase_date, opened_date, price, currency, lot, is_favorite,
+                     visibility, archived_at)
                 VALUES
                     (\(bind: ownerID), \(bind: bean.name), \(bind: bean.roaster), \(bind: bean.countryCode),
                      \(bind: bean.region), \(bind: bean.farm), \(bind: bean.producer), \(bind: bean.altitudeMinM),
                      \(bind: bean.altitudeMaxM), \(bind: bean.processingMethodSlug), \(bind: bean.roastLevel?.rawValue),
                      \(bind: bean.roastDate?.isoString)::date, \(bind: bean.harvestYear), \(bind: bean.scaScore),
                      \(bind: bean.weightG), coalesce(\(bind: bean.remainingG)::numeric, \(bind: bean.weightG)::numeric),
-                     \(bind: bean.isDecaf), \(bind: bean.notes), \(bind: bean.visibility.rawValue),
+                     \(bind: bean.isDecaf), \(bind: bean.notes), \(bind: bean.photoMediaId),
+                     \(bind: bean.purchaseDate?.isoString)::date, \(bind: bean.openedDate?.isoString)::date,
+                     \(bind: bean.price), \(bind: bean.currency), \(bind: bean.lot), \(bind: bean.isFavorite),
+                     \(bind: bean.visibility.rawValue),
                      CASE WHEN \(bind: bean.isArchived) THEN now() END)
                 RETURNING id
                 """).first()
@@ -142,6 +162,12 @@ struct PostgresBeanRepository: BeanRepository {
     func update(id: UUID, ownerID: UUID, _ bean: UpsertBeanRequest) async throws -> BeanDTO? {
         try await database.transaction { tx in
             let sql = tx.sql
+            guard let current = try await sql.raw("""
+                SELECT photo_media_id FROM coffee_beans WHERE id = \(bind: id) AND owner_id = \(bind: ownerID) FOR UPDATE
+                """).first()
+            else { return nil }
+            let previousPhoto = try current.decode(column: "photo_media_id", as: UUID?.self)
+            try await PostgresMediaRepository.checkUsable(bean.photoMediaId, ownerID: ownerID, current: previousPhoto, sql: sql)
             let row = try await sql.raw("""
                 UPDATE coffee_beans SET
                     name = \(bind: bean.name), roaster = \(bind: bean.roaster), country_code = \(bind: bean.countryCode),
@@ -152,21 +178,32 @@ struct PostgresBeanRepository: BeanRepository {
                     roast_date = \(bind: bean.roastDate?.isoString)::date, harvest_year = \(bind: bean.harvestYear),
                     sca_score = \(bind: bean.scaScore), weight_g = \(bind: bean.weightG),
                     remaining_g = \(bind: bean.remainingG), is_decaf = \(bind: bean.isDecaf),
-                    notes = \(bind: bean.notes), visibility = \(bind: bean.visibility.rawValue),
+                    notes = \(bind: bean.notes), photo_media_id = \(bind: bean.photoMediaId),
+                    purchase_date = \(bind: bean.purchaseDate?.isoString)::date,
+                    opened_date = \(bind: bean.openedDate?.isoString)::date, price = \(bind: bean.price),
+                    currency = \(bind: bean.currency), lot = \(bind: bean.lot), is_favorite = \(bind: bean.isFavorite),
+                    visibility = \(bind: bean.visibility.rawValue),
                     archived_at = CASE WHEN \(bind: bean.isArchived) THEN coalesce(archived_at, now()) END
                 WHERE id = \(bind: id) AND owner_id = \(bind: ownerID)
                 RETURNING id
                 """).first()
             guard row != nil else { return nil }
             try await Self.replaceRelations(beanID: id, bean, sql: sql)
+            try await PostgresMediaRepository.deleteReplaced(previousPhoto, by: bean.photoMediaId, sql: sql)
             return try await Self.find(id: id, viewerID: ownerID, sql: sql)
         }
     }
 
     func delete(id: UUID, ownerID: UUID) async throws -> Bool {
-        try await database.sql.raw("""
-            DELETE FROM coffee_beans WHERE id = \(bind: id) AND owner_id = \(bind: ownerID) RETURNING id
-            """).first() != nil
+        try await database.transaction { tx in
+            guard let row = try await tx.sql.raw("""
+                DELETE FROM coffee_beans WHERE id = \(bind: id) AND owner_id = \(bind: ownerID) RETURNING photo_media_id
+                """).first()
+            else { return false }
+            let photo = try row.decode(column: "photo_media_id", as: UUID?.self)
+            try await PostgresMediaRepository.deleteReplaced(photo, by: nil, sql: tx.sql)
+            return true
+        }
     }
 
     private static func replaceRelations(beanID: UUID, _ bean: UpsertBeanRequest, sql: any SQLDatabase) async throws {

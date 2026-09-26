@@ -56,7 +56,7 @@ struct BrewLogService: Sendable {
     private func mappingReferenceErrors<T>(_ operation: () async throws -> T) async throws -> T {
         do {
             return try await operation()
-        } catch is UnavailableBrewPhotoError {
+        } catch is UnavailableMediaError {
             throw AppError.unknownReference(field: "photoMediaId")
         } catch let error as PSQLError where error.isForeignKeyViolation {
             let field = switch error.constraintName {

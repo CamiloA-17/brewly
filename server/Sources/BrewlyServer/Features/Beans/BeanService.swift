@@ -44,7 +44,9 @@ struct BeanService: Sendable {
     func validated(_ request: UpsertBeanRequest, now: Date = Date()) throws -> UpsertBeanRequest {
         // "Today" is taken one day ahead in UTC so users in any time zone can log today's roast.
         let latestAllowedDay = CalendarDate(date: now.addingTimeInterval(86_400), timeZone: TimeZone(identifier: "UTC")!)
-        let violations = BeanRules.validate(request.parameters, today: latestAllowedDay)
+        var parameters = request.parameters
+        parameters.currency = request.currency.nilIfBlank?.uppercased()
+        let violations = BeanRules.validate(parameters, today: latestAllowedDay)
         guard violations.isEmpty else { throw AppError.validation(violations) }
 
         var bean = request
@@ -56,6 +58,8 @@ struct BeanService: Sendable {
         bean.producer = request.producer.nilIfBlank
         bean.processingMethodSlug = request.processingMethodSlug.nilIfBlank
         bean.notes = request.notes.nilIfBlank
+        bean.lot = request.lot.nilIfBlank
+        bean.currency = request.currency.nilIfBlank?.uppercased()
         bean.varietalSlugs = request.varietalSlugs.uniqued
         bean.flavorNoteSlugs = request.flavorNoteSlugs.uniqued
         return bean
@@ -65,6 +69,8 @@ struct BeanService: Sendable {
     private func mappingReferenceErrors<T>(_ operation: () async throws -> T) async throws -> T {
         do {
             return try await operation()
+        } catch is UnavailableMediaError {
+            throw AppError.unknownReference(field: "photoMediaId")
         } catch let error as PSQLError where error.isForeignKeyViolation {
             let field = switch error.constraintName {
             case "coffee_beans_country_code_fkey": "countryCode"

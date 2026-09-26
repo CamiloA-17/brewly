@@ -118,6 +118,18 @@ the app asks for the missing details with `PUT /v1/me/onboarding` before anythin
 Refresh tokens are single use: `POST /v1/auth/refresh` returns a new pair and invalidates the old
 refresh token. Reusing it revokes every session of the user.
 
+### Recipes and beans
+
+- A recipe is a template: `averageRating` and `brewCount` come from the brews of the recipe the
+  viewer can see; results are logged per cup in the journal (`/v1/me/brews`). Recipes also have
+  `servings`, `iceG` (iced brews; not part of the ratio), `drinkType` and `milkG` (espresso
+  drinks), `brewerDetail` and an optional cover (`coverMediaId` in requests, `coverURL` in
+  responses).
+- Beans have `photoMediaId`/`photoURL`, `purchaseDate`, `openedDate`, `price` with `currency`
+  (ISO 4217), `lot` and `isFavorite`; favorites come first in `GET /v1/me/beans`.
+- Every uploaded image has a single use. Referencing an image that is not an unused upload of
+  the same member returns a `not_found` field error.
+
 ### Create a recipe
 
 ```http
@@ -140,8 +152,8 @@ Content-Type: application/json
   "bloomTimeS": 45,
   "totalTimeS": 180,
   "filterType": "paper",
-  "tdsPercent": 1.38,
-  "rating": 5,
+  "servings": 1,
+  "brewerDetail": "V60 02 ceramic",
   "flavorNoteSlugs": ["jasmine", "peach"],
   "steps": [
     { "kind": "bloom", "startS": 0, "waterTargetG": 45, "instruction": "Bloom and swirl" },
@@ -151,8 +163,8 @@ Content-Type: application/json
 }
 ```
 
-The response is the full `RecipeDTO`, including `"ratio": 16.67` and
-`"extractionYieldPercent": 19.78`, both computed by the database.
+The response is the full `RecipeDTO`, including `"ratio": 16.67` computed by the database, and
+`"averageRating"` and `"brewCount"` from the journal.
 
 For espresso (`ratioBasis: "beverage"`), send `yieldG` (beverage weight) and omit `waterG`:
 `{ "methodSlug": "espresso", "doseG": 18, "yieldG": 36, "grindSize": "fine", "pressureBar": 9, … }`

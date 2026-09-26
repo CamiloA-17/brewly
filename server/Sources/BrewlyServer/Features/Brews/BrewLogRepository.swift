@@ -21,9 +21,6 @@ protocol BrewLogRepository: Sendable {
     func delete(id: UUID, userID: UUID) async throws -> Bool
 }
 
-/// The photo is not one of the member's unused uploads.
-struct UnavailableBrewPhotoError: Error {}
-
 struct PostgresBrewLogRepository: BrewLogRepository {
     let database: any Database
 
@@ -195,7 +192,7 @@ struct PostgresBrewLogRepository: BrewLogRepository {
     func create(userID: UUID, _ brew: UpsertBrewLogRequest) async throws -> BrewLogDTO {
         try await database.transaction { tx in
             let sql = tx.sql
-            try await Self.checkPhoto(brew.photoMediaId, userID: userID, brewID: nil, sql: sql)
+            try await PostgresMediaRepository.checkUsable(brew.photoMediaId, ownerID: userID, current: nil, sql: sql)
             guard let row = try await sql.raw("""
                 INSERT INTO brew_logs
                     (user_id, recipe_id, bean_id, method_slug, equipment_id, brewed_at, dose_g, water_g, yield_g,
@@ -226,7 +223,9 @@ struct PostgresBrewLogRepository: BrewLogRepository {
         try await database.transaction { tx in
             let sql = tx.sql
             guard let previous = try await Self.lockedBrew(id: id, userID: userID, sql: sql) else { return nil }
-            try await Self.checkPhoto(brew.photoMediaId, userID: userID, brewID: id, sql: sql)
+            try await PostgresMediaRepository.checkUsable(
+                brew.photoMediaId, ownerID: userID, current: previous.photoMediaId, sql: sql
+            )
             try await Self.restore(beanID: previous.beanId, doseG: previous.doseG, userID: userID, sql: sql)
             try await sql.raw("""
                 UPDATE brew_logs SET
@@ -244,10 +243,7 @@ struct PostgresBrewLogRepository: BrewLogRepository {
                 """).run()
             try await Self.replaceFlavorNotes(brewID: id, brew.flavorNoteSlugs, sql: sql)
             try await Self.consume(beanID: brew.beanId, doseG: brew.doseG, userID: userID, sql: sql)
-            // A replaced photo is no longer used anywhere.
-            if let oldPhoto = previous.photoMediaId, oldPhoto != brew.photoMediaId {
-                try await sql.raw("DELETE FROM media WHERE id = \(bind: oldPhoto)").run()
-            }
+            try await PostgresMediaRepository.deleteReplaced(previous.photoMediaId, by: brew.photoMediaId, sql: sql)
             return try await Self.find(id: id, viewerID: userID, sql: sql)
         }
     }
@@ -259,9 +255,7 @@ struct PostgresBrewLogRepository: BrewLogRepository {
             try await sql.raw("DELETE FROM brew_logs WHERE id = \(bind: id)").run()
             // Deleting a brew gives its coffee back to the bag.
             try await Self.restore(beanID: previous.beanId, doseG: previous.doseG, userID: userID, sql: sql)
-            if let photo = previous.photoMediaId {
-                try await sql.raw("DELETE FROM media WHERE id = \(bind: photo)").run()
-            }
+            try await PostgresMediaRepository.deleteReplaced(previous.photoMediaId, by: nil, sql: sql)
             return true
         }
     }
@@ -280,20 +274,6 @@ struct PostgresBrewLogRepository: BrewLogRepository {
             WHERE id = \(bind: id) AND user_id = \(bind: userID)
             FOR UPDATE
             """).first().map { try $0.decodeSnakeCase(StoredBrew.self) }
-    }
-
-    /// A photo must be the member's own upload, not used by a post, an avatar or another brew.
-    private static func checkPhoto(_ mediaID: UUID?, userID: UUID, brewID: UUID?, sql: any SQLDatabase) async throws {
-        guard let mediaID else { return }
-        let usable = try await sql.raw("""
-            SELECT 1 FROM media m
-            WHERE m.id = \(bind: mediaID) AND m.owner_id = \(bind: userID)
-              AND NOT EXISTS (SELECT 1 FROM post_media pm WHERE pm.media_id = m.id)
-              AND NOT EXISTS (SELECT 1 FROM users u WHERE u.avatar_media_id = m.id)
-              AND NOT EXISTS (SELECT 1 FROM brew_logs bl
-                              WHERE bl.photo_media_id = m.id AND bl.id IS DISTINCT FROM \(bind: brewID))
-            """).first()
-        guard usable != nil else { throw UnavailableBrewPhotoError() }
     }
 
     private static func replaceFlavorNotes(brewID: UUID, _ slugs: [String], sql: any SQLDatabase) async throws {

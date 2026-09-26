@@ -217,6 +217,14 @@ final class IntegrationTests: XCTestCase {
         var updatedBean: BeanDTO = try await send(.GET, "v1/beans/\(bean.id)", token: ana.accessToken)
         XCTAssertEqual(updatedBean.remainingG, 235)
 
+        // The recipe's rating comes from the brews each viewer can see.
+        let rated: RecipeDTO = try await send(.GET, "v1/recipes/\(recipe.id)", token: ana.accessToken)
+        XCTAssertEqual(rated.brewCount, 1)
+        XCTAssertEqual(rated.averageRating, 4)
+        let seenByLeo: RecipeDTO = try await send(.GET, "v1/recipes/\(recipe.id)", token: leo.accessToken)
+        XCTAssertEqual(seenByLeo.brewCount, 0)
+        XCTAssertNil(seenByLeo.averageRating)
+
         // Editing the dose adjusts the bag; deleting the brew gives the coffee back.
         request.doseG = 18
         request.waterG = 300
@@ -244,6 +252,43 @@ final class IntegrationTests: XCTestCase {
         XCTAssertEqual(updatedBean.remainingG, 250)
     }
 
+    // MARK: - Bean details and photos
+
+    func testBeanPurchaseDetailsAndExclusivePhotos() async throws {
+        let ana = try await register("ana.barista")
+        let leo = try await register("leo.roaster")
+        let photo = try await upload(tinyJPEG(width: 400, height: 300), token: ana.accessToken)
+
+        var bag = Self.geisha
+        bag.photoMediaId = photo.id
+        bag.purchaseDate = CalendarDate(year: 2026, month: 9, day: 1)
+        bag.openedDate = CalendarDate(year: 2026, month: 9, day: 3)
+        bag.price = 68_000
+        bag.currency = "cop"
+        bag.isFavorite = true
+        let bean: BeanDTO = try await send(.POST, "v1/beans", token: ana.accessToken, body: bag)
+        XCTAssertEqual(bean.currency, "COP")
+        XCTAssertTrue(bean.isFavorite)
+        XCTAssertEqual(bean.photoURL, photo.url)
+
+        // A public bean's photo is visible to others; the same image can't illustrate anything else.
+        try await expectStatus(.GET, "v1/media/\(photo.id)", token: leo.accessToken, status: .ok)
+        try await expectError(.POST, "v1/posts", token: ana.accessToken,
+            body: CreatePostRequest(body: "Reusing", mediaIds: [photo.id]),
+            status: .unprocessableEntity, code: APIErrorCode.validationFailed)
+
+        // Removing the photo deletes the image.
+        bag.photoMediaId = nil
+        let updated: BeanDTO = try await send(.PUT, "v1/beans/\(bean.id)", token: ana.accessToken, body: bag)
+        XCTAssertNil(updated.photoURL)
+        try await expectError(.GET, "v1/media/\(photo.id)", token: ana.accessToken, status: .notFound)
+
+        bag.openedDate = CalendarDate(year: 2026, month: 8, day: 1)
+        let error = try await expectError(.PUT, "v1/beans/\(bean.id)", token: ana.accessToken, body: bag,
+            status: .unprocessableEntity, code: APIErrorCode.validationFailed)
+        XCTAssertEqual(error.fieldErrors?.map(\.field), ["openedDate"])
+    }
+
     // MARK: - Beans and recipes
 
     func testBeanAndRecipeLifecycle() async throws {
@@ -254,7 +299,9 @@ final class IntegrationTests: XCTestCase {
 
         let recipe: RecipeDTO = try await send(.POST, "v1/recipes", token: ana.accessToken, body: Self.v60(beanID: bean.id))
         XCTAssertEqual(recipe.ratio, 16.67)
-        XCTAssertEqual(recipe.extractionYieldPercent, 19.78)
+        XCTAssertEqual(recipe.servings, 1)
+        XCTAssertEqual(recipe.brewerDetail, "V60 02 ceramic")
+        XCTAssertEqual(recipe.brewCount, 0)
         XCTAssertEqual(recipe.steps.map(\.position), [1, 2])
         XCTAssertEqual(recipe.bean.id, bean.id)
 
@@ -296,7 +343,8 @@ final class IntegrationTests: XCTestCase {
 
         espresso.waterG = nil
         espresso.yieldG = 36
-        espresso.tdsPercent = 9
+        espresso.drinkType = .flatWhite
+        espresso.milkG = 120
         let shot: RecipeDTO = try await send(.POST, "v1/recipes", token: ana.accessToken, body: espresso)
         XCTAssertEqual(shot.ratio, 2.4)
     }
@@ -742,8 +790,8 @@ final class IntegrationTests: XCTestCase {
             bloomTimeS: 45,
             totalTimeS: 180,
             filterType: .paper,
-            tdsPercent: 1.38,
-            rating: 5,
+            servings: 1,
+            brewerDetail: "V60 02 ceramic",
             flavorNoteSlugs: ["jasmine", "peach"],
             steps: [
                 RecipeStepInput(kind: .bloom, startS: 0, waterTargetG: 45, instruction: "Bloom"),
