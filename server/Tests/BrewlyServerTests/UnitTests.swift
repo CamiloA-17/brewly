@@ -81,6 +81,36 @@ final class BeanServiceTests: XCTestCase {
     }
 }
 
+final class EquipmentServiceTests: XCTestCase {
+    func testKeepsOneSettingPerMethodAndBlankTextBecomesNil() throws {
+        let service = EquipmentService(equipment: UnreachableEquipmentRepository())
+        let item = try service.validated(UpsertEquipmentRequest(
+            kind: .grinder, grinderSlug: "comandante_c40_mk4", brand: " ", nickname: " My C40 ",
+            grindSettings: [
+                GrindSettingInput(methodSlug: "v60", grindSetting: "22 clicks"),
+                GrindSettingInput(methodSlug: "aeropress", grindSetting: " 18 clicks "),
+                GrindSettingInput(methodSlug: "v60", grindSetting: "24 clicks"),
+            ]
+        ))
+        XCTAssertNil(item.brand)
+        XCTAssertEqual(item.nickname, "My C40")
+        XCTAssertEqual(item.grindSettings, [
+            GrindSettingInput(methodSlug: "aeropress", grindSetting: "18 clicks"),
+            GrindSettingInput(methodSlug: "v60", grindSetting: "24 clicks"),
+        ])
+    }
+
+    func testOnlyGrindersHaveSettings() {
+        let service = EquipmentService(equipment: UnreachableEquipmentRepository())
+        let request = UpsertEquipmentRequest(
+            kind: .kettle, brand: "Fellow", grindSettings: [GrindSettingInput(methodSlug: "v60", grindSetting: "24")]
+        )
+        XCTAssertThrowsError(try service.validated(request)) { error in
+            XCTAssertEqual((error as? AppError)?.fieldErrors?.map(\.field), ["grindSettings"])
+        }
+    }
+}
+
 // MARK: - Helpers
 
 final class PeopleServiceTests: XCTestCase {
@@ -214,6 +244,18 @@ struct UnreachableBeanRepository: BeanRepository {
     func find(id: UUID, viewerID: UUID) async throws -> BeanDTO? { fatalError("Not used in unit tests") }
     func create(ownerID: UUID, _ bean: UpsertBeanRequest) async throws -> BeanDTO { fatalError("Not used in unit tests") }
     func update(id: UUID, ownerID: UUID, _ bean: UpsertBeanRequest) async throws -> BeanDTO? {
+        fatalError("Not used in unit tests")
+    }
+    func delete(id: UUID, ownerID: UUID) async throws -> Bool { fatalError("Not used in unit tests") }
+}
+
+struct UnreachableEquipmentRepository: EquipmentRepository {
+    func list(ownerID: UUID) async throws -> [EquipmentDTO] { fatalError("Not used in unit tests") }
+    func canViewProfile(ownerID: UUID, viewerID: UUID) async throws -> Bool { fatalError("Not used in unit tests") }
+    func create(ownerID: UUID, _ item: UpsertEquipmentRequest) async throws -> EquipmentDTO {
+        fatalError("Not used in unit tests")
+    }
+    func update(id: UUID, ownerID: UUID, _ item: UpsertEquipmentRequest) async throws -> EquipmentDTO? {
         fatalError("Not used in unit tests")
     }
     func delete(id: UUID, ownerID: UUID) async throws -> Bool { fatalError("Not used in unit tests") }

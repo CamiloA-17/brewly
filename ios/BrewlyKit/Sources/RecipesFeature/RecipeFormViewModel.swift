@@ -10,6 +10,8 @@ final class RecipeFormViewModel {
     private(set) var catalog: Catalog = .empty
     private(set) var beans: [Bean] = []
     private(set) var myMethodSlugs: Set<String> = []
+    /// The user's gear, to pre-fill the default grinder and its usual setting.
+    private(set) var equipment: [Equipment] = []
     private(set) var violations: [RuleViolation] = []
     private(set) var errorMessage: String?
     private(set) var isSaving = false
@@ -62,6 +64,9 @@ final class RecipeFormViewModel {
         } catch {
             errorMessage = error.brewlyMessage
         }
+        // Optional: without it the form simply isn't pre-filled.
+        equipment = (try? await dependencies.equipment.myEquipment()) ?? []
+        if !isEditing { draft.applyUsualGrind(from: equipment) }
     }
 
     /// Selects a brew method and prefills its suggested parameters.
@@ -71,6 +76,7 @@ final class RecipeFormViewModel {
             return
         }
         draft.applyDefaults(of: method)
+        if !isEditing { draft.applyUsualGrind(from: equipment) }
     }
 
     func message(for field: String) -> String? {

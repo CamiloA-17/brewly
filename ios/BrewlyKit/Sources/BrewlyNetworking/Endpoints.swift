@@ -71,6 +71,26 @@ public enum Endpoints {
         Endpoint(.delete, "v1/beans/\(id.uuidString)")
     }
 
+    // MARK: Equipment
+
+    public static let myEquipment = Endpoint<[EquipmentDTO]>(.get, "v1/me/equipment")
+
+    public static func memberEquipment(id: UUID) -> Endpoint<[EquipmentDTO]> {
+        Endpoint(.get, "v1/users/\(id.uuidString)/equipment")
+    }
+
+    public static func createEquipment(_ body: UpsertEquipmentRequest) -> Endpoint<EquipmentDTO> {
+        Endpoint(.post, "v1/me/equipment", body: body)
+    }
+
+    public static func updateEquipment(id: UUID, _ body: UpsertEquipmentRequest) -> Endpoint<EquipmentDTO> {
+        Endpoint(.put, "v1/me/equipment/\(id.uuidString)", body: body)
+    }
+
+    public static func deleteEquipment(id: UUID) -> Endpoint<EmptyResponse> {
+        Endpoint(.delete, "v1/me/equipment/\(id.uuidString)")
+    }
+
     // MARK: Recipes
 
     public static func myRecipes(cursor: String?) -> Endpoint<Page<RecipeSummaryDTO>> {

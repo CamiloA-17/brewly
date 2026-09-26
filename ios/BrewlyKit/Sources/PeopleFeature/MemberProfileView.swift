@@ -31,6 +31,7 @@ public struct MemberProfileView: View {
                     Picker(selection: $model.tab) {
                         Text("Recipes", bundle: .module).tag(MemberProfileViewModel.Tab.recipes)
                         Text("Posts", bundle: .module).tag(MemberProfileViewModel.Tab.posts)
+                        Text("Equipment", bundle: .module).tag(MemberProfileViewModel.Tab.equipment)
                     } label: {
                         Text("Show", bundle: .module)
                     }
@@ -41,6 +42,7 @@ public struct MemberProfileView: View {
                 switch model.tab {
                 case .recipes: recipesSection(profile)
                 case .posts: postsSection
+                case .equipment: equipmentSection
                 }
             }
             .refreshable { await model.load() }
@@ -157,6 +159,24 @@ public struct MemberProfileView: View {
                     ProgressView()
                         .frame(maxWidth: .infinity)
                         .task { await model.posts.loadMore() }
+                }
+            }
+        }
+    }
+
+    @ViewBuilder
+    private var equipmentSection: some View {
+        Section {
+            switch model.equipment {
+            case .idle, .loading:
+                ProgressView().frame(maxWidth: .infinity)
+            case .failed:
+                Text("Couldn't load the equipment.", bundle: .module).foregroundStyle(.secondary)
+            case let .loaded(items) where items.isEmpty:
+                Text("No equipment to show yet.", bundle: .module).foregroundStyle(.secondary)
+            case let .loaded(items):
+                ForEach(items) { item in
+                    EquipmentRow(equipment: item, catalog: model.catalog)
                 }
             }
         }

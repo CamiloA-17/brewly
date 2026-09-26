@@ -118,6 +118,30 @@ public extension FlavorCategory {
 // Catalog names come from the API in English. Known items are translated through
 // dedicated string tables keyed by their English name; unknown ones fall back to it.
 
+public extension EquipmentKind {
+    var localizedName: String {
+        switch self {
+        case .grinder: String(localized: "Grinder", bundle: .module)
+        case .brewer: String(localized: "Brewer", bundle: .module)
+        case .kettle: String(localized: "Kettle", bundle: .module)
+        case .scale: String(localized: "Scale", bundle: .module)
+        case .espressoMachine: String(localized: "Espresso machine", bundle: .module)
+        case .other: String(localized: "Other equipment", bundle: .module)
+        }
+    }
+
+    var systemImage: String {
+        switch self {
+        case .grinder: "gearshape.2"
+        case .brewer: "cup.and.saucer"
+        case .kettle: "drop"
+        case .scale: "scalemass"
+        case .espressoMachine: "cup.and.heat.waves"
+        case .other: "wrench.and.screwdriver"
+        }
+    }
+}
+
 public extension BrewMethod {
     var localizedName: String {
         Bundle.module.localizedString(forKey: name, value: name, table: "CatalogMethods")

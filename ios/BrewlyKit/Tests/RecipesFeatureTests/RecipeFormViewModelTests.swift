@@ -32,6 +32,15 @@ struct StubUserMethodsRepository: UserMethodsRepository {
     func setUsing(_ isUsing: Bool, methodSlug: String) async throws {}
 }
 
+struct StubEquipmentRepository: EquipmentRepository {
+    var items: [Equipment] = []
+
+    func myEquipment() async throws -> [Equipment] { items }
+    func equipment(ofMember memberID: UUID) async throws -> [Equipment] { items }
+    func save(_ draft: EquipmentDraft, id: UUID?) async throws -> Equipment { throw DomainError.notFound }
+    func delete(id: UUID) async throws {}
+}
+
 /// Saves succeed unless `failing` is set; the count starts at `initialCount`.
 actor StubSavesRepository: RecipeSavesRepository {
     var failing = false
@@ -91,13 +100,17 @@ actor RecordingRecipeRepository: RecipeRepository {
 @MainActor
 @Suite("RecipeFormViewModel")
 struct RecipeFormViewModelTests {
-    private func makeModel(recipes: RecordingRecipeRepository) -> RecipeFormViewModel {
+    private func makeModel(
+        recipes: RecordingRecipeRepository,
+        equipment: [Equipment] = []
+    ) -> RecipeFormViewModel {
         let dependencies = RecipesDependencies(
             recipes: recipes,
             saves: StubSavesRepository(),
             beans: StubBeanRepository(),
             catalog: StubCatalogRepository(),
             userMethods: StubUserMethodsRepository(),
+            equipment: StubEquipmentRepository(items: equipment),
             saveRecipe: SaveRecipeUseCase(recipes: recipes),
             currentUserID: UUID()
         )
@@ -117,7 +130,8 @@ struct RecipeFormViewModelTests {
         let dependencies = RecipesDependencies(
             recipes: recipes, saves: StubSavesRepository(), beans: StubBeanRepository(),
             catalog: StubCatalogRepository(), userMethods: StubUserMethodsRepository(),
-            saveRecipe: SaveRecipeUseCase(recipes: recipes), currentUserID: UUID()
+            equipment: StubEquipmentRepository(), saveRecipe: SaveRecipeUseCase(recipes: recipes),
+            currentUserID: UUID()
         )
         let model = RecipeFormViewModel(recipe: nil, remixOf: original, dependencies: dependencies)
         #expect(model.isRemix)
@@ -130,6 +144,19 @@ struct RecipeFormViewModelTests {
         let input = await recipes.created.first
         #expect(input?.draft.forkedFromID == original.id)
         #expect(input?.beanID == sampleBean.id)
+    }
+
+    @Test("A new recipe starts with the default grinder and its setting for the method")
+    func prefillsUsualGrind() async {
+        let grinder = Equipment(
+            id: UUID(), kind: .grinder, grinderSlug: "comandante_c40_mk4", isDefault: true,
+            grindSettings: ["v60": "24 clicks"]
+        )
+        let model = makeModel(recipes: RecordingRecipeRepository(), equipment: [grinder])
+        await model.load()
+        #expect(model.draft.grinderSlug == "comandante_c40_mk4")
+        model.selectMethod("v60")
+        #expect(model.draft.grindSetting == "24 clicks")
     }
 
     @Test("Loading selects the first bean and lists the user's methods first")
@@ -200,7 +227,8 @@ struct RecipeDetailViewModelTests {
         let dependencies = RecipesDependencies(
             recipes: recipes, saves: saves, beans: StubBeanRepository(),
             catalog: StubCatalogRepository(), userMethods: StubUserMethodsRepository(),
-            saveRecipe: SaveRecipeUseCase(recipes: recipes), currentUserID: UUID()
+            equipment: StubEquipmentRepository(), saveRecipe: SaveRecipeUseCase(recipes: recipes),
+            currentUserID: UUID()
         )
         let model = RecipeDetailViewModel(recipeID: recipe.id, dependencies: dependencies)
         await model.load()

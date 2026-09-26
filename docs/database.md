@@ -14,6 +14,10 @@ erDiagram
     users ||--o{ recipes : writes
     users ||--o{ user_brew_methods : uses
     brew_methods ||--o{ user_brew_methods : "used by"
+    users ||--o{ user_equipment : owns
+    grinders |o--o{ user_equipment : "model of"
+    user_equipment ||--o{ equipment_grind_settings : "usual setting"
+    brew_methods ||--o{ equipment_grind_settings : "for method"
 
     countries ||--o{ coffee_beans : "origin of"
     processing_methods ||--o{ coffee_beans : "processed with"
@@ -115,6 +119,7 @@ erDiagram
 | `media` | `media` (and changes to `post_media`, `posts`, `users`) | Uploaded JPEG images stored as `bytea`; post photos and avatars reference them. |
 | `notification_delivery` | — | Deduplication and pagination indexes for `notifications`. |
 | `profile_details` | — (changes to `users`, `auth_identities`) | Private details (first and last name, birth date), country and city, role, onboarding and activity timestamps; Sign in with Apple fields. |
+| `user_equipment` | `user_equipment`, `equipment_grind_settings` | Members' gear (grinders, brewers, kettles, scales, espresso machines) and each grinder's usual setting per brew method. |
 
 ## Integrity rules
 
@@ -162,6 +167,11 @@ erDiagram
 - **Sign in with Apple.** `auth_identities.provider_refresh_token` (encrypted by the API) and
   `provider_email` are only allowed on `apple` identities; the token is needed to revoke the
   authorization when the account is deleted.
+- **Equipment.** A `grinder` item can name a catalog grinder (`grinder_slug`); anything else
+  needs a brand, model or nickname (`user_equipment_named`). `user_equipment_one_default_idx`
+  allows one default item per kind, and the API clears the previous default in the same
+  transaction. `equipment_grind_settings` keeps a grinder's usual setting per brew method (the
+  API only accepts them on grinders); the default grinder and that setting pre-fill new recipes.
 - **Remixes.** `recipes.forked_from_id` points to the original recipe and becomes `NULL` when the
   original is deleted, so a remix survives its original.
 
