@@ -50,8 +50,10 @@ public struct SaveRecipeUseCase: Sendable {
             pressureBar: draft.pressureBar,
             waterProfile: draft.waterProfile,
             waterTdsPpm: draft.waterTdsPpm,
-            tdsPercent: draft.tdsPercent,
-            rating: draft.rating,
+            servings: draft.servings,
+            iceG: draft.iceG,
+            milkG: draft.milkG,
+            brewerDetail: draft.brewerDetail,
             notes: draft.notes,
             steps: draft.steps.map {
                 RecipeParameters.Step(startS: $0.startS, waterTargetG: $0.waterTargetG, instruction: $0.instruction)

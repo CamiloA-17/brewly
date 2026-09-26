@@ -73,8 +73,8 @@ public struct RecipeSummaryRow: View {
             HStack(alignment: .firstTextBaseline) {
                 Text(recipe.title).font(.headline)
                 Spacer()
-                if let rating = recipe.rating {
-                    RatingView(rating: rating).font(.caption2)
+                if let rating = recipe.averageRating {
+                    AverageRatingView(rating: rating, count: recipe.brewCount).font(.caption2)
                 }
             }
             Text(subtitle)

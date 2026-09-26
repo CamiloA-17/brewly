@@ -86,6 +86,26 @@ public struct RatingView: View {
     }
 }
 
+/// The average rating of a recipe's brews, rounded to whole stars, with how many brews it has.
+public struct AverageRatingView: View {
+    private let rating: Double
+    private let count: Int
+
+    public init(rating: Double, count: Int) {
+        self.rating = rating
+        self.count = count
+    }
+
+    public var body: some View {
+        HStack(spacing: 4) {
+            RatingView(rating: Int(rating.rounded()))
+            Text(verbatim: "(\(count))").foregroundStyle(.secondary)
+        }
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel(Text("Average rating \(BrewFormat.number(rating, maxFractionDigits: 1)) from \(count) brews", bundle: .module))
+    }
+}
+
 /// Validation message shown under a form field.
 public struct FieldErrorText: View {
     private let message: String?

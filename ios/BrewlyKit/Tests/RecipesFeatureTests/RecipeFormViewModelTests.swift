@@ -125,7 +125,7 @@ struct RecipeFormViewModelTests {
             author: UserSummary(id: UUID(), username: "leo.roaster", displayName: "Leo"),
             bean: BeanSummary(id: UUID(), name: "Leo's bean"),
             methodSlug: "v60", title: "Floral V60", doseG: 15, waterG: 250, ratio: 16.7,
-            grindSize: .mediumFine, rating: 5
+            grindSize: .mediumFine, notes: "Leo's notes"
         )
         let dependencies = RecipesDependencies(
             recipes: recipes, saves: StubSavesRepository(), beans: StubBeanRepository(),
@@ -136,7 +136,7 @@ struct RecipeFormViewModelTests {
         let model = RecipeFormViewModel(recipe: nil, remixOf: original, dependencies: dependencies)
         #expect(model.isRemix)
         #expect(model.draft.beanID == nil)
-        #expect(model.draft.rating == nil)
+        #expect(model.draft.notes.isEmpty)
 
         await model.load()
         #expect(model.draft.beanID == sampleBean.id)

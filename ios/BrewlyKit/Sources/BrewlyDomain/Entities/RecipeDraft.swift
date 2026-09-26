@@ -39,8 +39,15 @@ public struct RecipeDraft: Hashable, Sendable {
     public var filterType: FilterType?
     public var waterProfile = ""
     public var waterTdsPpm: Int?
-    public var tdsPercent: Double?
-    public var rating: Int?
+    public var servings: Int?
+    public var iceG: Double?
+    public var drinkType: DrinkType?
+    public var milkG: Double?
+    public var brewerDetail = ""
+    /// The current cover photo; `nil` removes it when saving.
+    public var coverURL: URL?
+    /// A newly picked cover photo, uploaded when saving.
+    public var newCoverData: Data?
     public var notes = ""
     public var flavorNoteSlugs: Set<String> = []
     public var steps: [Step] = []
@@ -68,8 +75,12 @@ public struct RecipeDraft: Hashable, Sendable {
         filterType = recipe.filterType
         waterProfile = recipe.waterProfile ?? ""
         waterTdsPpm = recipe.waterTdsPpm
-        tdsPercent = recipe.tdsPercent
-        rating = recipe.rating
+        servings = recipe.servings
+        iceG = recipe.iceG
+        drinkType = recipe.drinkType
+        milkG = recipe.milkG
+        brewerDetail = recipe.brewerDetail ?? ""
+        coverURL = recipe.coverURL
         notes = recipe.notes ?? ""
         flavorNoteSlugs = Set(recipe.flavorNoteSlugs)
         steps = recipe.steps.map {
@@ -80,14 +91,13 @@ public struct RecipeDraft: Hashable, Sendable {
 
     /// A new recipe that starts from someone else's parameters.
     ///
-    /// The brewer picks one of their own beans, and results (TDS, rating, tasting notes) start
-    /// empty because they belong to each cup.
+    /// The brewer picks one of their own beans; notes, tasting notes and the cover photo start
+    /// empty because they belong to the original's author.
     public init(remixOf recipe: Recipe) {
         self.init(recipe: recipe)
         beanID = nil
         forkedFromID = recipe.id
-        tdsPercent = nil
-        rating = nil
+        coverURL = nil
         notes = ""
         flavorNoteSlugs = []
         visibility = .public
@@ -96,11 +106,6 @@ public struct RecipeDraft: Hashable, Sendable {
     /// Live brew ratio, computed like the database does.
     public var ratio: Double? {
         doseG.flatMap { BrewMath.ratio(doseG: $0, waterG: waterG, yieldG: yieldG) }
-    }
-
-    /// Live extraction yield percentage.
-    public var extractionYield: Double? {
-        doseG.flatMap { BrewMath.extractionYield(doseG: $0, beverageG: yieldG, tdsPercent: tdsPercent) }
     }
 
     /// Pre-fills the grinder and its usual setting for the selected method from the member's default

@@ -91,6 +91,16 @@
         }
       }
     },
+    "Add a cover photo": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Agregar foto de portada"
+          }
+        }
+      }
+    },
     "Add step": {
       "localizations": {
         "es": {
@@ -221,12 +231,52 @@
         }
       }
     },
+    "Brewer": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cafetera"
+          }
+        }
+      }
+    },
+    "Brewer (e.g. V60 02 ceramic)": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cafetera (p. ej. V60 02 de cerámica)"
+          }
+        }
+      }
+    },
+    "Brewers' rating": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Calificación de quienes la prepararon"
+          }
+        }
+      }
+    },
     "Cancel": {
       "localizations": {
         "es": {
           "stringUnit": {
             "state": "translated",
             "value": "Cancelar"
+          }
+        }
+      }
+    },
+    "Change cover photo": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cambiar foto de portada"
           }
         }
       }
@@ -331,6 +381,16 @@
         }
       }
     },
+    "Drink": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bebida"
+          }
+        }
+      }
+    },
     "Edit": {
       "localizations": {
         "es": {
@@ -377,26 +437,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "Extracción"
-          }
-        }
-      }
-    },
-    "Extraction yield": {
-      "localizations": {
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "% de extracción"
-          }
-        }
-      }
-    },
-    "Extraction yield is calculated from the beverage weight and TDS.": {
-      "localizations": {
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "El % de extracción se calcula con el peso de la bebida y el TDS."
           }
         }
       }
@@ -491,12 +531,62 @@
         }
       }
     },
+    "Ice": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hielo"
+          }
+        }
+      }
+    },
+    "Ice for iced brews is not part of the ratio.": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "El hielo de las preparaciones frías no cuenta en la proporción."
+          }
+        }
+      }
+    },
+    "Ice in the carafe (g)": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hielo en la jarra (g)"
+          }
+        }
+      }
+    },
     "Instruction": {
       "localizations": {
         "es": {
           "stringUnit": {
             "state": "translated",
             "value": "Instrucción"
+          }
+        }
+      }
+    },
+    "Milk": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Leche"
+          }
+        }
+      }
+    },
+    "Milk (g)": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Leche (g)"
           }
         }
       }
@@ -537,6 +627,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "No tienes recetas guardadas"
+          }
+        }
+      }
+    },
+    "Nobody has logged a brew of this recipe yet.": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nadie ha registrado una preparación de esta receta todavía."
           }
         }
       }
@@ -631,12 +731,12 @@
         }
       }
     },
-    "Rating": {
+    "Rating, TDS and extraction yield are recorded for each cup in your journal.": {
       "localizations": {
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Calificación"
+            "value": "La calificación, el TDS y el rendimiento de extracción se registran por taza en tu diario."
           }
         }
       }
@@ -691,12 +791,12 @@
         }
       }
     },
-    "Results": {
+    "Remove cover photo": {
       "localizations": {
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Resultados"
+            "value": "Quitar foto de portada"
           }
         }
       }
@@ -741,6 +841,26 @@
         }
       }
     },
+    "Serving": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Servicio"
+          }
+        }
+      }
+    },
+    "Servings": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Porciones"
+          }
+        }
+      }
+    },
     "Start (s)": {
       "localizations": {
         "es": {
@@ -781,22 +901,12 @@
         }
       }
     },
-    "TDS": {
+    "Tasting": {
       "localizations": {
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "TDS"
-          }
-        }
-      }
-    },
-    "TDS (%)": {
-      "localizations": {
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "TDS (%)"
+            "value": "Cata"
           }
         }
       }
@@ -807,6 +917,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Notas de cata"
+          }
+        }
+      }
+    },
+    "The rating is the average of the brews of this recipe that you can see.": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "La calificación es el promedio de las preparaciones de esta receta que puedes ver."
           }
         }
       }

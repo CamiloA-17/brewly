@@ -142,6 +142,24 @@ public extension EquipmentKind {
     }
 }
 
+public extension DrinkType {
+    var localizedName: String {
+        switch self {
+        case .espresso: String(localized: "Espresso", bundle: .module)
+        case .ristretto: String(localized: "Ristretto", bundle: .module)
+        case .lungo: String(localized: "Lungo", bundle: .module)
+        case .americano: String(localized: "Americano", bundle: .module)
+        case .cortado: String(localized: "Cortado", bundle: .module)
+        case .flatWhite: String(localized: "Flat white", bundle: .module)
+        case .cappuccino: String(localized: "Cappuccino", bundle: .module)
+        case .latte: String(localized: "Latte", bundle: .module)
+        case .macchiato: String(localized: "Macchiato", bundle: .module)
+        case .mocha: String(localized: "Mocha", bundle: .module)
+        case .other: String(localized: "Other drink", bundle: .module)
+        }
+    }
+}
+
 public extension Tasting.Attribute {
     var localizedName: String {
         switch self {
@@ -204,6 +222,8 @@ public extension RuleViolation {
             return String(localized: "Must have at most \(max) items.", bundle: .module)
         case let .tooYoung(minimumAge):
             return String(localized: "You must be at least \(minimumAge) years old.", bundle: .module)
+        case .before:
+            return String(localized: "Is earlier than the related date.", bundle: .module)
         }
     }
 }

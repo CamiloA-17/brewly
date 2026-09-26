@@ -88,6 +88,9 @@ struct BeanRow: View {
         VStack(alignment: .leading, spacing: Spacing.xs) {
             HStack {
                 Text(bean.name).font(.headline)
+                if bean.isFavorite {
+                    Image(systemName: "star.fill").foregroundStyle(Color.brewlyAccent)
+                }
                 if bean.isArchived {
                     Image(systemName: "archivebox").foregroundStyle(.secondary)
                 }

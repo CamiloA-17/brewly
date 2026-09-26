@@ -19,6 +19,15 @@ struct BeanDetailView: View {
 
     var body: some View {
         List {
+            if let photo = bean.photoURL {
+                Section {
+                    Color.clear
+                        .aspectRatio(4 / 3, contentMode: .fit)
+                        .overlay { RemoteImage(url: photo) }
+                        .clipped()
+                        .listRowInsets(EdgeInsets())
+                }
+            }
             Section {
                 row("Roaster", bean.roaster)
                 row("Country", catalog.country(bean.countryCode)?.localizedName)
@@ -58,6 +67,12 @@ struct BeanDetailView: View {
                 }
                 row("Weight", bean.weightG.map { BrewFormat.grams(Double($0)) })
                 row("Remaining", bean.remainingG.map(BrewFormat.grams))
+                row("Purchased", bean.purchaseDate?.date().formatted(date: .abbreviated, time: .omitted))
+                row("Opened", bean.openedDate?.date().formatted(date: .abbreviated, time: .omitted))
+                row("Price", bean.price.map { price in
+                    price.formatted(.currency(code: bean.currency ?? "USD"))
+                })
+                row("Lot", bean.lot)
             } header: {
                 Text("Roast", bundle: .module)
             }

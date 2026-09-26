@@ -106,6 +106,15 @@ public struct RecipeDetailView: View {
 
     private func content(_ recipe: Recipe) -> some View {
         List {
+            if let cover = recipe.coverURL {
+                Section {
+                    Color.clear
+                        .aspectRatio(4 / 3, contentMode: .fit)
+                        .overlay { RemoteImage(url: cover) }
+                        .clipped()
+                        .listRowInsets(EdgeInsets())
+                }
+            }
             Section {
                 VStack(alignment: .leading, spacing: Spacing.s) {
                     Text(recipe.title).font(.title2.bold())
@@ -179,6 +188,19 @@ public struct RecipeDetailView: View {
                 Text("Parameters", bundle: .module)
             }
 
+            if recipe.servings != nil || recipe.brewerDetail != nil || recipe.iceG != nil
+                || recipe.drinkType != nil || recipe.milkG != nil {
+                Section {
+                    value("Servings", recipe.servings.map { "\($0)" })
+                    value("Brewer", recipe.brewerDetail)
+                    value("Ice", recipe.iceG.map(BrewFormat.grams))
+                    value("Drink", recipe.drinkType?.localizedName)
+                    value("Milk", recipe.milkG.map(BrewFormat.grams))
+                } header: {
+                    Text("Serving", bundle: .module)
+                }
+            }
+
             if !recipe.steps.isEmpty {
                 Section {
                     ForEach(recipe.steps, id: \.position) { step in
@@ -190,14 +212,15 @@ public struct RecipeDetailView: View {
             }
 
             Section {
-                value("TDS", recipe.tdsPercent.map(BrewFormat.percent))
-                value("Extraction yield", recipe.extractionYieldPercent.map(BrewFormat.percent))
-                if let rating = recipe.rating {
+                if let rating = recipe.averageRating {
                     LabeledContent {
-                        RatingView(rating: rating)
+                        AverageRatingView(rating: rating, count: recipe.brewCount)
                     } label: {
-                        Text("Rating", bundle: .module)
+                        Text("Brewers' rating", bundle: .module)
                     }
+                } else {
+                    Text("Nobody has logged a brew of this recipe yet.", bundle: .module)
+                        .foregroundStyle(.secondary)
                 }
                 if !recipe.flavorNoteSlugs.isEmpty {
                     Text(recipe.flavorNoteSlugs.compactMap { model.catalog.flavorNote($0)?.localizedName }.joined(separator: " · "))
@@ -207,7 +230,9 @@ public struct RecipeDetailView: View {
                 }
                 FieldErrorText(model.errorMessage)
             } header: {
-                Text("Results", bundle: .module)
+                Text("Tasting", bundle: .module)
+            } footer: {
+                Text("The rating is the average of the brews of this recipe that you can see.", bundle: .module)
             }
         }
     }

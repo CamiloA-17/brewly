@@ -78,6 +78,12 @@ extension Bean {
             isDecaf: dto.isDecaf,
             notes: dto.notes,
             photoURL: dto.photoURL.flatMap(URL.init(string:)),
+            purchaseDate: dto.purchaseDate,
+            openedDate: dto.openedDate,
+            price: dto.price,
+            currency: dto.currency,
+            lot: dto.lot,
+            isFavorite: dto.isFavorite,
             visibility: dto.visibility,
             isArchived: dto.isArchived,
             createdAt: dto.createdAt,
@@ -115,9 +121,14 @@ extension Recipe {
             filterType: dto.filterType,
             waterProfile: dto.waterProfile,
             waterTdsPpm: dto.waterTdsPpm,
-            tdsPercent: dto.tdsPercent,
-            extractionYieldPercent: dto.extractionYieldPercent,
-            rating: dto.rating,
+            servings: dto.servings,
+            iceG: dto.iceG,
+            drinkType: dto.drinkType,
+            milkG: dto.milkG,
+            brewerDetail: dto.brewerDetail,
+            coverURL: dto.coverURL.flatMap(URL.init(string:)),
+            averageRating: dto.averageRating,
+            brewCount: dto.brewCount,
             notes: dto.notes,
             flavorNoteSlugs: dto.flavorNoteSlugs,
             steps: dto.steps.map {
@@ -259,7 +270,9 @@ extension RecipeSummary {
             grindSize: dto.grindSize,
             waterTempC: dto.waterTempC,
             totalTimeS: dto.totalTimeS,
-            rating: dto.rating,
+            averageRating: dto.averageRating,
+            brewCount: dto.brewCount,
+            coverURL: dto.coverURL.flatMap(URL.init(string:)),
             visibility: dto.visibility,
             createdAt: dto.createdAt
         )
@@ -366,7 +379,7 @@ extension UpsertEquipmentRequest {
 }
 
 extension UpsertBeanRequest {
-    init(_ draft: BeanDraft) {
+    init(_ draft: BeanDraft, photoMediaID: UUID?) {
         self.init(
             name: draft.name.trimmingWhitespace,
             roaster: draft.roaster.nilIfBlank,
@@ -387,6 +400,13 @@ extension UpsertBeanRequest {
             remainingG: draft.remainingG,
             isDecaf: draft.isDecaf,
             notes: draft.notes.nilIfBlank,
+            photoMediaId: photoMediaID,
+            purchaseDate: draft.purchaseDate,
+            openedDate: draft.openedDate,
+            price: draft.price,
+            currency: draft.price == nil ? nil : draft.currency,
+            lot: draft.lot.nilIfBlank,
+            isFavorite: draft.isFavorite,
             visibility: draft.visibility,
             isArchived: draft.isArchived
         )
@@ -394,7 +414,7 @@ extension UpsertBeanRequest {
 }
 
 extension UpsertRecipeRequest {
-    init(_ input: RecipeInput) {
+    init(_ input: RecipeInput, coverMediaID: UUID?) {
         let draft = input.draft
         self.init(
             beanId: input.beanID,
@@ -417,8 +437,12 @@ extension UpsertRecipeRequest {
             filterType: draft.filterType,
             waterProfile: draft.waterProfile.nilIfBlank,
             waterTdsPpm: draft.waterTdsPpm,
-            tdsPercent: draft.tdsPercent,
-            rating: draft.rating,
+            servings: draft.servings,
+            iceG: draft.iceG,
+            drinkType: draft.drinkType,
+            milkG: draft.milkG,
+            brewerDetail: draft.brewerDetail.nilIfBlank,
+            coverMediaId: coverMediaID,
             notes: draft.notes.nilIfBlank,
             flavorNoteSlugs: draft.flavorNoteSlugs.sorted(),
             steps: draft.steps.map {

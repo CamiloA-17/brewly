@@ -46,6 +46,7 @@ extension DomainError {
         case "in_future": .inFuture
         case "not_allowed": .notAllowed
         case "too_young": .tooYoung(minimumAge: AccountRules.minimumAge)
+        case "before": .before(field: "")
         default: .invalidFormat
         }
     }

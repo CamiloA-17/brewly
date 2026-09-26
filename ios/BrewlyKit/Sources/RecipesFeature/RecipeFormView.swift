@@ -1,10 +1,12 @@
 import BrewlyDesignSystem
 import BrewlyDomain
+import PhotosUI
 import SwiftUI
 
 /// Creates or edits a recipe with every brewing parameter.
 struct RecipeFormView: View {
     @State private var model: RecipeFormViewModel
+    @State private var pickedCover: PhotosPickerItem?
     @Environment(\.dismiss) private var dismiss
     private let onSaved: @MainActor (Recipe) -> Void
 
@@ -65,6 +67,10 @@ struct RecipeFormView: View {
                     }
                 }
             }
+            .onChange(of: pickedCover) {
+                guard let item = pickedCover else { return }
+                Task { model.draft.newCoverData = try? await item.loadTransferable(type: Data.self) }
+            }
             .task { await model.load() }
         }
     }
@@ -83,8 +89,9 @@ struct RecipeFormView: View {
             grindSection
             extractionSection
             waterSection
+            servingSection
             stepsSection
-            resultsSection
+            notesSection
             if let errorMessage = model.errorMessage {
                 Section { FieldErrorText(errorMessage) }
             }
@@ -105,6 +112,55 @@ struct RecipeFormView: View {
                 }
             } label: {
                 Text("Visible to", bundle: .module)
+            }
+            PhotosPicker(selection: $pickedCover, matching: .images) {
+                Label {
+                    hasCover ? Text("Change cover photo", bundle: .module) : Text("Add a cover photo", bundle: .module)
+                } icon: {
+                    Image(systemName: "photo")
+                }
+            }
+            if hasCover {
+                Button(role: .destructive) {
+                    model.draft.newCoverData = nil
+                    model.draft.coverURL = nil
+                    pickedCover = nil
+                } label: {
+                    Text("Remove cover photo", bundle: .module)
+                }
+            }
+            FieldErrorText(model.message(for: "coverMediaId") ?? model.message(for: "photos"))
+        }
+    }
+
+    private var hasCover: Bool {
+        model.draft.newCoverData != nil || model.draft.coverURL != nil
+    }
+
+    private var servingSection: some View {
+        Section {
+            integerField("Servings", value: $model.draft.servings, field: "servings")
+            TextField(String(localized: "Brewer (e.g. V60 02 ceramic)", bundle: .module), text: $model.draft.brewerDetail)
+            FieldErrorText(model.message(for: "brewerDetail"))
+            switch model.ratioBasis {
+            case .water:
+                numberField("Ice in the carafe (g)", value: $model.draft.iceG, field: "iceG")
+            case .beverage:
+                Picker(selection: $model.draft.drinkType) {
+                    Text("Not specified", bundle: .module).tag(DrinkType?.none)
+                    ForEach(DrinkType.allCases, id: \.self) { drink in
+                        Text(drink.localizedName).tag(Optional(drink))
+                    }
+                } label: {
+                    Text("Drink", bundle: .module)
+                }
+                numberField("Milk (g)", value: $model.draft.milkG, field: "milkG")
+            }
+        } header: {
+            Text("Serving", bundle: .module)
+        } footer: {
+            if model.ratioBasis == .water {
+                Text("Ice for iced brews is not part of the ratio.", bundle: .module)
             }
         }
     }
@@ -248,20 +304,8 @@ struct RecipeFormView: View {
         }
     }
 
-    private var resultsSection: some View {
+    private var notesSection: some View {
         Section {
-            numberField("TDS (%)", value: $model.draft.tdsPercent, field: "tdsPercent")
-            LabeledContent {
-                Text(model.draft.extractionYield.map(BrewFormat.percent) ?? "—")
-                    .monospacedDigit()
-            } label: {
-                Text("Extraction yield", bundle: .module)
-            }
-            LabeledContent {
-                RatingView(rating: $model.draft.rating)
-            } label: {
-                Text("Rating", bundle: .module)
-            }
             NavigationLink {
                 MultiSelectionList(items: model.catalog.flavorNotes, selection: $model.draft.flavorNoteSlugs) {
                     $0.localizedName
@@ -280,9 +324,9 @@ struct RecipeFormView: View {
                 .lineLimit(2...6)
             FieldErrorText(model.message(for: "notes"))
         } header: {
-            Text("Results", bundle: .module)
+            Text("Notes", bundle: .module)
         } footer: {
-            Text("Extraction yield is calculated from the beverage weight and TDS.", bundle: .module)
+            Text("Rating, TDS and extraction yield are recorded for each cup in your journal.", bundle: .module)
         }
     }
 

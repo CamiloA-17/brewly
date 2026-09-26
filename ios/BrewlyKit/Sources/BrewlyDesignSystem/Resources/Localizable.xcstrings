@@ -31,6 +31,16 @@
         }
       }
     },
+    "Americano": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Americano"
+          }
+        }
+      }
+    },
     "An account with that email already exists.": {
       "localizations": {
         "es": {
@@ -47,6 +57,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Arábica"
+          }
+        }
+      }
+    },
+    "Average rating %@ from %lld brews": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Calificación promedio de %@ en %lld preparaciones"
           }
         }
       }
@@ -121,6 +141,16 @@
         }
       }
     },
+    "Cappuccino": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Capuchino"
+          }
+        }
+      }
+    },
     "Cloth": {
       "localizations": {
         "es": {
@@ -157,6 +187,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Comentarios"
+          }
+        }
+      }
+    },
+    "Cortado": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cortado"
           }
         }
       }
@@ -261,6 +301,16 @@
         }
       }
     },
+    "Flat white": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Flat white"
+          }
+        }
+      }
+    },
     "Floral": {
       "localizations": {
         "es": {
@@ -341,6 +391,16 @@
         }
       }
     },
+    "Is earlier than the related date.": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Es anterior a la fecha relacionada."
+          }
+        }
+      }
+    },
     "Is greater than the related value.": {
       "localizations": {
         "es": {
@@ -357,6 +417,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Hervidor"
+          }
+        }
+      }
+    },
+    "Latte": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Latte"
           }
         }
       }
@@ -387,6 +457,26 @@
           "stringUnit": {
             "state": "translated",
             "value": "Me gusta"
+          }
+        }
+      }
+    },
+    "Lungo": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Lungo"
+          }
+        }
+      }
+    },
+    "Macchiato": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Macchiato"
           }
         }
       }
@@ -457,6 +547,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Metal"
+          }
+        }
+      }
+    },
+    "Mocha": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Moca"
           }
         }
       }
@@ -541,6 +641,16 @@
         }
       }
     },
+    "Other drink": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Otra bebida"
+          }
+        }
+      }
+    },
     "Other equipment": {
       "localizations": {
         "es": {
@@ -617,6 +727,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Presión"
+          }
+        }
+      }
+    },
+    "Ristretto": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ristretto"
           }
         }
       }

@@ -13,14 +13,15 @@ struct RecipeDraftTests {
         defaultRatio: 2, defaultGrindSize: .fine, defaultWaterTempC: 93
     )
 
-    @Test("A remix keeps the parameters and clears the bean and the results")
+    @Test("A remix keeps the parameters and serving, and clears the bean, notes and cover")
     func remix() {
         let original = Recipe(
             id: UUID(),
             author: UserSummary(id: UUID(), username: "leo.roaster", displayName: "Leo"),
             bean: BeanSummary(id: UUID(), name: "Leo's bean"),
             methodSlug: "v60", title: "Floral V60", doseG: 15, waterG: 250, ratio: 16.7,
-            grindSize: .mediumFine, waterTempC: 93, tdsPercent: 1.4, rating: 5, notes: "Juicy",
+            grindSize: .mediumFine, waterTempC: 93, servings: 2, iceG: 80,
+            coverURL: URL(string: "/v1/media/00000000-0000-0000-0000-000000000001"), notes: "Juicy",
             flavorNoteSlugs: ["jasmine"], steps: [RecipeStep(position: 1, kind: .bloom, startS: 0, waterTargetG: 45)],
             visibility: .followers
         )
@@ -29,7 +30,8 @@ struct RecipeDraftTests {
         #expect(draft.beanID == nil)
         #expect(draft.doseG == 15 && draft.waterG == 250 && draft.waterTempC == 93)
         #expect(draft.steps.count == 1)
-        #expect(draft.tdsPercent == nil && draft.rating == nil && draft.notes.isEmpty && draft.flavorNoteSlugs.isEmpty)
+        #expect(draft.servings == 2 && draft.iceG == 80)
+        #expect(draft.coverURL == nil && draft.notes.isEmpty && draft.flavorNoteSlugs.isEmpty)
         #expect(draft.visibility == .public)
     }
 
@@ -54,15 +56,6 @@ struct RecipeDraftTests {
         #expect(draft.waterG == nil)
         #expect(draft.yieldG == 36)
         #expect(draft.ratio == 2)
-    }
-
-    @Test("Live extraction yield")
-    func extractionYield() {
-        var draft = RecipeDraft()
-        draft.doseG = 15
-        draft.yieldG = 215
-        draft.tdsPercent = 1.38
-        #expect(draft.extractionYield == 19.78)
     }
 }
 

@@ -1,6 +1,26 @@
 {
   "sourceLanguage": "en",
   "strings": {
+    "Add": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Agregar"
+          }
+        }
+      }
+    },
+    "Add a photo of the bag": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Agregar una foto de la bolsa"
+          }
+        }
+      }
+    },
     "Add bean": {
       "localizations": {
         "es": {
@@ -71,6 +91,26 @@
         }
       }
     },
+    "Change photo": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cambiar foto"
+          }
+        }
+      }
+    },
+    "Clear": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Borrar"
+          }
+        }
+      }
+    },
     "Coffee": {
       "localizations": {
         "es": {
@@ -97,6 +137,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "País"
+          }
+        }
+      }
+    },
+    "Currency": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Moneda"
           }
         }
       }
@@ -171,6 +221,16 @@
         }
       }
     },
+    "Favorite": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Favorito"
+          }
+        }
+      }
+    },
     "Harvest": {
       "localizations": {
         "es": {
@@ -197,6 +257,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Conozco la fecha de tostión"
+          }
+        }
+      }
+    },
+    "Lot": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Lote"
           }
         }
       }
@@ -291,12 +361,32 @@
         }
       }
     },
+    "Opened": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Abierto"
+          }
+        }
+      }
+    },
     "Origin": {
       "localizations": {
         "es": {
           "stringUnit": {
             "state": "translated",
             "value": "Origen"
+          }
+        }
+      }
+    },
+    "Price": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Precio"
           }
         }
       }
@@ -317,6 +407,26 @@
           "stringUnit": {
             "state": "translated",
             "value": "Productor"
+          }
+        }
+      }
+    },
+    "Purchase": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Compra"
+          }
+        }
+      }
+    },
+    "Purchased": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Comprado"
           }
         }
       }
@@ -347,6 +457,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Restante (g)"
+          }
+        }
+      }
+    },
+    "Remove photo": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Quitar foto"
           }
         }
       }

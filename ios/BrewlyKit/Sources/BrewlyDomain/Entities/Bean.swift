@@ -25,6 +25,13 @@ public struct Bean: Identifiable, Hashable, Sendable {
     public var isDecaf: Bool
     public var notes: String?
     public var photoURL: URL?
+    public var purchaseDate: CalendarDate?
+    public var openedDate: CalendarDate?
+    public var price: Double?
+    /// ISO 4217 code of `price`.
+    public var currency: String?
+    public var lot: String?
+    public var isFavorite: Bool
     public var visibility: Visibility
     public var isArchived: Bool
     public var createdAt: Date
@@ -53,6 +60,12 @@ public struct Bean: Identifiable, Hashable, Sendable {
         isDecaf: Bool = false,
         notes: String? = nil,
         photoURL: URL? = nil,
+        purchaseDate: CalendarDate? = nil,
+        openedDate: CalendarDate? = nil,
+        price: Double? = nil,
+        currency: String? = nil,
+        lot: String? = nil,
+        isFavorite: Bool = false,
         visibility: Visibility = .public,
         isArchived: Bool = false,
         createdAt: Date = Date(),
@@ -80,6 +93,12 @@ public struct Bean: Identifiable, Hashable, Sendable {
         self.isDecaf = isDecaf
         self.notes = notes
         self.photoURL = photoURL
+        self.purchaseDate = purchaseDate
+        self.openedDate = openedDate
+        self.price = price
+        self.currency = currency
+        self.lot = lot
+        self.isFavorite = isFavorite
         self.visibility = visibility
         self.isArchived = isArchived
         self.createdAt = createdAt
@@ -146,6 +165,16 @@ public struct BeanDraft: Hashable, Sendable {
     public var remainingG: Double?
     public var isDecaf = false
     public var notes = ""
+    public var purchaseDate: CalendarDate?
+    public var openedDate: CalendarDate?
+    public var price: Double?
+    public var currency: String?
+    public var lot = ""
+    public var isFavorite = false
+    /// The current photo; `nil` removes it when saving.
+    public var photoURL: URL?
+    /// A newly picked photo, uploaded when saving.
+    public var newPhotoData: Data?
     public var visibility: Visibility = .public
     public var isArchived = false
 
@@ -171,6 +200,13 @@ public struct BeanDraft: Hashable, Sendable {
         remainingG = bean.remainingG
         isDecaf = bean.isDecaf
         notes = bean.notes ?? ""
+        purchaseDate = bean.purchaseDate
+        openedDate = bean.openedDate
+        price = bean.price
+        currency = bean.currency
+        lot = bean.lot ?? ""
+        isFavorite = bean.isFavorite
+        photoURL = bean.photoURL
         visibility = bean.visibility
         isArchived = bean.isArchived
     }
@@ -190,6 +226,11 @@ public struct BeanDraft: Hashable, Sendable {
             scaScore: scaScore,
             weightG: weightG,
             remainingG: remainingG,
+            purchaseDate: purchaseDate,
+            openedDate: openedDate,
+            price: price,
+            currency: currency,
+            lot: lot,
             notes: notes
         )
     }

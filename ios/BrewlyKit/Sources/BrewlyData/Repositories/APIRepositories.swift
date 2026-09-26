@@ -143,11 +143,17 @@ public struct APIBeanRepository: BeanRepository {
     }
 
     public func create(_ draft: BeanDraft) async throws -> Bean {
-        try await mappingErrors { Bean(try await client.send(Endpoints.createBean(UpsertBeanRequest(draft)))) }
+        try await mappingErrors {
+            let photo = try await photoMediaID(new: draft.newPhotoData, current: draft.photoURL, client: client)
+            return Bean(try await client.send(Endpoints.createBean(UpsertBeanRequest(draft, photoMediaID: photo))))
+        }
     }
 
     public func update(id: UUID, _ draft: BeanDraft) async throws -> Bean {
-        try await mappingErrors { Bean(try await client.send(Endpoints.updateBean(id: id, UpsertBeanRequest(draft)))) }
+        try await mappingErrors {
+            let photo = try await photoMediaID(new: draft.newPhotoData, current: draft.photoURL, client: client)
+            return Bean(try await client.send(Endpoints.updateBean(id: id, UpsertBeanRequest(draft, photoMediaID: photo))))
+        }
     }
 
     public func delete(id: UUID) async throws {
@@ -177,12 +183,7 @@ public struct APIBrewLogRepository: BrewLogRepository {
 
     public func save(_ draft: BrewLogDraft, beanID: UUID, methodSlug: String, id: UUID?) async throws -> BrewLog {
         try await mappingErrors {
-            let photoID: UUID?
-            if let data = draft.newPhotoData {
-                photoID = try await APIPostRepository.upload(data, client: client).id
-            } else {
-                photoID = draft.photoURL.flatMap(Self.mediaID(from:))
-            }
+            let photoID = try await photoMediaID(new: draft.newPhotoData, current: draft.photoURL, client: client)
             let request = UpsertBrewLogRequest(draft, beanID: beanID, methodSlug: methodSlug, photoMediaID: photoID)
             if let id {
                 return BrewLog(try await client.send(Endpoints.updateBrew(id: id, request)))
@@ -193,11 +194,6 @@ public struct APIBrewLogRepository: BrewLogRepository {
 
     public func delete(id: UUID) async throws {
         try await mappingErrors { _ = try await client.send(Endpoints.deleteBrew(id: id)) }
-    }
-
-    /// The media id at the end of a `/v1/media/{id}` URL.
-    static func mediaID(from url: URL) -> UUID? {
-        UUID(uuidString: url.lastPathComponent)
     }
 }
 
@@ -262,11 +258,18 @@ public struct APIRecipeRepository: RecipeRepository {
     }
 
     public func create(_ input: RecipeInput) async throws -> Recipe {
-        try await mappingErrors { Recipe(try await client.send(Endpoints.createRecipe(UpsertRecipeRequest(input)))) }
+        try await mappingErrors {
+            let cover = try await photoMediaID(new: input.draft.newCoverData, current: input.draft.coverURL, client: client)
+            return Recipe(try await client.send(Endpoints.createRecipe(UpsertRecipeRequest(input, coverMediaID: cover))))
+        }
     }
 
     public func update(id: UUID, _ input: RecipeInput) async throws -> Recipe {
-        try await mappingErrors { Recipe(try await client.send(Endpoints.updateRecipe(id: id, UpsertRecipeRequest(input)))) }
+        try await mappingErrors {
+            let cover = try await photoMediaID(new: input.draft.newCoverData, current: input.draft.coverURL, client: client)
+            let request = UpsertRecipeRequest(input, coverMediaID: cover)
+            return Recipe(try await client.send(Endpoints.updateRecipe(id: id, request)))
+        }
     }
 
     public func delete(id: UUID) async throws {
@@ -444,4 +447,14 @@ public struct APINotificationRepository: NotificationRepository {
     public func markAllRead() async throws {
         try await mappingErrors { _ = try await client.send(Endpoints.markNotificationsRead) }
     }
+}
+
+/// The image a form ends up with: a newly picked photo (uploaded now), else the current one,
+/// else none.
+func photoMediaID(new data: Data?, current url: URL?, client: APIClient) async throws -> UUID? {
+    if let data {
+        return try await APIPostRepository.upload(data, client: client).id
+    }
+    // Media URLs end with the image id: `/v1/media/{id}`.
+    return url.flatMap { UUID(uuidString: $0.lastPathComponent) }
 }

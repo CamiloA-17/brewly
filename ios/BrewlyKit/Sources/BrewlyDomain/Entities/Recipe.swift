@@ -43,9 +43,19 @@ public struct Recipe: Identifiable, Hashable, Sendable {
     public var filterType: FilterType?
     public var waterProfile: String?
     public var waterTdsPpm: Int?
-    public var tdsPercent: Double?
-    public var extractionYieldPercent: Double?
-    public var rating: Int?
+    /// Cups the recipe makes.
+    public var servings: Int?
+    /// Ice in the carafe for iced brews; not part of the ratio.
+    public var iceG: Double?
+    public var drinkType: DrinkType?
+    public var milkG: Double?
+    /// The exact brewer, e.g. "V60 02 ceramic".
+    public var brewerDetail: String?
+    public var coverURL: URL?
+    /// Average rating of the brews of this recipe that the signed-in user can see.
+    public var averageRating: Double?
+    /// Brews of this recipe that the signed-in user can see.
+    public var brewCount: Int
     public var notes: String?
     public var flavorNoteSlugs: [String]
     public var steps: [RecipeStep]
@@ -82,9 +92,14 @@ public struct Recipe: Identifiable, Hashable, Sendable {
         filterType: FilterType? = nil,
         waterProfile: String? = nil,
         waterTdsPpm: Int? = nil,
-        tdsPercent: Double? = nil,
-        extractionYieldPercent: Double? = nil,
-        rating: Int? = nil,
+        servings: Int? = nil,
+        iceG: Double? = nil,
+        drinkType: DrinkType? = nil,
+        milkG: Double? = nil,
+        brewerDetail: String? = nil,
+        coverURL: URL? = nil,
+        averageRating: Double? = nil,
+        brewCount: Int = 0,
         notes: String? = nil,
         flavorNoteSlugs: [String] = [],
         steps: [RecipeStep] = [],
@@ -119,9 +134,14 @@ public struct Recipe: Identifiable, Hashable, Sendable {
         self.filterType = filterType
         self.waterProfile = waterProfile
         self.waterTdsPpm = waterTdsPpm
-        self.tdsPercent = tdsPercent
-        self.extractionYieldPercent = extractionYieldPercent
-        self.rating = rating
+        self.servings = servings
+        self.iceG = iceG
+        self.drinkType = drinkType
+        self.milkG = milkG
+        self.brewerDetail = brewerDetail
+        self.coverURL = coverURL
+        self.averageRating = averageRating
+        self.brewCount = brewCount
         self.notes = notes
         self.flavorNoteSlugs = flavorNoteSlugs
         self.steps = steps
@@ -170,7 +190,10 @@ public struct RecipeSummary: Identifiable, Hashable, Sendable {
     public var grindSize: GrindSize
     public var waterTempC: Double?
     public var totalTimeS: Int?
-    public var rating: Int?
+    /// Average rating of the brews of this recipe that the signed-in user can see.
+    public var averageRating: Double?
+    public var brewCount: Int
+    public var coverURL: URL?
     public var visibility: Visibility
     public var createdAt: Date
 
@@ -185,7 +208,9 @@ public struct RecipeSummary: Identifiable, Hashable, Sendable {
         grindSize: GrindSize,
         waterTempC: Double? = nil,
         totalTimeS: Int? = nil,
-        rating: Int? = nil,
+        averageRating: Double? = nil,
+        brewCount: Int = 0,
+        coverURL: URL? = nil,
         visibility: Visibility = .public,
         createdAt: Date = Date()
     ) {
@@ -199,7 +224,9 @@ public struct RecipeSummary: Identifiable, Hashable, Sendable {
         self.grindSize = grindSize
         self.waterTempC = waterTempC
         self.totalTimeS = totalTimeS
-        self.rating = rating
+        self.averageRating = averageRating
+        self.brewCount = brewCount
+        self.coverURL = coverURL
         self.visibility = visibility
         self.createdAt = createdAt
     }

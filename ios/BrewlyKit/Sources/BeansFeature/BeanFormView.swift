@@ -1,10 +1,12 @@
 import BrewlyDesignSystem
 import BrewlyDomain
+import PhotosUI
 import SwiftUI
 
 /// Creates or edits a coffee bean.
 struct BeanFormView: View {
     @State private var model: BeanFormViewModel
+    @State private var pickedPhoto: PhotosPickerItem?
     @Environment(\.dismiss) private var dismiss
     private let onSaved: @MainActor (Bean) -> Void
 
@@ -20,6 +22,7 @@ struct BeanFormView: View {
                 originSection
                 processSection
                 roastSection
+                purchaseSection
                 notesSection
                 if let errorMessage = model.errorMessage {
                     Section { FieldErrorText(errorMessage) }
@@ -52,6 +55,16 @@ struct BeanFormView: View {
                     }
                 }
             }
+            .onChange(of: model.draft.price) {
+                // A price needs a currency: start with the one of the user's region.
+                if model.draft.price != nil, model.draft.currency == nil {
+                    model.draft.currency = Locale.current.currency?.identifier
+                }
+            }
+            .onChange(of: pickedPhoto) {
+                guard let item = pickedPhoto else { return }
+                Task { model.draft.newPhotoData = try? await item.loadTransferable(type: Data.self) }
+            }
             .task { await model.loadCatalog() }
         }
     }
@@ -69,13 +82,113 @@ struct BeanFormView: View {
             } label: {
                 Text("Visible to", bundle: .module)
             }
+            Toggle(isOn: $model.draft.isFavorite) {
+                Label {
+                    Text("Favorite", bundle: .module)
+                } icon: {
+                    Image(systemName: "star")
+                }
+            }
             if model.isEditing {
                 Toggle(isOn: $model.draft.isArchived) {
                     Text("Archived", bundle: .module)
                 }
             }
+            PhotosPicker(selection: $pickedPhoto, matching: .images) {
+                Label {
+                    hasPhoto ? Text("Change photo", bundle: .module) : Text("Add a photo of the bag", bundle: .module)
+                } icon: {
+                    Image(systemName: "camera")
+                }
+            }
+            if hasPhoto {
+                Button(role: .destructive) {
+                    model.draft.newPhotoData = nil
+                    model.draft.photoURL = nil
+                    pickedPhoto = nil
+                } label: {
+                    Text("Remove photo", bundle: .module)
+                }
+            }
+            FieldErrorText(model.message(for: "photoMediaId") ?? model.message(for: "photos"))
         } header: {
             Text("Coffee", bundle: .module)
+        }
+    }
+
+    private var hasPhoto: Bool {
+        model.draft.newPhotoData != nil || model.draft.photoURL != nil
+    }
+
+    private var purchaseSection: some View {
+        Section {
+            optionalDatePicker(Text("Purchased", bundle: .module), date: $model.draft.purchaseDate)
+            FieldErrorText(model.message(for: "purchaseDate"))
+            optionalDatePicker(Text("Opened", bundle: .module), date: $model.draft.openedDate)
+            FieldErrorText(model.message(for: "openedDate"))
+            LabeledContent {
+                TextField(String(localized: "Price", bundle: .module), value: $model.draft.price, format: .number)
+                    .keyboardType(.decimalPad)
+                    .multilineTextAlignment(.trailing)
+            } label: {
+                Text("Price", bundle: .module)
+            }
+            FieldErrorText(model.message(for: "price"))
+            Picker(selection: currency) {
+                ForEach(Self.currencies, id: \.self) { code in
+                    Text(verbatim: "\(code) · \(Locale.current.localizedString(forCurrencyCode: code) ?? code)").tag(code)
+                }
+            } label: {
+                Text("Currency", bundle: .module)
+            }
+            .pickerStyle(.navigationLink)
+            FieldErrorText(model.message(for: "currency"))
+            TextField(String(localized: "Lot", bundle: .module), text: $model.draft.lot)
+            FieldErrorText(model.message(for: "lot"))
+        } header: {
+            Text("Purchase", bundle: .module)
+        }
+    }
+
+    /// The draft's currency, or the one of the user's region until they choose.
+    private var currency: Binding<String> {
+        Binding {
+            model.draft.currency ?? Locale.current.currency?.identifier ?? "USD"
+        } set: { code in
+            model.draft.currency = code
+        }
+    }
+
+    private static let currencies: [String] = Locale.commonISOCurrencyCodes
+
+    private func optionalDatePicker(_ title: Text, date: Binding<CalendarDate?>) -> some View {
+        Group {
+            if let value = date.wrappedValue {
+                DatePicker(
+                    selection: Binding(get: { value.date() }, set: { date.wrappedValue = CalendarDate(date: $0) }),
+                    in: ...Date(),
+                    displayedComponents: .date
+                ) {
+                    title
+                }
+                .swipeActions {
+                    Button(role: .destructive) {
+                        date.wrappedValue = nil
+                    } label: {
+                        Text("Clear", bundle: .module)
+                    }
+                }
+            } else {
+                LabeledContent {
+                    Button {
+                        date.wrappedValue = .today()
+                    } label: {
+                        Text("Add", bundle: .module)
+                    }
+                } label: {
+                    title
+                }
+            }
         }
     }
 
