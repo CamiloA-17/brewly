@@ -1,0 +1,11 @@
+// Build settings for the Brewly app target, applied to every configuration.
+// Personal values (Team ID, API address for a device) go in Local.xcconfig,
+// which is ignored by git.
+
+// `//` starts a comment in .xcconfig files, so URLs are written as http:/$()/…
+BREWLY_API_BASE_URL = http:/$()/localhost:8080
+
+BREWLY_BUNDLE_IDENTIFIER = app.brewly.ios
+
+// Optional: the build still works when Local.xcconfig does not exist.
+#include? "Local.xcconfig"
