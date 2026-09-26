@@ -29,6 +29,7 @@ public final class AppContainer {
     let posts: any PostRepository
     let imageLoader: any ImageLoader
     let notifications: any NotificationRepository
+    let equipment: any EquipmentRepository
 
     public init(apiBaseURL: URL, tokenStore: any TokenStore = KeychainTokenStore()) {
         let publicClient = APIClient(baseURL: apiBaseURL)
@@ -48,6 +49,7 @@ public final class AppContainer {
         posts = APIPostRepository(client: client)
         imageLoader = APIImageLoader(client: client)
         notifications = APINotificationRepository(client: client)
+        equipment = APIEquipmentRepository(client: client)
     }
 
     func feedDependencies(currentUserID: UUID) -> FeedDependencies {
@@ -73,6 +75,7 @@ public final class AppContainer {
             beans: beans,
             catalog: catalog,
             userMethods: userMethods,
+            equipment: equipment,
             saveRecipe: SaveRecipeUseCase(recipes: recipes),
             currentUserID: currentUserID
         )
@@ -83,11 +86,11 @@ public final class AppContainer {
     }
 
     var profileDependencies: ProfileDependencies {
-        ProfileDependencies(profile: profile, auth: auth, people: people)
+        ProfileDependencies(profile: profile, auth: auth, people: people, equipment: equipment, catalog: catalog)
     }
 
     var peopleDependencies: PeopleDependencies {
-        PeopleDependencies(people: people, posts: posts, catalog: catalog)
+        PeopleDependencies(people: people, posts: posts, catalog: catalog, equipment: equipment)
     }
 
     /// The screen each `AppRoute` opens, shared by every tab.

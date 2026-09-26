@@ -51,6 +51,16 @@
         }
       }
     },
+    "Brewer": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cafetera"
+          }
+        }
+      }
+    },
     "Can't be in the future.": {
       "localizations": {
         "es": {
@@ -131,6 +141,16 @@
         }
       }
     },
+    "Default": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Predeterminado"
+          }
+        }
+      }
+    },
     "Drip machine": {
       "localizations": {
         "es": {
@@ -147,6 +167,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Espresso"
+          }
+        }
+      }
+    },
+    "Espresso machine": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Máquina de espresso"
           }
         }
       }
@@ -231,6 +261,16 @@
         }
       }
     },
+    "Grinder": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Molino"
+          }
+        }
+      }
+    },
     "Immersion": {
       "localizations": {
         "es": {
@@ -267,6 +307,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Es mayor que el valor relacionado."
+          }
+        }
+      }
+    },
+    "Kettle": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hervidor"
           }
         }
       }
@@ -451,6 +501,16 @@
         }
       }
     },
+    "Other equipment": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Otro equipo"
+          }
+        }
+      }
+    },
     "Paper": {
       "localizations": {
         "es": {
@@ -537,6 +597,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Robusta"
+          }
+        }
+      }
+    },
+    "Scale": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Balanza"
           }
         }
       }

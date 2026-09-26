@@ -11,6 +11,26 @@
         }
       }
     },
+    "Add equipment": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Agregar equipo"
+          }
+        }
+      }
+    },
+    "Add your grinder and its usual setting per method to pre-fill your recipes.": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Agrega tu molino y su ajuste habitual por método para precargar tus recetas."
+          }
+        }
+      }
+    },
     "Bio": {
       "localizations": {
         "es": {
@@ -27,6 +47,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Fecha de nacimiento"
+          }
+        }
+      }
+    },
+    "Brand": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Marca"
           }
         }
       }
@@ -57,6 +87,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Ciudad (opcional)"
+          }
+        }
+      }
+    },
+    "Delete": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Eliminar"
           }
         }
       }
@@ -97,6 +137,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Nombre visible"
+          }
+        }
+      }
+    },
+    "Edit equipment": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Editar equipo"
           }
         }
       }
@@ -161,12 +211,82 @@
         }
       }
     },
+    "Model": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Modelo"
+          }
+        }
+      }
+    },
+    "My equipment": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mi equipo"
+          }
+        }
+      }
+    },
     "Name": {
       "localizations": {
         "es": {
           "stringUnit": {
             "state": "translated",
             "value": "Nombre"
+          }
+        }
+      }
+    },
+    "New recipes with your default grinder start with this setting.": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Las recetas nuevas con tu molino predeterminado empiezan con este ajuste."
+          }
+        }
+      }
+    },
+    "Nickname (optional)": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Apodo (opcional)"
+          }
+        }
+      }
+    },
+    "No equipment yet": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Todavía no tienes equipo"
+          }
+        }
+      }
+    },
+    "Not in the list": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No está en la lista"
+          }
+        }
+      }
+    },
+    "Notes": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Notas"
           }
         }
       }
@@ -241,12 +361,62 @@
         }
       }
     },
+    "Type": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tipo"
+          }
+        }
+      }
+    },
+    "Use by default": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Usar por defecto"
+          }
+        }
+      }
+    },
+    "Usual grind setting": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ajuste de molienda habitual"
+          }
+        }
+      }
+    },
     "Your beans, recipes and posts will be permanently deleted.": {
       "localizations": {
         "es": {
           "stringUnit": {
             "state": "translated",
             "value": "Tus granos, recetas y publicaciones se eliminarán de forma permanente."
+          }
+        }
+      }
+    },
+    "Your equipment is shown on your profile.": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tu equipo se muestra en tu perfil."
+          }
+        }
+      }
+    },
+    "e.g. 24 clicks": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "p. ej. 24 clics"
           }
         }
       }

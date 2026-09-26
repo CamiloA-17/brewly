@@ -21,6 +21,15 @@ public protocol ProfileRepository: Sendable {
     func deleteAccount() async throws
 }
 
+/// The signed-in user's gear, and other members' (public on their profile).
+public protocol EquipmentRepository: Sendable {
+    func myEquipment() async throws -> [Equipment]
+    func equipment(ofMember memberID: UUID) async throws -> [Equipment]
+    /// Creates the item when `id` is `nil`, otherwise replaces it.
+    func save(_ draft: EquipmentDraft, id: UUID?) async throws -> Equipment
+    func delete(id: UUID) async throws
+}
+
 public protocol CatalogRepository: Sendable {
     /// The global catalogs, cached after the first successful load.
     func catalog(forceRefresh: Bool) async throws -> Catalog

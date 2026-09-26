@@ -155,6 +155,36 @@ public struct APIBeanRepository: BeanRepository {
     }
 }
 
+public struct APIEquipmentRepository: EquipmentRepository {
+    private let client: APIClient
+
+    public init(client: APIClient) {
+        self.client = client
+    }
+
+    public func myEquipment() async throws -> [Equipment] {
+        try await mappingErrors { try await client.send(Endpoints.myEquipment).map(Equipment.init) }
+    }
+
+    public func equipment(ofMember memberID: UUID) async throws -> [Equipment] {
+        try await mappingErrors { try await client.send(Endpoints.memberEquipment(id: memberID)).map(Equipment.init) }
+    }
+
+    public func save(_ draft: EquipmentDraft, id: UUID?) async throws -> Equipment {
+        try await mappingErrors {
+            let request = UpsertEquipmentRequest(draft)
+            if let id {
+                return Equipment(try await client.send(Endpoints.updateEquipment(id: id, request)))
+            }
+            return Equipment(try await client.send(Endpoints.createEquipment(request)))
+        }
+    }
+
+    public func delete(id: UUID) async throws {
+        try await mappingErrors { _ = try await client.send(Endpoints.deleteEquipment(id: id)) }
+    }
+}
+
 public struct APIRecipeRepository: RecipeRepository {
     private let client: APIClient
 
