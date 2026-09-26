@@ -125,6 +125,14 @@ public struct RecipeDetailView: View {
                         .font(.footnote)
                         .foregroundStyle(.secondary)
                 }
+                NavigationLink(value: AppRoute.newBrew(recipeID: recipe.id)) {
+                    Label {
+                        Text("Brew this recipe", bundle: .module)
+                    } icon: {
+                        Image(systemName: "cup.and.saucer.fill")
+                    }
+                    .foregroundStyle(Color.brewlyAccent)
+                }
                 NavigationLink(value: AppRoute.member(recipe.author.id)) {
                     MemberRow(member: recipe.author)
                 }

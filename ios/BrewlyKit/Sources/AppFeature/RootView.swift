@@ -3,7 +3,7 @@ import BeansFeature
 import BrewlyDesignSystem
 import BrewlyDomain
 import FeedFeature
-import MethodsFeature
+import JournalFeature
 import ProfileFeature
 import RecipesFeature
 import SwiftUI
@@ -69,20 +69,20 @@ struct MainTabView: View {
                         Image(systemName: "list.bullet.clipboard")
                     }
                 }
+            JournalView(dependencies: container.journalDependencies(currentUserID: user.id))
+                .tabItem {
+                    Label {
+                        Text("Journal", bundle: .module)
+                    } icon: {
+                        Image(systemName: "book.closed")
+                    }
+                }
             BeansRootView(dependencies: container.beansDependencies)
                 .tabItem {
                     Label {
                         Text("Beans", bundle: .module)
                     } icon: {
                         Image(systemName: "leaf")
-                    }
-                }
-            MethodsView(dependencies: container.methodsDependencies)
-                .tabItem {
-                    Label {
-                        Text("Methods", bundle: .module)
-                    } icon: {
-                        Image(systemName: "cup.and.saucer")
                     }
                 }
             ProfileView(user: user, dependencies: container.profileDependencies, onSignedOut: onSignedOut)

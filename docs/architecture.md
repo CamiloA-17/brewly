@@ -56,7 +56,7 @@ XcodeGen (`ios/project.yml`) only contains `BrewlyApp.swift` and assets.
 ```mermaid
 flowchart TD
     subgraph Presentation
-        Features["Feature modules<br/>Auth · Beans · Recipes · Methods · Feed · Profile · People · Notifications<br/>SwiftUI views + @Observable view models"]
+        Features["Feature modules<br/>Auth · Beans · Recipes · Journal · Methods · Feed · Profile · People · Notifications<br/>SwiftUI views + @Observable view models"]
         DS["BrewlyDesignSystem<br/>theme · components · localization"]
     end
     Domain["BrewlyDomain<br/>entities · repository protocols · use cases"]
@@ -169,6 +169,10 @@ sequenceDiagram
    (followed users + explore), posts with photos, likes, comments and in-app notifications
    *(done)*. Next: push notifications with APNs (a `device_tokens` table and a sender called
    from `NotificationWriter`, which already runs for every notification).
-3. **Trust and safety:** report and block in the UI (App Store Guideline 1.2), moderation queue.
-4. **More:** Sign in with Apple, search (`pg_trgm`), guided brew timer that plays recipe steps,
+3. **Brew journal:** personal details, members' equipment with the usual grind setting per
+   method, and a journal of every cup (real parameters, tasting scores, notes, photo) that
+   consumes the bean's remaining coffee *(in progress)*. The app's tabs are Home, Recipes,
+   Journal, Beans and Profile; brew methods moved into the profile.
+4. **Trust and safety:** report and block in the UI (App Store Guideline 1.2), moderation queue.
+5. **More:** Sign in with Apple, search (`pg_trgm`), guided brew timer that plays recipe steps,
    offline cache, more languages.
