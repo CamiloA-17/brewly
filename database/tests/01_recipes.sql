@@ -2,14 +2,14 @@
 BEGIN;
 SELECT pg_temp.create_fixture_users();
 
--- V60: ratio from brew water, EY from beverage weight and TDS.
-INSERT INTO recipes (id, author_id, bean_id, method_slug, title, dose_g, water_g, yield_g, grind_size, tds_percent)
+-- V60: ratio from brew water. Results (TDS, EY, rating) live in brew_logs.
+INSERT INTO recipes (id, author_id, bean_id, method_slug, title, dose_g, water_g, yield_g, grind_size,
+                     servings, ice_g, brewer_detail)
 VALUES ('00000000-0000-0000-0000-0000000000c1', '00000000-0000-0000-0000-00000000000a',
-        '00000000-0000-0000-0000-0000000000b1', 'v60', 'Morning V60', 15, 250, 215, 'medium_fine', 1.38);
+        '00000000-0000-0000-0000-0000000000b1', 'v60', 'Morning V60', 15, 250, 215, 'medium_fine',
+        1, 80, 'V60 02 ceramic');
 SELECT pg_temp.expect_equal((SELECT ratio FROM recipes WHERE id = '00000000-0000-0000-0000-0000000000c1'),
                             16.67::numeric, 'filter ratio uses water');
-SELECT pg_temp.expect_equal((SELECT extraction_yield_percent FROM recipes WHERE id = '00000000-0000-0000-0000-0000000000c1'),
-                            19.78::numeric, 'extraction yield');
 
 -- Espresso: ratio from beverage weight.
 INSERT INTO recipes (id, author_id, bean_id, method_slug, title, dose_g, yield_g, grind_size, pressure_bar)
@@ -17,8 +17,13 @@ VALUES ('00000000-0000-0000-0000-0000000000c2', '00000000-0000-0000-0000-0000000
         '00000000-0000-0000-0000-0000000000b1', 'espresso', 'Classic shot', 18, 36, 'fine', 9);
 SELECT pg_temp.expect_equal((SELECT ratio FROM recipes WHERE id = '00000000-0000-0000-0000-0000000000c2'),
                             2.00::numeric, 'espresso ratio uses beverage');
-SELECT pg_temp.expect_equal((SELECT extraction_yield_percent FROM recipes WHERE id = '00000000-0000-0000-0000-0000000000c2'),
-                            NULL::numeric, 'no EY without TDS');
+
+-- Milk drinks built on espresso.
+UPDATE recipes SET drink_type = 'flat_white', milk_g = 120 WHERE id = '00000000-0000-0000-0000-0000000000c2';
+SELECT pg_temp.expect_error($$
+    UPDATE recipes SET drink_type = 'frappe' WHERE id = '00000000-0000-0000-0000-0000000000c2'$$, '23514');
+SELECT pg_temp.expect_error($$
+    UPDATE recipes SET servings = 0 WHERE id = '00000000-0000-0000-0000-0000000000c2'$$, '23514');
 
 -- updated_at trigger.
 UPDATE recipes SET updated_at = now() - interval '1 day' WHERE id = '00000000-0000-0000-0000-0000000000c2';

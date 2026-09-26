@@ -126,6 +126,7 @@ erDiagram
 | `profile_details` | — (changes to `users`, `auth_identities`) | Private details (first and last name, birth date), country and city, role, onboarding and activity timestamps; Sign in with Apple fields. |
 | `user_equipment` | `user_equipment`, `equipment_grind_settings` | Members' gear (grinders, brewers, kettles, scales, espresso machines) and each grinder's usual setting per brew method. |
 | `brew_journal` | `brew_logs`, `brew_log_flavor_notes` (and `coffee_beans.remaining_g`) | The brew journal: each cup with its real parameters, tasting scores (1–5), notes and photo; how much coffee is left in each bag. |
+| `recipe_bean_details` | — (changes to `recipes`, `coffee_beans`) | Recipe results move to the journal; recipes gain a cover photo, servings, ice, drink type, milk and brewer; beans gain a photo, purchase and opening dates, price, lot and favorite; `media_in_use()` function. |
 
 ## Integrity rules
 
@@ -185,6 +186,15 @@ erDiagram
   `private` by default. The API subtracts each brew's dose from `coffee_beans.remaining_g` in the
   same transaction, and gives it back when the brew is edited or deleted. A brew photo is
   exclusive: it can't also be a post photo or an avatar.
+- **Recipes are templates.** Results (rating, TDS, extraction yield) belong to each cup, so they
+  live in `brew_logs`; the API shows a recipe's average rating and brew count computed from the
+  brews each viewer can see. The migration turned existing recipe results into the author's first
+  private brew of the recipe.
+- **One use per image.** `media_in_use(id)` knows every place an upload can be used (post photo,
+  avatar, brew photo, bean photo, recipe cover). The API only accepts an unused upload of the same
+  member, and deletes the previous image when a photo is replaced or its row is deleted.
+- **Bean purchase details.** `opened_date` can't be earlier than `purchase_date`, and a `price`
+  needs an ISO 4217 `currency`.
 - **Remixes.** `recipes.forked_from_id` points to the original recipe and becomes `NULL` when the
   original is deleted, so a remix survives its original.
 
