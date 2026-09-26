@@ -5,10 +5,12 @@ import SwiftUI
 public struct AuthDependencies: Sendable {
     public var signIn: SignInUseCase
     public var signUp: SignUpUseCase
+    public var completeOnboarding: CompleteOnboardingUseCase
 
-    public init(signIn: SignInUseCase, signUp: SignUpUseCase) {
+    public init(signIn: SignInUseCase, signUp: SignUpUseCase, completeOnboarding: CompleteOnboardingUseCase) {
         self.signIn = signIn
         self.signUp = signUp
+        self.completeOnboarding = completeOnboarding
     }
 }
 
@@ -100,6 +102,20 @@ public struct AuthView: View {
     @ViewBuilder
     private var signUpForm: some View {
         Section {
+            TextField(String(localized: "First name", bundle: .module), text: $signUpModel.firstName)
+                .textContentType(.givenName)
+            FieldErrorText(signUpModel.violations.message(for: "firstName"))
+            TextField(String(localized: "Last name", bundle: .module), text: $signUpModel.lastName)
+                .textContentType(.familyName)
+            FieldErrorText(signUpModel.violations.message(for: "lastName"))
+            BirthDateField(date: $signUpModel.birthDate)
+            FieldErrorText(signUpModel.violations.message(for: "birthDate"))
+        } header: {
+            Text("About you", bundle: .module)
+        } footer: {
+            Text("Your name and birth date are private. Others see your display name.", bundle: .module)
+        }
+        Section {
             TextField(String(localized: "Email", bundle: .module), text: $signUpModel.email)
                 .textContentType(.emailAddress)
                 .keyboardType(.emailAddress)
@@ -111,16 +127,19 @@ public struct AuthView: View {
                 .textInputAutocapitalization(.never)
                 .autocorrectionDisabled()
             FieldErrorText(signUpModel.violations.message(for: "username"))
-            TextField(String(localized: "Display name", bundle: .module), text: $signUpModel.displayName)
-                .textContentType(.name)
-            FieldErrorText(signUpModel.violations.message(for: "displayName"))
             SecureField(String(localized: "Password", bundle: .module), text: $signUpModel.password)
                 .textContentType(.newPassword)
             FieldErrorText(signUpModel.violations.message(for: "password"))
+        } header: {
+            Text("Account", bundle: .module)
         } footer: {
             Text("Usernames use lowercase letters, numbers, dots and underscores.", bundle: .module)
         }
         Section {
+            Toggle(isOn: $signUpModel.acceptedTerms) {
+                Text("I accept the terms of use and the privacy policy", bundle: .module)
+            }
+            FieldErrorText(signUpModel.violations.message(for: "acceptedTerms"))
             submitButton(title: Text("Create account", bundle: .module), isSubmitting: signUpModel.isSubmitting) {
                 if let user = await signUpModel.submit() { onAuthenticated(user) }
             }

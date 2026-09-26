@@ -26,8 +26,12 @@ final class ProfileViewModel {
     private(set) var isUpdatingPhoto = false
     private(set) var violations: [RuleViolation] = []
     var displayName = ""
+    var firstName = ""
+    var lastName = ""
+    var birthDate: CalendarDate?
     var bio = ""
-    var location = ""
+    var countryCode: String?
+    var city = ""
 
     private let dependencies: ProfileDependencies
 
@@ -51,21 +55,32 @@ final class ProfileViewModel {
     func beginEditing() {
         guard let user = state.value else { return }
         displayName = user.displayName
+        firstName = user.firstName ?? ""
+        lastName = user.lastName ?? ""
+        birthDate = user.birthDate
         bio = user.bio ?? ""
-        location = user.location ?? ""
+        countryCode = user.countryCode
+        city = user.city ?? ""
         violations = []
     }
 
     /// Returns `true` when the profile was saved.
     func saveProfile() async -> Bool {
-        violations = AccountRules.validateProfile(displayName: displayName, bio: bio, location: location)
+        violations = AccountRules.validateProfile(
+            displayName: displayName, firstName: firstName, lastName: lastName, birthDate: birthDate,
+            bio: bio, countryCode: countryCode, city: city
+        )
         guard violations.isEmpty else { return false }
         do {
-            let user = try await dependencies.profile.updateProfile(
+            let user = try await dependencies.profile.updateProfile(ProfileChanges(
                 displayName: displayName.trimmingWhitespace,
+                firstName: firstName.trimmingWhitespace,
+                lastName: lastName.trimmingWhitespace,
+                birthDate: birthDate,
                 bio: bio.trimmingWhitespace.isEmpty ? nil : bio.trimmingWhitespace,
-                location: location.trimmingWhitespace.isEmpty ? nil : location.trimmingWhitespace
-            )
+                countryCode: countryCode,
+                city: city.trimmingWhitespace.isEmpty ? nil : city.trimmingWhitespace
+            ))
             state = .loaded(user)
             errorMessage = nil
             return true
@@ -139,8 +154,8 @@ public struct ProfileView: View {
                             if let bio = user.bio {
                                 Text(bio).padding(.top, Spacing.xs)
                             }
-                            if let location = user.location {
-                                Label(location, systemImage: "mappin.and.ellipse")
+                            if let place = memberPlace(city: user.city, countryCode: user.countryCode) {
+                                Label(place, systemImage: "mappin.and.ellipse")
                                     .font(.subheadline)
                                     .foregroundStyle(.secondary)
                             }
@@ -165,6 +180,27 @@ public struct ProfileView: View {
 
                     Section {
                         AppearancePicker()
+                    }
+
+                    Section {
+                        if let firstName = user.firstName, let lastName = user.lastName {
+                            LabeledContent {
+                                Text(verbatim: "\(firstName) \(lastName)")
+                            } label: {
+                                Text("Name", bundle: .module)
+                            }
+                        }
+                        if let birthDate = user.birthDate {
+                            LabeledContent {
+                                Text(birthDate.date(in: .current), format: .dateTime.day().month(.wide).year())
+                            } label: {
+                                Text("Birth date", bundle: .module)
+                            }
+                        }
+                    } header: {
+                        Text("Personal details", bundle: .module)
+                    } footer: {
+                        Text("Only you can see your name and birth date.", bundle: .module)
                     }
 
                     Section {
@@ -238,13 +274,34 @@ public struct ProfileView: View {
                     }
                     FieldErrorText(model.errorMessage)
                 }
-                TextField(String(localized: "Display name", bundle: .module), text: $model.displayName)
-                FieldErrorText(model.violations.message(for: "displayName"))
-                TextField(String(localized: "Bio", bundle: .module), text: $model.bio, axis: .vertical)
-                    .lineLimit(2...5)
-                FieldErrorText(model.violations.message(for: "bio"))
-                TextField(String(localized: "Location", bundle: .module), text: $model.location)
-                FieldErrorText(model.violations.message(for: "location"))
+                Section {
+                    TextField(String(localized: "Display name", bundle: .module), text: $model.displayName)
+                    FieldErrorText(model.violations.message(for: "displayName"))
+                    TextField(String(localized: "Bio", bundle: .module), text: $model.bio, axis: .vertical)
+                        .lineLimit(2...5)
+                    FieldErrorText(model.violations.message(for: "bio"))
+                    CountryPicker(code: $model.countryCode)
+                    FieldErrorText(model.violations.message(for: "countryCode"))
+                    TextField(String(localized: "City (optional)", bundle: .module), text: $model.city)
+                        .textContentType(.addressCity)
+                    FieldErrorText(model.violations.message(for: "city"))
+                } header: {
+                    Text("Public profile", bundle: .module)
+                }
+                Section {
+                    TextField(String(localized: "First name", bundle: .module), text: $model.firstName)
+                        .textContentType(.givenName)
+                    FieldErrorText(model.violations.message(for: "firstName"))
+                    TextField(String(localized: "Last name", bundle: .module), text: $model.lastName)
+                        .textContentType(.familyName)
+                    FieldErrorText(model.violations.message(for: "lastName"))
+                    BirthDateField(date: $model.birthDate)
+                    FieldErrorText(model.violations.message(for: "birthDate"))
+                } header: {
+                    Text("Personal details", bundle: .module)
+                } footer: {
+                    Text("Only you can see your name and birth date.", bundle: .module)
+                }
             }
             .navigationTitle(Text("Edit profile", bundle: .module))
             .onChange(of: pickedPhoto) {

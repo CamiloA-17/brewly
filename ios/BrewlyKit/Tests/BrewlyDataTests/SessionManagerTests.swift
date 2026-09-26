@@ -35,6 +35,7 @@ final class RefreshStubProtocol: URLProtocol, @unchecked Sendable {
         "id": "11111111-1111-4111-8111-111111111111",
         "username": "ana.barista",
         "displayName": "Ana",
+        "needsOnboarding": false,
         "createdAt": "2026-09-01T00:00:00Z"
       }
     }

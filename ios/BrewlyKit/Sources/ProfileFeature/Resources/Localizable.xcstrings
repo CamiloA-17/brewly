@@ -21,6 +21,16 @@
         }
       }
     },
+    "Birth date": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Fecha de nacimiento"
+          }
+        }
+      }
+    },
     "Cancel": {
       "localizations": {
         "es": {
@@ -37,6 +47,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Elegir foto de perfil"
+          }
+        }
+      }
+    },
+    "City (optional)": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ciudad (opcional)"
           }
         }
       }
@@ -101,6 +121,16 @@
         }
       }
     },
+    "First name": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nombre"
+          }
+        }
+      }
+    },
     "Followers": {
       "localizations": {
         "es": {
@@ -121,12 +151,42 @@
         }
       }
     },
-    "Location": {
+    "Last name": {
       "localizations": {
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Ubicación"
+            "value": "Apellido"
+          }
+        }
+      }
+    },
+    "Name": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nombre"
+          }
+        }
+      }
+    },
+    "Only you can see your name and birth date.": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Solo tú puedes ver tu nombre y tu fecha de nacimiento."
+          }
+        }
+      }
+    },
+    "Personal details": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Datos personales"
           }
         }
       }
@@ -137,6 +197,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Perfil"
+          }
+        }
+      }
+    },
+    "Public profile": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Perfil público"
           }
         }
       }

@@ -166,6 +166,8 @@ public extension RuleViolation {
             return String(localized: "Can't be in the future.", bundle: .module)
         case let .tooMany(max):
             return String(localized: "Must have at most \(max) items.", bundle: .module)
+        case let .tooYoung(minimumAge):
+            return String(localized: "You must be at least \(minimumAge) years old.", bundle: .module)
         }
     }
 }
