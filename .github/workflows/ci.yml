@@ -41,6 +41,8 @@ jobs:
         run: dbmate --wait up
       - name: Run SQL tests
         run: database/tests/run.sh
+      - name: Check catalog translations
+        run: python3 scripts/check_catalog_localizations.py
       - name: Roll back every migration, then migrate again
         run: |
           for _ in database/migrations/*.sql; do dbmate rollback; done

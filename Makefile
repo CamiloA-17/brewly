@@ -8,7 +8,7 @@ DBMATE_MIGRATIONS_DIR ?= database/migrations
 DBMATE_NO_DUMP_SCHEMA ?= true
 DBMATE ?= dbmate
 
-.PHONY: help db-up db-down db-migrate db-rollback db-reset db-seed db-test \
+.PHONY: help db-up db-down db-migrate db-rollback db-reset db-seed db-test catalog-test \
         shared-test server-run server-test ios-project ios-test
 
 help: ## Show available targets
@@ -35,6 +35,9 @@ db-seed: ## Load demo data (development only; password from DEMO_PASSWORD)
 
 db-test: ## Run the SQL test suite
 	database/tests/run.sh
+
+catalog-test: ## Check Spanish catalog translations against migrated PostgreSQL
+	python3 scripts/check_catalog_localizations.py
 
 shared-test: ## Test the shared Swift package
 	swift test --package-path shared/BrewlyShared

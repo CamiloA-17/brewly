@@ -118,6 +118,12 @@ public extension FlavorCategory {
 // Catalog names come from the API in English. Known items are translated through
 // dedicated string tables keyed by their English name; unknown ones fall back to it.
 
+public extension Varietal {
+    var localizedName: String {
+        Bundle.module.localizedString(forKey: name, value: name, table: "CatalogVarietals")
+    }
+}
+
 public extension BrewMethod {
     var localizedName: String {
         Bundle.module.localizedString(forKey: name, value: name, table: "CatalogMethods")

@@ -121,7 +121,7 @@ public struct RecipeDetailView: View {
                 value("Roaster", recipe.bean.roaster)
                 value("Farm", recipe.bean.farm)
                 value("Country", model.catalog.country(recipe.bean.countryCode)?.localizedName)
-                value("Varietals", recipe.bean.varietalSlugs.compactMap { model.catalog.varietal($0)?.name }.joined(separator: ", "))
+                value("Varietals", recipe.bean.varietalSlugs.compactMap { model.catalog.varietal($0)?.localizedName }.joined(separator: ", "))
                 value("Process", model.catalog.processingMethod(recipe.bean.processingMethodSlug)?.localizedName)
             } header: {
                 Text("Coffee", bundle: .module)
