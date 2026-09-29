@@ -1,12 +1,52 @@
 {
   "sourceLanguage": "en",
   "strings": {
+    "About you": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sobre ti"
+          }
+        }
+      }
+    },
+    "Account": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cuenta"
+          }
+        }
+      }
+    },
     "Already have an account? Sign in": {
       "localizations": {
         "es": {
           "stringUnit": {
             "state": "translated",
             "value": "¿Ya tienes cuenta? Inicia sesión"
+          }
+        }
+      }
+    },
+    "Complete your profile": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Completa tu perfil"
+          }
+        }
+      }
+    },
+    "Continue": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Continuar"
           }
         }
       }
@@ -21,22 +61,42 @@
         }
       }
     },
-    "Display name": {
-      "localizations": {
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Nombre visible"
-          }
-        }
-      }
-    },
     "Email": {
       "localizations": {
         "es": {
           "stringUnit": {
             "state": "translated",
             "value": "Correo electrónico"
+          }
+        }
+      }
+    },
+    "First name": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nombre"
+          }
+        }
+      }
+    },
+    "I accept the terms of use and the privacy policy": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Acepto los términos de uso y la política de privacidad"
+          }
+        }
+      }
+    },
+    "Last name": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Apellido"
           }
         }
       }
@@ -81,6 +141,16 @@
         }
       }
     },
+    "Sign out": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cerrar sesión"
+          }
+        }
+      }
+    },
     "Username": {
       "localizations": {
         "es": {
@@ -97,6 +167,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "El nombre de usuario usa minúsculas, números, puntos y guiones bajos."
+          }
+        }
+      }
+    },
+    "Your name and birth date are private. Others see your display name.": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tu nombre y tu fecha de nacimiento son privados. Los demás ven tu nombre visible."
           }
         }
       }

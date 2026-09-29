@@ -3,7 +3,7 @@ import Foundation
 /// Authentication and session lifecycle.
 public protocol AuthRepository: Sendable {
     func signIn(email: String, password: String) async throws -> UserProfile
-    func signUp(email: String, password: String, username: String, displayName: String) async throws -> UserProfile
+    func signUp(_ account: NewAccount) async throws -> UserProfile
     func signOut() async
     /// Whether credentials from a previous launch are stored.
     func hasStoredSession() async -> Bool
@@ -11,7 +11,9 @@ public protocol AuthRepository: Sendable {
 
 public protocol ProfileRepository: Sendable {
     func currentUser() async throws -> UserProfile
-    func updateProfile(displayName: String, bio: String?, location: String?) async throws -> UserProfile
+    func updateProfile(_ changes: ProfileChanges) async throws -> UserProfile
+    /// Stores the private details of an account that does not have them yet.
+    func completeOnboarding(_ details: PersonalDetails) async throws -> UserProfile
     /// Uploads a picked image (resized before sending) and uses it as the profile picture.
     func updateAvatar(imageData: Data) async throws -> UserProfile
     func removeAvatar() async throws -> UserProfile

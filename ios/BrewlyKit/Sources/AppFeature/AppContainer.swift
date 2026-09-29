@@ -42,7 +42,11 @@ public final class AppContainer {
     }
 
     var authDependencies: AuthDependencies {
-        AuthDependencies(signIn: SignInUseCase(auth: auth), signUp: SignUpUseCase(auth: auth))
+        AuthDependencies(
+            signIn: SignInUseCase(auth: auth),
+            signUp: SignUpUseCase(auth: auth),
+            completeOnboarding: CompleteOnboardingUseCase(profile: profile)
+        )
     }
 
     var beansDependencies: BeansDependencies {

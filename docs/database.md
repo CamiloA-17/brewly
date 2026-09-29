@@ -120,6 +120,7 @@ erDiagram
 | `brew_sessions` | `brew_sessions` | Actual cups with measured parameters and taste scores; existing recipe results are backfilled. |
 | `media` | `media` (and changes to `users`) | Uploaded JPEG images stored as `bytea`; avatars reference them. |
 | `remove_social_data` | — | Removes the former social tables and makes every recipe private. |
+| `profile_details` | — (changes to `users`, `auth_identities`) | Private details (first and last name, birth date), country and city, role, onboarding and activity timestamps; Sign in with Apple fields. |
 
 ## Integrity rules
 
@@ -153,6 +154,15 @@ erDiagram
   recipe title, bean, method and actual parameters. Extraction yield is generated from dose,
   beverage weight and TDS. Deleting or editing a recipe does not erase
   recorded cups; the optional recipe link is cleared on deletion.
+- **Personal details.** `users.first_name`, `last_name` and `birth_date` are private (only
+  `/v1/me` returns them). They are nullable because Sign in with Apple may not provide them, but
+  `users_onboarding_complete` requires them, plus `terms_accepted_at`, once
+  `onboarding_completed_at` is set. The minimum age (13) depends on today's date, so
+  `AccountRules` enforces it instead of a CHECK. `country_code` is any ISO 3166-1 alpha-2 code
+  (not a coffee origin from `countries`) and `city` is optional.
+- **Sign in with Apple.** `auth_identities.provider_refresh_token` (encrypted by the API) and
+  `provider_email` are only allowed on `apple` identities; the token is needed to revoke the
+  authorization when the account is deleted.
 
 ## Conventions
 

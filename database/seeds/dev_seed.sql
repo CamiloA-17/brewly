@@ -8,11 +8,12 @@ BEGIN;
 
 CREATE EXTENSION IF NOT EXISTS pgcrypto;
 
-INSERT INTO users (id, username, display_name, email, bio, location) VALUES
+INSERT INTO users (id, username, display_name, email, bio, first_name, last_name, birth_date,
+                   country_code, city, terms_accepted_at, onboarding_completed_at) VALUES
     ('11111111-1111-4111-8111-111111111111', 'ana.barista', 'Ana', 'ana@example.com',
-     'Home barista. Pour-over nerd.', 'Bogotá, CO'),
+     'Home barista. Pour-over nerd.', 'Ana', 'Demo', '1995-04-12', 'CO', 'Bogotá', now(), now()),
     ('22222222-2222-4222-8222-222222222222', 'leo.roaster', 'Leo', 'leo@example.com',
-     'Small-batch roaster. Espresso every morning.', 'Medellín, CO')
+     'Small-batch roaster. Espresso every morning.', 'Leo', 'Demo', '1990-11-03', 'CO', 'Medellín', now(), now())
 ON CONFLICT (id) DO NOTHING;
 
 INSERT INTO auth_identities (user_id, provider, subject, password_hash) VALUES

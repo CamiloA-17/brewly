@@ -125,7 +125,9 @@ flowchart LR
 ### Authentication
 
 Email and password today (Bcrypt), Sign in with Apple next (`auth_identities` already supports
-it). Access tokens are short-lived JWTs; refresh tokens are opaque, stored hashed and rotated on
+it, including the Apple refresh token needed to revoke it on account deletion). Sign-up asks for
+first and last name, birth date (13 or older) and acceptance of the terms; accounts without them
+(`needsOnboarding`) see `OnboardingView` before the app. Access tokens are short-lived JWTs; refresh tokens are opaque, stored hashed and rotated on
 every use. Reusing a consumed refresh token revokes all of the user's sessions.
 
 ```mermaid

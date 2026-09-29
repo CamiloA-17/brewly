@@ -29,6 +29,10 @@ public enum Endpoints {
         Endpoint(.patch, "v1/me", body: body)
     }
 
+    public static func completeOnboarding(_ body: CompleteOnboardingRequest) -> Endpoint<CurrentUserDTO> {
+        Endpoint(.put, "v1/me/onboarding", body: body)
+    }
+
     public static let deleteMe = Endpoint<EmptyResponse>(.delete, "v1/me")
 
     public static let myMethods = Endpoint<UserMethodsDTO>(.get, "v1/me/methods")
