@@ -11,6 +11,13 @@ database: dbmate migrations create the schema and six global catalogs. Never run
    Connect the Railway API service to that branch for the first release; switch its GitHub source
    to `main` after the changes are integrated. Do not use a restrictive root directory: the
    Docker build needs `server/`, `shared/` and `database/` from the repository root.
+
+   After `main` contains the release and its CI run passes, choose `main` in the API service's
+   Settings → Source, or run:
+
+   ```sh
+   railway service source connect --repo CamiloA-17/brewly --branch main --service api
+   ```
 2. In one Railway project and environment, create a PostgreSQL service and an API service in
    the same region. Set the API builder to Dockerfile and its path to `server/Dockerfile`.
 3. Give the API service `DATABASE_URL` as a reference to the PostgreSQL service's private
@@ -25,8 +32,9 @@ database: dbmate migrations create the schema and six global catalogs. Never run
    image contains dbmate and `/app/database/migrations`; the command must finish successfully
    before the API starts. Set the healthcheck path to `/health` with a 300-second timeout.
    Do not enable serverless sleep for the API.
-5. Enable daily PostgreSQL backups. Set a workspace compute usage email alert at US$5 and a
-   hard limit at US$10. Hitting the hard limit stops workloads, including the API and database.
+5. Enable daily PostgreSQL backups in the Postgres service's Backups tab. Set a workspace
+   compute usage email alert at US$5 and a hard limit at US$10. Hitting the hard limit stops
+   workloads, including the API and database.
 
 The existing `server/Dockerfile` is also used by the local Compose stack. Vapor reads `PORT`
 at startup and otherwise listens on 8080. A failed migration stops the new deployment; inspect
@@ -53,7 +61,6 @@ physical iPhone; the local override is ignored by Git.
    Verify an iPhone can reach the API while the developer's Mac is off. Delete the temporary
    accounts after these checks.
 4. Review deploy logs, database backup status, and the Railway usage dashboard after release.
-   Test restoration to a separate database before relying on backups for real user data.
 
 To return to an earlier API release, redeploy a known-good image or commit. Database migrations
 are managed separately and may be destructive; take a backup before any future migration that
