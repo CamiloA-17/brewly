@@ -18,7 +18,7 @@ struct DTOCodingTests {
         let json = try #require(String(data: BrewlyJSON.makeEncoder().encode(request), encoding: .utf8))
         #expect(json.contains(#""grindSize":"medium_fine""#))
         #expect(json.contains(#""doseG":15"#))
-        #expect(json.contains(#""visibility":"public""#))
+        #expect(json.contains(#""visibility":"private""#))
         #expect(!json.contains("yieldG"))
 
         let decoded = try BrewlyJSON.makeDecoder().decode(UpsertRecipeRequest.self, from: Data(json.utf8))

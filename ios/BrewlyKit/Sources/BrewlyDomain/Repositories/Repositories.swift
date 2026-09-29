@@ -53,6 +53,12 @@ public protocol RecipeRepository: Sendable {
     func delete(id: UUID) async throws
 }
 
+/// The signed-in user's preparation history.
+public protocol BrewSessionRepository: Sendable {
+    func sessions(recipeID: UUID?, cursor: String?) async throws -> PagedResult<BrewSession>
+    func create(_ draft: BrewSessionDraft) async throws -> BrewSession
+}
+
 /// Recipes the signed-in user saved to brew later.
 public protocol RecipeSavesRepository: Sendable {
     func savedRecipes(cursor: String?) async throws -> PagedResult<RecipeSummary>

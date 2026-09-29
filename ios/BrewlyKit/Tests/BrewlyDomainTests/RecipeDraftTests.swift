@@ -33,6 +33,21 @@ struct RecipeDraftTests {
         #expect(draft.visibility == .public)
     }
 
+    @Test("Copying a saved recipe clears results and makes it private")
+    func copyingASavedRecipeMakesAPrivatePlan() {
+        let original = Recipe(
+            id: UUID(), author: UserSummary(id: UUID(), username: "leo.roaster", displayName: "Leo"),
+            bean: BeanSummary(id: UUID(), name: "Leo's bean"), methodSlug: "v60",
+            title: "Saved V60", doseG: 15, waterG: 250, ratio: 16.7,
+            grindSize: .mediumFine, rating: 5, notes: "Nice"
+        )
+        let copy = RecipeDraft(copyOf: original)
+        #expect(copy.beanID == nil)
+        #expect(copy.forkedFromID == nil)
+        #expect(copy.visibility == .private)
+        #expect(copy.rating == nil && copy.notes.isEmpty)
+    }
+
     @Test("Method defaults fill empty parameters")
     func appliesDefaults() {
         var draft = RecipeDraft()

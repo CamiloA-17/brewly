@@ -17,15 +17,20 @@ final class RecipeFormViewModel {
 
     /// The recipe being edited, or `nil` when creating one.
     let recipeID: UUID?
+    let isCopy: Bool
     private let dependencies: RecipesDependencies
 
     /// - Parameters:
     ///   - recipe: The recipe to edit, or `nil` to create one.
     ///   - remixOf: A recipe to start from when creating a remix.
-    init(recipe: Recipe?, remixOf original: Recipe? = nil, dependencies: RecipesDependencies) {
+    init(recipe: Recipe?, remixOf original: Recipe? = nil, copyOf source: Recipe? = nil,
+         dependencies: RecipesDependencies) {
         self.recipeID = recipe?.id
+        self.isCopy = source != nil
         if let recipe {
             draft = RecipeDraft(recipe: recipe)
+        } else if let source {
+            draft = RecipeDraft(copyOf: source)
         } else if let original {
             draft = RecipeDraft(remixOf: original)
         } else {
@@ -58,7 +63,7 @@ final class RecipeFormViewModel {
             self.catalog = loadedCatalog
             self.beans = loadedBeans
             self.myMethodSlugs = loadedMethods
-            if draft.beanID == nil { draft.beanID = loadedBeans.first?.id }
+            if draft.beanID == nil && !isCopy { draft.beanID = loadedBeans.first?.id }
         } catch {
             errorMessage = error.brewlyMessage
         }

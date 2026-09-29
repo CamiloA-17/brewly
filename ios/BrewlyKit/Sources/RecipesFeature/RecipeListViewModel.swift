@@ -6,14 +6,6 @@ import Observation
 @MainActor
 @Observable
 final class RecipeListViewModel {
-    enum Scope: Hashable {
-        case mine
-        case saved
-        case explore
-    }
-
-    var scope: Scope = .mine
-    var methodFilter: String?
     private(set) var state: LoadState<[RecipeSummary]> = .idle
     private(set) var catalog: Catalog = .empty
     private(set) var isLoadingMore = false
@@ -56,13 +48,6 @@ final class RecipeListViewModel {
     }
 
     private func fetch(cursor: String?) async throws -> PagedResult<RecipeSummary> {
-        switch scope {
-        case .mine:
-            return try await dependencies.recipes.myRecipes(cursor: cursor)
-        case .saved:
-            return try await dependencies.saves.savedRecipes(cursor: cursor)
-        case .explore:
-            return try await dependencies.recipes.explore(filter: RecipeFilter(methodSlug: methodFilter), cursor: cursor)
-        }
+        try await dependencies.recipes.myRecipes(cursor: cursor)
     }
 }

@@ -23,28 +23,15 @@ erDiagram
     flavor_notes ||--o{ bean_flavor_notes : "describes"
 
     coffee_beans ||--o{ recipes : "brewed in"
+    recipes |o--o{ brew_sessions : "used for"
+    users ||--o{ brew_sessions : "records"
     brew_methods ||--o{ recipes : "method of"
     grinders ||--o{ recipes : "grinds for"
     recipes ||--o{ recipe_steps : "has ordered"
     recipes ||--o{ recipe_flavor_notes : has
     flavor_notes ||--o{ recipe_flavor_notes : describes
-    recipes ||--o{ recipe_saves : "saved in"
-    recipes |o--o{ recipes : "forked from"
-
-    users ||--o{ follows : follows
-    users ||--o{ user_blocks : blocks
-    users ||--o{ posts : publishes
-    recipes |o--o{ posts : "shared in"
-    coffee_beans |o--o{ posts : "shared in"
-    posts ||--o{ post_media : has
     users ||--o{ media : uploads
-    media ||--o| post_media : "shown in"
     media |o--o| users : "avatar of"
-    posts ||--o{ post_likes : receives
-    posts ||--o{ comments : receives
-    comments |o--o{ comments : "replies to"
-    users ||--o{ notifications : receives
-    users ||--o{ reports : files
 
     coffee_beans {
         uuid id PK
@@ -98,6 +85,26 @@ erDiagram
         grind_size default_grind_size
         numeric default_water_temp_c
     }
+
+    brew_sessions {
+        uuid id PK
+        uuid user_id FK
+        uuid recipe_id FK
+        text recipe_title
+        text bean_name
+        text method_slug FK
+        numeric dose_g
+        numeric water_g
+        numeric yield_g
+        int elapsed_s
+        numeric tds_percent
+        numeric extraction_yield_percent "generated"
+        smallint rating
+        smallint acidity
+        smallint bitterness
+        smallint body
+        timestamptz created_at
+    }
 ```
 
 ## Tables
@@ -109,18 +116,16 @@ erDiagram
 | `catalogs` | `countries`, `varietals`, `processing_methods`, `brew_methods`, `grinders`, `flavor_notes` | Global reference data shared by every user. |
 | `catalog_seed` | — | ~46 countries, ~37 varietals, 20 processes, 18 brew methods, 20 grinders, 51 flavor notes. |
 | `coffee_beans` | `coffee_beans`, `bean_varietals`, `bean_flavor_notes` | The user's beans; blends have several varietals. |
-| `recipes` | `recipes`, `recipe_steps`, `recipe_flavor_notes`, `recipe_saves`, `user_brew_methods` | Recipes (preparations), pour schedule, perceived notes, bookmarks, the user's methods. |
-| `social` | `follows`, `user_blocks`, `posts`, `post_media`, `post_likes`, `comments` | Social graph and feed content; `can_view_content()` function. |
-| `notifications_moderation` | `notifications`, `reports` | Activity notifications and reports of objectionable content. |
-| `media` | `media` (and changes to `post_media`, `posts`, `users`) | Uploaded JPEG images stored as `bytea`; post photos and avatars reference them. |
-| `notification_delivery` | — | Deduplication and pagination indexes for `notifications`. |
+| `recipes` | `recipes`, `recipe_steps`, `recipe_flavor_notes`, `user_brew_methods` | Private reusable preparation plans and their steps. |
+| `brew_sessions` | `brew_sessions` | Actual cups with measured parameters and taste scores; existing recipe results are backfilled. |
+| `media` | `media` (and changes to `users`) | Uploaded JPEG images stored as `bytea`; avatars reference them. |
+| `remove_social_data` | — | Removes the former social tables and makes every recipe private. |
 
 ## Integrity rules
 
 - **Ownership through composite foreign keys.**
   `recipes (bean_id, author_id) → coffee_beans (id, owner_id)` guarantees that a recipe only uses
-  a bean of its own author. Posts use the same technique for the recipe or bean they share, and
-  replies reference `(parent_id, post_id)` so they always belong to the parent's post.
+  a bean of its own author.
 - **Generated columns.** `recipes.ratio = coalesce(water_g, yield_g) / dose_g` (brew water for
   filter methods, beverage weight for espresso) and
   `recipes.extraction_yield_percent = yield_g × tds_percent / dose_g`. They can't drift from
@@ -135,25 +140,19 @@ erDiagram
   (`archived_at`). Deleting a user removes everything they own in a single statement, as the
   App Store requires in-app account deletion. Catalog rows in use can't be deleted, and slug
   changes cascade.
-- **Visibility.** `can_view_content(viewer, owner, visibility)` is the single place that decides
-  whether someone can see content: owners always can; blocks hide everything in both directions;
-  otherwise `public` is visible to everyone and `followers` only to followers.
+- **Privacy.** The API scopes recipes, beans and brew sessions to their owner. Recipe writes
+  always store `private`, including requests from older clients that send another visibility.
 - **Catalog keys.** Catalogs use stable slugs (`v60`, `washed`, `geisha`) or ISO codes as primary
   keys, so references are identical in every environment and readable in queries.
 
-- **Counts are computed when read.** Follower, save, remix and recipe counts are `count(*)`
-  subqueries over indexed keys (for example the `follows` primary key and
-  `recipe_saves_recipe_idx`), so there are no counter columns to keep in sync.
 - **Images.** `media` stores JPEG bytes (at most 2 MB and 4096 × 4096 px) with the uploader as
-  owner. Each image is in at most one post (`post_media.media_id` is unique) or used as an
-  avatar; `users.avatar_url` is generated from `avatar_media_id`, so it always points to
-  `/v1/media/{id}`. Deleting a post deletes its images, and uploads that are never used are
-  deleted after a day. See [ADR 0006](adr/0006-media-in-postgresql.md).
-- **Notifications** are written by the API in the same transaction as the action.
-  `notifications_once_idx` makes follows, likes and saves notify once per actor and target, and
-  `notifications_kind_target` checks that each kind points to the right post, comment or recipe.
-- **Remixes.** `recipes.forked_from_id` points to the original recipe and becomes `NULL` when the
-  original is deleted, so a remix survives its original.
+  owner. `users.avatar_url` is generated from `avatar_media_id`, so it always points to
+  `/v1/media/{id}`. Uploads that are never used as an avatar are deleted after a day. See
+  [ADR 0006](adr/0006-media-in-postgresql.md).
+- **Brew history.** Each session belongs to the user who owns its recipe. It snapshots the
+  recipe title, bean, method and actual parameters. Extraction yield is generated from dose,
+  beverage weight and TDS. Deleting or editing a recipe does not erase
+  recorded cups; the optional recipe link is cleared on deletion.
 
 ## Conventions
 

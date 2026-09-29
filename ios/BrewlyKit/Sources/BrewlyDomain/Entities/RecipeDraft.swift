@@ -44,7 +44,7 @@ public struct RecipeDraft: Hashable, Sendable {
     public var notes = ""
     public var flavorNoteSlugs: Set<String> = []
     public var steps: [Step] = []
-    public var visibility: Visibility = .public
+    public var visibility: Visibility = .private
 
     public init() {}
 
@@ -91,6 +91,19 @@ public struct RecipeDraft: Hashable, Sendable {
         notes = ""
         flavorNoteSlugs = []
         visibility = .public
+    }
+
+    /// Copies a previously saved recipe into the user's private library.
+    /// The new recipe uses one of the user's beans and does not notify the source author.
+    public init(copyOf recipe: Recipe) {
+        self.init(recipe: recipe)
+        beanID = nil
+        forkedFromID = nil
+        tdsPercent = nil
+        rating = nil
+        notes = ""
+        flavorNoteSlugs = []
+        visibility = .private
     }
 
     /// Live brew ratio, computed like the database does.

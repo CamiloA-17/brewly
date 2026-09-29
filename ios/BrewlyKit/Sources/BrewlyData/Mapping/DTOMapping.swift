@@ -288,6 +288,19 @@ extension UpsertBeanRequest {
     }
 }
 
+extension BrewSession {
+    init(_ dto: BrewSessionDTO) {
+        self.init(id: dto.id, recipeID: dto.recipeId, recipeTitle: dto.recipeTitle,
+                  beanName: dto.beanName, methodSlug: dto.methodSlug, doseG: dto.doseG,
+                  waterG: dto.waterG, yieldG: dto.yieldG, grindSetting: dto.grindSetting,
+                  waterTempC: dto.waterTempC, elapsedS: dto.elapsedS,
+                  tdsPercent: dto.tdsPercent, extractionYieldPercent: dto.extractionYieldPercent,
+                  rating: dto.rating,
+                  acidity: dto.acidity, bitterness: dto.bitterness, body: dto.body,
+                  notes: dto.notes, createdAt: dto.createdAt)
+    }
+}
+
 extension UpsertRecipeRequest {
     init(_ input: RecipeInput) {
         let draft = input.draft

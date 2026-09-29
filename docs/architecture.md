@@ -1,6 +1,6 @@
 # Architecture
 
-Brewly is a Swift full-stack monorepo: a native iOS app, a Vapor API and a PostgreSQL
+Brewly is a Swift full-stack brewing companion: a native iOS app, a Vapor API and a PostgreSQL
 database, with a shared Swift package that both the app and the server compile.
 
 ## System overview
@@ -33,7 +33,8 @@ flowchart LR
 | **BrewlyShared** (`shared/`) | `BrewlyCore`: enums mirroring the database, brewing math, validation rules. `BrewlyAPI`: request/response DTOs. |
 | **PostgreSQL** (`database/`) | Source of truth. Integrity is enforced with foreign keys, CHECK constraints, domains and generated columns. |
 
-Because the app and the server compile the same `BrewlyCore` rules, a form in the app and the
+Because the app and the server compile the same `BrewlyCore` rules, including
+`BrewSessionRules`, a form in the app and the
 API reject exactly the same input, and the ratio shown while typing is computed with the same
 formula as the database's generated column.
 
@@ -42,11 +43,11 @@ formula as the database's generated column.
 A **user** owns **coffee beans** (one bag each: farm, altitude, varietals, process, roast…).
 **Brew methods**, varietals, processes, countries, grinders and flavor notes are **global
 catalogs** shared by everyone; each user marks the methods they use. A **recipe** is a
-preparation: it uses one of the author's beans and a brew method, and stores dose, water or
+reusable preparation plan: it uses one of the owner's beans and a brew method, and stores dose, water or
 beverage weight, the generated **ratio**, grind (size, grinder, setting, microns), temperature,
-bloom, total time, pressure, filter, water, ordered **steps** and results (TDS, generated
-**extraction yield**, rating, tasting notes). **Posts** share text, a recipe or a bean; people
-follow, like, comment, block and report. See [database.md](database.md).
+bloom, total time, pressure, filter, water and ordered **steps**. A **brew session** records
+the actual measurements, elapsed time and taste of one cup. Recipes and sessions are private
+to their owner. See [database.md](database.md).
 
 ## iOS app
 
@@ -56,7 +57,7 @@ XcodeGen (`ios/project.yml`) only contains `BrewlyApp.swift` and assets.
 ```mermaid
 flowchart TD
     subgraph Presentation
-        Features["Feature modules<br/>Auth · Beans · Recipes · Methods · Feed · Profile · People · Notifications<br/>SwiftUI views + @Observable view models"]
+        Features["Feature modules<br/>Auth · Beans · Recipes · Methods · Profile<br/>SwiftUI views + @Observable view models"]
         DS["BrewlyDesignSystem<br/>theme · components · localization"]
     end
     Domain["BrewlyDomain<br/>entities · repository protocols · use cases"]
@@ -112,12 +113,11 @@ flowchart LR
     PG --> DB[("PostgreSQL")]
 ```
 
-- One folder per feature (`Features/Auth`, `Users`, `Catalog`, `Beans`, `Recipes`, `People`,
-  `Media`, `Posts`, `Notifications`).
+- Active feature folders are `Features/Auth`, `Users`, `Catalog`, `Beans`, `Recipes`, `Brews`
+  and `Media`. Social routes and their PostgreSQL tables have been removed.
 - **SQL-first.** The schema is owned by the migrations in `database/`; Fluent is used only for
   configuration and connection pooling (no Fluent models or migrations). Repositories write
-  explicit SQL so PostgreSQL features (generated columns, composite keys, the
-  `can_view_content` function) are used directly.
+  explicit SQL so PostgreSQL features such as generated columns and composite keys are used directly.
 - **Errors.** Services throw `AppError` values with stable codes; `APIErrorMiddleware` renders
   every error, including PostgreSQL constraint violations, as `APIErrorResponse` JSON.
 - **Pagination** is keyset-based on `(created_at, id)` with an opaque cursor.
@@ -161,12 +161,7 @@ sequenceDiagram
 
 ## Roadmap
 
-1. **Now: architecture and skeleton.** Schema, shared package, API for auth, catalogs, beans and
-   recipes, and the iOS app with navigation and bean/recipe screens.
-2. **Social:** profiles of other users, follow, saving and remixing (forking) recipes, feed
-   (followed users + explore), posts with photos, likes, comments and in-app notifications
-   *(done)*. Next: push notifications with APNs (a `device_tokens` table and a sender called
-   from `NotificationWriter`, which already runs for every notification).
-3. **Trust and safety:** report and block in the UI (App Store Guideline 1.2), moderation queue.
-4. **More:** Sign in with Apple, search (`pg_trgm`), guided brew timer that plays recipe steps,
-   offline cache, more languages.
+1. **Brewing companion:** recipe plans, guided timer and private brew sessions.
+2. **Next:** inventory that deducts each dose, and offline session capture with
+   synchronization. The first side-by-side comparison is available in recipe history.
+3. **Later:** Sign in with Apple, more languages and optional device integrations.

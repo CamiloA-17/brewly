@@ -2,7 +2,7 @@ import BrewlyAPI
 import Foundation
 import PostgresNIO
 
-/// Business rules for recipes (preparations).
+/// Business rules for reusable recipe plans and legacy result fields.
 struct RecipeService: Sendable {
     let recipes: any RecipeRepository
     let catalog: any CatalogRepository
@@ -18,10 +18,6 @@ struct RecipeService: Sendable {
 
     func create(authorID: UUID, _ request: UpsertRecipeRequest) async throws -> RecipeDTO {
         let recipe = try await validated(request)
-        // A remix must start from a recipe the author can see.
-        if let originalID = recipe.forkedFromId, try await recipes.find(id: originalID, viewerID: authorID) == nil {
-            throw AppError.unknownReference(field: "forkedFromId")
-        }
         return try await mappingReferenceErrors { try await recipes.create(authorID: authorID, recipe) }
     }
 
@@ -36,17 +32,11 @@ struct RecipeService: Sendable {
         guard try await recipes.delete(id: id, authorID: authorID) else { throw AppError.notFound("Recipe") }
     }
 
-    func save(id: UUID, userID: UUID) async throws -> SaveStateDTO {
-        guard let state = try await recipes.save(id: id, userID: userID) else { throw AppError.notFound("Recipe") }
-        return state
-    }
-
-    func unsave(id: UUID, userID: UUID) async throws -> SaveStateDTO {
-        try await recipes.unsave(id: id, userID: userID)
-    }
-
     /// Checks the recipe against its brew method and normalizes optional text.
     func validated(_ request: UpsertRecipeRequest) async throws -> UpsertRecipeRequest {
+        if request.forkedFromId != nil {
+            throw AppError.validation([RuleViolation(field: "forkedFromId", kind: .notAllowed)])
+        }
         guard let method = try await catalog.brewMethod(slug: request.methodSlug) else {
             throw AppError.unknownReference(field: "methodSlug")
         }
@@ -54,6 +44,8 @@ struct RecipeService: Sendable {
         guard violations.isEmpty else { throw AppError.validation(violations) }
 
         var recipe = request
+        recipe.forkedFromId = nil
+        recipe.visibility = .private
         recipe.title = request.title.trimmingWhitespace
         recipe.description = request.description.nilIfBlank
         recipe.grinderSlug = request.grinderSlug.nilIfBlank
@@ -76,7 +68,6 @@ struct RecipeService: Sendable {
         } catch let error as PSQLError where error.isForeignKeyViolation {
             let field = switch error.constraintName {
             case "recipes_bean_owned_by_author": "beanId"
-            case "recipes_forked_from_id_fkey": "forkedFromId"
             case "recipes_method_slug_fkey": "methodSlug"
             case "recipes_grinder_slug_fkey": "grinderSlug"
             case "recipe_flavor_notes_flavor_note_slug_fkey": "flavorNoteSlugs"

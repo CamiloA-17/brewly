@@ -2,7 +2,7 @@ import BrewlyDesignSystem
 import BrewlyDomain
 import SwiftUI
 
-/// Creates or edits a recipe with every brewing parameter.
+/// Creates or edits a reusable brewing plan.
 struct RecipeFormView: View {
     @State private var model: RecipeFormViewModel
     @Environment(\.dismiss) private var dismiss
@@ -11,10 +11,12 @@ struct RecipeFormView: View {
     init(
         recipe: Recipe?,
         remixOf original: Recipe? = nil,
+        copyOf source: Recipe? = nil,
         dependencies: RecipesDependencies,
         onSaved: @escaping @MainActor (Recipe) -> Void
     ) {
-        _model = State(initialValue: RecipeFormViewModel(recipe: recipe, remixOf: original, dependencies: dependencies))
+        _model = State(initialValue: RecipeFormViewModel(recipe: recipe, remixOf: original,
+                                                         copyOf: source, dependencies: dependencies))
         self.onSaved = onSaved
     }
 
@@ -84,7 +86,6 @@ struct RecipeFormView: View {
             extractionSection
             waterSection
             stepsSection
-            resultsSection
             if let errorMessage = model.errorMessage {
                 Section { FieldErrorText(errorMessage) }
             }
@@ -99,19 +100,13 @@ struct RecipeFormView: View {
             FieldErrorText(model.message(for: "title"))
             TextField(String(localized: "Description", bundle: .module), text: $model.draft.description, axis: .vertical)
                 .lineLimit(2...5)
-            Picker(selection: $model.draft.visibility) {
-                ForEach(Visibility.allCases, id: \.self) { visibility in
-                    Label(visibility.localizedName, systemImage: visibility.systemImage).tag(visibility)
-                }
-            } label: {
-                Text("Visible to", bundle: .module)
-            }
         }
     }
 
     private var coffeeSection: some View {
         Section {
             Picker(selection: $model.draft.beanID) {
+                Text("Choose a bean", bundle: .module).tag(UUID?.none)
                 ForEach(model.beans) { bean in
                     Text(bean.name).tag(Optional(bean.id))
                 }
@@ -245,44 +240,6 @@ struct RecipeFormView: View {
             Text("Steps", bundle: .module)
         } footer: {
             Text("Water targets are the scale reading to reach during the step.", bundle: .module)
-        }
-    }
-
-    private var resultsSection: some View {
-        Section {
-            numberField("TDS (%)", value: $model.draft.tdsPercent, field: "tdsPercent")
-            LabeledContent {
-                Text(model.draft.extractionYield.map(BrewFormat.percent) ?? "—")
-                    .monospacedDigit()
-            } label: {
-                Text("Extraction yield", bundle: .module)
-            }
-            LabeledContent {
-                RatingView(rating: $model.draft.rating)
-            } label: {
-                Text("Rating", bundle: .module)
-            }
-            NavigationLink {
-                MultiSelectionList(items: model.catalog.flavorNotes, selection: $model.draft.flavorNoteSlugs) {
-                    $0.localizedName
-                } subtitle: {
-                    $0.category.localizedName
-                }
-                .navigationTitle(Text("Tasting notes", bundle: .module))
-            } label: {
-                LabeledContent {
-                    Text(model.draft.flavorNoteSlugs.compactMap { model.catalog.flavorNote($0)?.localizedName }.sorted().joined(separator: ", "))
-                } label: {
-                    Text("Tasting notes", bundle: .module)
-                }
-            }
-            TextField(String(localized: "Notes", bundle: .module), text: $model.draft.notes, axis: .vertical)
-                .lineLimit(2...6)
-            FieldErrorText(model.message(for: "notes"))
-        } header: {
-            Text("Results", bundle: .module)
-        } footer: {
-            Text("Extraction yield is calculated from the beverage weight and TDS.", bundle: .module)
         }
     }
 

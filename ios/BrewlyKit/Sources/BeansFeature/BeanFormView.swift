@@ -62,13 +62,6 @@ struct BeanFormView: View {
             FieldErrorText(model.message(for: "name"))
             TextField(String(localized: "Roaster", bundle: .module), text: $model.draft.roaster)
             FieldErrorText(model.message(for: "roaster"))
-            Picker(selection: $model.draft.visibility) {
-                ForEach(Visibility.allCases, id: \.self) { visibility in
-                    Label(visibility.localizedName, systemImage: visibility.systemImage).tag(visibility)
-                }
-            } label: {
-                Text("Visible to", bundle: .module)
-            }
             if model.isEditing {
                 Toggle(isOn: $model.draft.isArchived) {
                     Text("Archived", bundle: .module)

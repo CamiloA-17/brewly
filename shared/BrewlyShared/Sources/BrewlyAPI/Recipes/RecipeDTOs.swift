@@ -35,7 +35,7 @@ public struct RecipeStepInput: Codable, Sendable, Equatable, Hashable {
     }
 }
 
-/// A full recipe (a preparation) with every brewing parameter.
+/// A reusable preparation plan. Result fields remain for legacy clients.
 public struct RecipeDTO: Codable, Sendable, Equatable, Hashable {
     public var id: UUID
     public var author: UserSummaryDTO
@@ -231,7 +231,7 @@ public struct RecipeSummaryDTO: Codable, Sendable, Equatable, Hashable {
 /// Body of `POST /recipes` and `PUT /recipes/{id}`.
 public struct UpsertRecipeRequest: Codable, Sendable, Equatable {
     public var beanId: UUID
-    /// The recipe this one remixes. Only read on create; the viewer must be able to see it.
+    /// Retired remix field; requests that supply it are rejected.
     public var forkedFromId: UUID?
     public var methodSlug: String
     public var title: String
@@ -284,7 +284,7 @@ public struct UpsertRecipeRequest: Codable, Sendable, Equatable {
         notes: String? = nil,
         flavorNoteSlugs: [String] = [],
         steps: [RecipeStepInput] = [],
-        visibility: Visibility = .public
+        visibility: Visibility = .private
     ) {
         self.beanId = beanId
         self.forkedFromId = forkedFromId

@@ -16,7 +16,7 @@ public struct RecipeStep: Hashable, Sendable {
     }
 }
 
-/// A recipe (a preparation): every parameter needed to reproduce a cup.
+/// A reusable preparation plan. Result fields remain for legacy recipes.
 public struct Recipe: Identifiable, Hashable, Sendable {
     public var id: UUID
     public var author: UserSummary

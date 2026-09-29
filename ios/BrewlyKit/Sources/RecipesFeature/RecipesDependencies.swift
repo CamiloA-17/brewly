@@ -3,7 +3,7 @@ import Foundation
 
 public struct RecipesDependencies: Sendable {
     public var recipes: any RecipeRepository
-    public var saves: any RecipeSavesRepository
+    public var sessions: (any BrewSessionRepository)?
     public var beans: any BeanRepository
     public var catalog: any CatalogRepository
     public var userMethods: any UserMethodsRepository
@@ -13,7 +13,7 @@ public struct RecipesDependencies: Sendable {
 
     public init(
         recipes: any RecipeRepository,
-        saves: any RecipeSavesRepository,
+        sessions: (any BrewSessionRepository)? = nil,
         beans: any BeanRepository,
         catalog: any CatalogRepository,
         userMethods: any UserMethodsRepository,
@@ -21,7 +21,7 @@ public struct RecipesDependencies: Sendable {
         currentUserID: UUID
     ) {
         self.recipes = recipes
-        self.saves = saves
+        self.sessions = sessions
         self.beans = beans
         self.catalog = catalog
         self.userMethods = userMethods

@@ -2,12 +2,15 @@ import BrewlyDesignSystem
 import BrewlyDomain
 import SwiftUI
 
-/// A recipe with every parameter. Other members' recipes can be saved and remixed.
+/// A reusable preparation plan with the cups brewed from it.
 public struct RecipeDetailView: View {
     @State private var model: RecipeDetailViewModel
     @State private var isEditing = false
-    @State private var isRemixing = false
     @State private var isConfirmingDelete = false
+    @State private var isBrewing = false
+    @State private var history: [BrewSession] = []
+    @State private var historyCursor: String?
+    @State private var isLoadingHistory = false
     @Environment(\.dismiss) private var dismiss
 
     public init(recipeID: UUID, dependencies: RecipesDependencies) {
@@ -21,28 +24,17 @@ public struct RecipeDetailView: View {
         .navigationTitle(model.state.value?.title ?? "")
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
-            if let recipe = model.state.value {
-                if !model.isOwner {
-                    ToolbarItem(placement: .primaryAction) {
-                        Button {
-                            Task { await model.toggleSave() }
-                        } label: {
-                            Label {
-                                recipe.isSaved ? Text("Unsave", bundle: .module) : Text("Save", bundle: .module)
-                            } icon: {
-                                Image(systemName: recipe.isSaved ? "bookmark.fill" : "bookmark")
-                            }
-                        }
-                    }
-                }
+            if model.isOwner {
                 ToolbarItem(placement: .primaryAction) {
                     actionsMenu
                 }
             }
         }
-        .sheet(isPresented: $isRemixing) {
-            if let recipe = model.state.value {
-                RecipeFormView(recipe: nil, remixOf: recipe, dependencies: model.dependencies) { _ in }
+        .sheet(isPresented: $isBrewing) {
+            if let recipe = model.state.value, let sessions = model.dependencies.sessions {
+                GuidedBrewView(recipe: recipe, sessions: sessions) { saved in
+                    history.insert(saved, at: 0)
+                }
             }
         }
         .sheet(isPresented: $isEditing) {
@@ -65,20 +57,14 @@ public struct RecipeDetailView: View {
                 Text("Delete recipe", bundle: .module)
             }
         }
-        .task { await model.load() }
+        .task {
+            await model.load()
+            await loadHistory(replacing: true)
+        }
     }
 
     private var actionsMenu: some View {
         Menu {
-            Button {
-                isRemixing = true
-            } label: {
-                Label {
-                    Text("Remix", bundle: .module)
-                } icon: {
-                    Image(systemName: "arrow.triangle.branch")
-                }
-            }
             if model.isOwner {
                 Button {
                     isEditing = true
@@ -121,22 +107,12 @@ public struct RecipeDetailView: View {
                         waterTempC: recipe.waterTempC,
                         totalTimeS: recipe.totalTimeS
                     )
-                    Text(statsText(recipe))
-                        .font(.footnote)
-                        .foregroundStyle(.secondary)
                 }
-                NavigationLink(value: AppRoute.member(recipe.author.id)) {
-                    MemberRow(member: recipe.author)
-                }
-                if let original = recipe.forkedFrom {
-                    NavigationLink(value: AppRoute.recipe(original.id)) {
-                        Label {
-                            Text("Remix of \(original.title) by @\(original.author.username)", bundle: .module)
-                        } icon: {
-                            Image(systemName: "arrow.triangle.branch")
-                        }
-                        .font(.subheadline)
+                if model.isOwner && model.dependencies.sessions != nil {
+                    Button { isBrewing = true } label: {
+                        Label { Text("Start brewing", bundle: .module) } icon: { Image(systemName: "timer") }
                     }
+                    .buttonStyle(.borderedProminent)
                 }
             }
 
@@ -181,25 +157,44 @@ public struct RecipeDetailView: View {
                 }
             }
 
-            Section {
-                value("TDS", recipe.tdsPercent.map(BrewFormat.percent))
-                value("Extraction yield", recipe.extractionYieldPercent.map(BrewFormat.percent))
-                if let rating = recipe.rating {
-                    LabeledContent {
-                        RatingView(rating: rating)
-                    } label: {
-                        Text("Rating", bundle: .module)
+            if model.isOwner {
+                Section {
+                    if history.count >= 2,
+                       let comparison = BrewCoach.compare(history[0], with: history[1]) {
+                        VStack(alignment: .leading, spacing: Spacing.xs) {
+                            Text("Compared with the previous cup", bundle: .module).font(.headline)
+                            Text("Changed settings: \(comparison.changedVariables.count)", bundle: .module)
+                            if let change = comparison.ratingChange {
+                                Text("Rating change: \(change)", bundle: .module)
+                            }
+                            HStack(alignment: .top, spacing: Spacing.m) {
+                                comparisonColumn(history[1], title: String(localized: "Previous", bundle: .module))
+                                comparisonColumn(history[0], title: String(localized: "Latest", bundle: .module))
+                            }
+                            .padding(.top, Spacing.xs)
+                        }
                     }
-                }
-                if !recipe.flavorNoteSlugs.isEmpty {
-                    Text(recipe.flavorNoteSlugs.compactMap { model.catalog.flavorNote($0)?.localizedName }.joined(separator: " · "))
-                }
-                if let notes = recipe.notes {
-                    Text(notes)
-                }
-                FieldErrorText(model.errorMessage)
-            } header: {
-                Text("Results", bundle: .module)
+                    if history.isEmpty {
+                        Text("No cups recorded yet.", bundle: .module).foregroundStyle(.secondary)
+                    }
+                    ForEach(history) { session in
+                        VStack(alignment: .leading, spacing: Spacing.xs) {
+                            Text(session.createdAt, style: .date).font(.headline)
+                            Text("\(BrewFormat.grams(session.doseG)) · \(BrewFormat.duration(session.elapsedS))")
+                            if let rating = session.rating {
+                                Text("Rating: \(rating)/5", bundle: .module)
+                            }
+                            if let notes = session.notes { Text(notes).foregroundStyle(.secondary) }
+                        }
+                    }
+                    if historyCursor != nil {
+                        Button { Task { await loadHistory(replacing: false) } } label: {
+                            Text("Load older cups", bundle: .module)
+                        }
+                        .disabled(isLoadingHistory)
+                    }
+                    FieldErrorText(model.errorMessage)
+                } header: { Text("Brew history", bundle: .module) }
             }
         }
     }
@@ -215,18 +210,40 @@ public struct RecipeDetailView: View {
         }
     }
 
-    private func statsText(_ recipe: Recipe) -> String {
-        let saves = String(localized: "\(recipe.saveCount) saves", bundle: .module)
-        let remixes = String(localized: "\(recipe.forkCount) remixes", bundle: .module)
-        return "\(saves) · \(remixes)"
-    }
-
     private func bloomText(_ recipe: Recipe) -> String? {
         switch (recipe.bloomWaterG, recipe.bloomTimeS) {
         case let (water?, time?): "\(BrewFormat.grams(water)) · \(time) s"
         case let (water?, nil): BrewFormat.grams(water)
         case let (nil, time?): "\(time) s"
         case (nil, nil): nil
+        }
+    }
+
+    private func comparisonColumn(_ cup: BrewSession, title: String) -> some View {
+        VStack(alignment: .leading, spacing: Spacing.xs) {
+            Text(title).font(.subheadline.bold())
+            Text(BrewFormat.grams(cup.doseG))
+            if let water = cup.waterG { Text(BrewFormat.grams(water)) }
+            if let grind = cup.grindSetting { Text(grind) }
+            if let temperature = cup.waterTempC { Text(BrewFormat.temperature(temperature)) }
+            Text(BrewFormat.duration(cup.elapsedS))
+            if let rating = cup.rating { Text("Rating: \(rating)/5", bundle: .module) }
+        }
+        .font(.footnote)
+        .frame(maxWidth: .infinity, alignment: .leading)
+    }
+
+    private func loadHistory(replacing: Bool) async {
+        guard !isLoadingHistory, let recipeID = model.state.value?.id,
+              let sessions = model.dependencies.sessions else { return }
+        isLoadingHistory = true
+        defer { isLoadingHistory = false }
+        do {
+            let page = try await sessions.sessions(recipeID: recipeID, cursor: replacing ? nil : historyCursor)
+            history = replacing ? page.items : history + page.items
+            historyCursor = page.nextCursor
+        } catch {
+            historyCursor = nil
         }
     }
 }
