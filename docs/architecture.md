@@ -148,16 +148,16 @@ sequenceDiagram
     App->>API: retry GET /v1/me/beans
 ```
 
-## Deployment (proposed)
+## Deployment
 
-- **API:** the multi-stage `server/Dockerfile` produces a small Ubuntu image; any container
-  platform works (Fly.io, Render, Railway, AWS ECS…).
-- **Database:** managed PostgreSQL 17 (Neon, RDS, Cloud SQL…); run `dbmate up` on every deploy
-  before starting the new API version.
+- **API:** the multi-stage `server/Dockerfile` produces a small Ubuntu image for Railway.
+- **Database:** Railway PostgreSQL in the same region; run `dbmate --wait migrate` before
+  starting the new API version.
 - **Configuration:** `DATABASE_URL`, `JWT_SECRET` (at least 32 characters) and optional token TTLs.
 - **Media:** images are stored in PostgreSQL and served by the API at `/v1/media/{id}`
   ([ADR 0006](adr/0006-media-in-postgresql.md)); moving them to S3-compatible storage later only
   changes the server.
+See [deployment.md](deployment.md) for the service, backup, domain and iOS release settings.
 
 ## Roadmap
 

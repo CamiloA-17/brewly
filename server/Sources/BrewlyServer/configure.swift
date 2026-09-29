@@ -7,6 +7,7 @@ import Vapor
 func configure(_ app: Application) async throws {
     let config = try AppConfig.load(from: app.environment)
     app.appConfig = config
+    app.http.server.configuration.port = Environment.get("PORT").flatMap(Int.init) ?? 8080
 
     app.databases.use(
         .postgres(configuration: try SQLPostgresConfiguration(url: config.databaseURL)),

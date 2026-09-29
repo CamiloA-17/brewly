@@ -62,7 +62,7 @@ targets:
         ENABLE_PREVIEWS: YES
       configs:
         Release:
-          BREWLY_API_BASE_URL: https://api.brewly.app
+          BREWLY_API_BASE_URL: https://brewly.camilomolano.dev
 
 schemes:
   Brewly:

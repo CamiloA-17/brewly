@@ -5,6 +5,8 @@
 # ---------------------------------------------------------------------------
 # Build
 # ---------------------------------------------------------------------------
+FROM ghcr.io/amacneil/dbmate:2 AS dbmate
+
 FROM swift:6.2-noble AS build
 
 RUN export DEBIAN_FRONTEND=noninteractive DEBCONF_NONINTERACTIVE_SEEN=true \
@@ -46,10 +48,12 @@ RUN export DEBIAN_FRONTEND=noninteractive DEBCONF_NONINTERACTIVE_SEEN=true \
 RUN useradd --user-group --create-home --system --skel /dev/null --home-dir /app brewly
 WORKDIR /app
 COPY --from=build --chown=brewly:brewly /staging /app
+COPY --from=dbmate /usr/local/bin/dbmate /usr/local/bin/dbmate
+COPY --chown=brewly:brewly database/migrations /app/database/migrations
 
 ENV SWIFT_BACKTRACE=enable=yes,sanitize=yes,threads=all,images=all,interactive=no,swift-backtrace=./swift-backtrace-static
+ENV DBMATE_MIGRATIONS_DIR=/app/database/migrations DBMATE_NO_DUMP_SCHEMA=true
 
 USER brewly:brewly
 EXPOSE 8080
-ENTRYPOINT ["./BrewlyServer"]
-CMD ["serve", "--env", "production", "--hostname", "0.0.0.0", "--port", "8080"]
+CMD ["./BrewlyServer", "serve", "--env", "production", "--hostname", "0.0.0.0"]
