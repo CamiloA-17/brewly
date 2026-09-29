@@ -7,6 +7,13 @@ struct StubCatalogRepository: CatalogRepository {
     func catalog(forceRefresh: Bool) async throws -> Catalog { .empty }
 }
 
+struct EmptyEquipmentRepository: EquipmentRepository {
+    func myEquipment() async throws -> [Equipment] { [] }
+    func equipment(ofMember memberID: UUID) async throws -> [Equipment] { [] }
+    func save(_ draft: EquipmentDraft, id: UUID?) async throws -> Equipment { throw DomainError.notFound }
+    func delete(id: UUID) async throws {}
+}
+
 struct EmptyPostRepository: PostRepository {
     func feed(cursor: String?) async throws -> PagedResult<Post> { PagedResult(items: [], nextCursor: nil) }
     func explore(cursor: String?) async throws -> PagedResult<Post> { PagedResult(items: [], nextCursor: nil) }
@@ -77,7 +84,10 @@ struct MemberProfileViewModelTests {
     private func makeModel(_ people: FakePeopleRepository) -> MemberProfileViewModel {
         MemberProfileViewModel(
             memberID: leo.id,
-            dependencies: PeopleDependencies(people: people, posts: EmptyPostRepository(), catalog: StubCatalogRepository())
+            dependencies: PeopleDependencies(
+                people: people, posts: EmptyPostRepository(), catalog: StubCatalogRepository(),
+                equipment: EmptyEquipmentRepository()
+            )
         )
     }
 

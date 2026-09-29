@@ -6,6 +6,7 @@ import BrewlyDomain
 import BrewlyNetworking
 import FeedFeature
 import Foundation
+import JournalFeature
 import MethodsFeature
 import NotificationsFeature
 import PeopleFeature
@@ -29,6 +30,8 @@ public final class AppContainer {
     let posts: any PostRepository
     let imageLoader: any ImageLoader
     let notifications: any NotificationRepository
+    let equipment: any EquipmentRepository
+    let brews: any BrewLogRepository
 
     public init(apiBaseURL: URL, tokenStore: any TokenStore = KeychainTokenStore()) {
         let publicClient = APIClient(baseURL: apiBaseURL)
@@ -48,6 +51,8 @@ public final class AppContainer {
         posts = APIPostRepository(client: client)
         imageLoader = APIImageLoader(client: client)
         notifications = APINotificationRepository(client: client)
+        equipment = APIEquipmentRepository(client: client)
+        brews = APIBrewLogRepository(client: client)
     }
 
     func feedDependencies(currentUserID: UUID) -> FeedDependencies {
@@ -73,7 +78,20 @@ public final class AppContainer {
             beans: beans,
             catalog: catalog,
             userMethods: userMethods,
+            equipment: equipment,
             saveRecipe: SaveRecipeUseCase(recipes: recipes),
+            currentUserID: currentUserID
+        )
+    }
+
+    func journalDependencies(currentUserID: UUID) -> JournalDependencies {
+        JournalDependencies(
+            brews: brews,
+            beans: beans,
+            recipes: recipes,
+            catalog: catalog,
+            equipment: equipment,
+            saveBrew: SaveBrewLogUseCase(brews: brews),
             currentUserID: currentUserID
         )
     }
@@ -83,11 +101,11 @@ public final class AppContainer {
     }
 
     var profileDependencies: ProfileDependencies {
-        ProfileDependencies(profile: profile, auth: auth, people: people)
+        ProfileDependencies(profile: profile, auth: auth, people: people, equipment: equipment, catalog: catalog)
     }
 
     var peopleDependencies: PeopleDependencies {
-        PeopleDependencies(people: people, posts: posts, catalog: catalog)
+        PeopleDependencies(people: people, posts: posts, catalog: catalog, equipment: equipment)
     }
 
     /// The screen each `AppRoute` opens, shared by every tab.
@@ -108,6 +126,14 @@ public final class AppContainer {
                 AnyView(FollowListView(memberID: memberID, kind: .followers, dependencies: peopleDependencies))
             case let .following(memberID):
                 AnyView(FollowListView(memberID: memberID, kind: .following, dependencies: peopleDependencies))
+            case let .brew(id):
+                AnyView(BrewLogDetailView(brewID: id, dependencies: journalDependencies(currentUserID: currentUserID)))
+            case let .newBrew(recipeID):
+                AnyView(BrewLogFormView(
+                    brewLog: nil, recipeID: recipeID, dependencies: journalDependencies(currentUserID: currentUserID)
+                ))
+            case .methods:
+                AnyView(MethodsView(dependencies: methodsDependencies))
             }
         }
     }

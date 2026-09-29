@@ -331,6 +331,26 @@
         }
       }
     },
+    "Remaining": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Restante"
+          }
+        }
+      }
+    },
+    "Remaining (g)": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Restante (g)"
+          }
+        }
+      }
+    },
     "Roast": {
       "localizations": {
         "es": {

@@ -9,6 +9,7 @@ final class MemberProfileViewModel {
     enum Tab: Hashable {
         case recipes
         case posts
+        case equipment
     }
 
     var tab: Tab = .recipes
@@ -18,6 +19,7 @@ final class MemberProfileViewModel {
     private(set) var isUpdatingFollow = false
     let recipes: Paginator<RecipeSummary>
     let posts: Paginator<Post>
+    private(set) var equipment: LoadState<[Equipment]> = .idle
 
     let memberID: UUID
     private let dependencies: PeopleDependencies
@@ -53,6 +55,18 @@ final class MemberProfileViewModel {
         switch tab {
         case .recipes: await recipes.load()
         case .posts: await posts.load()
+        case .equipment: await loadEquipment()
+        }
+    }
+
+    private func loadEquipment() async {
+        if equipment.value == nil { equipment = .loading }
+        do {
+            equipment = .loaded(try await dependencies.equipment.equipment(ofMember: memberID))
+        } catch {
+            if equipment.value == nil {
+                equipment = .failed(error as? DomainError ?? .unexpected(String(describing: error)))
+            }
         }
     }
 

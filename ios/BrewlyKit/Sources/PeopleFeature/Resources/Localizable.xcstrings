@@ -1,6 +1,16 @@
 {
   "sourceLanguage": "en",
   "strings": {
+    "Couldn't load the equipment.": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No se pudo cargar el equipo."
+          }
+        }
+      }
+    },
     "Couldn't load the posts.": {
       "localizations": {
         "es": {
@@ -17,6 +27,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "No se pudieron cargar las recetas."
+          }
+        }
+      }
+    },
+    "Equipment": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Equipo"
           }
         }
       }
@@ -77,6 +97,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Te sigue"
+          }
+        }
+      }
+    },
+    "No equipment to show yet.": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Todavía no hay equipo para mostrar."
           }
         }
       }

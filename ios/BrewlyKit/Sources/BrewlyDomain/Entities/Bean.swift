@@ -20,6 +20,8 @@ public struct Bean: Identifiable, Hashable, Sendable {
     public var harvestYear: Int?
     public var scaScore: Double?
     public var weightG: Int?
+    /// Coffee left in the bag; each brew subtracts its dose.
+    public var remainingG: Double?
     public var isDecaf: Bool
     public var notes: String?
     public var photoURL: URL?
@@ -47,6 +49,7 @@ public struct Bean: Identifiable, Hashable, Sendable {
         harvestYear: Int? = nil,
         scaScore: Double? = nil,
         weightG: Int? = nil,
+        remainingG: Double? = nil,
         isDecaf: Bool = false,
         notes: String? = nil,
         photoURL: URL? = nil,
@@ -73,6 +76,7 @@ public struct Bean: Identifiable, Hashable, Sendable {
         self.harvestYear = harvestYear
         self.scaScore = scaScore
         self.weightG = weightG
+        self.remainingG = remainingG
         self.isDecaf = isDecaf
         self.notes = notes
         self.photoURL = photoURL
@@ -138,6 +142,8 @@ public struct BeanDraft: Hashable, Sendable {
     public var harvestYear: Int?
     public var scaScore: Double?
     public var weightG: Int?
+    /// Coffee left in the bag; each brew subtracts its dose.
+    public var remainingG: Double?
     public var isDecaf = false
     public var notes = ""
     public var visibility: Visibility = .public
@@ -162,6 +168,7 @@ public struct BeanDraft: Hashable, Sendable {
         harvestYear = bean.harvestYear
         scaScore = bean.scaScore
         weightG = bean.weightG
+        remainingG = bean.remainingG
         isDecaf = bean.isDecaf
         notes = bean.notes ?? ""
         visibility = bean.visibility
@@ -182,6 +189,7 @@ public struct BeanDraft: Hashable, Sendable {
             harvestYear: harvestYear,
             scaScore: scaScore,
             weightG: weightG,
+            remainingG: remainingG,
             notes: notes
         )
     }

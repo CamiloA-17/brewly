@@ -21,6 +21,15 @@ public protocol ProfileRepository: Sendable {
     func deleteAccount() async throws
 }
 
+/// The signed-in user's gear, and other members' (public on their profile).
+public protocol EquipmentRepository: Sendable {
+    func myEquipment() async throws -> [Equipment]
+    func equipment(ofMember memberID: UUID) async throws -> [Equipment]
+    /// Creates the item when `id` is `nil`, otherwise replaces it.
+    func save(_ draft: EquipmentDraft, id: UUID?) async throws -> Equipment
+    func delete(id: UUID) async throws
+}
+
 public protocol CatalogRepository: Sendable {
     /// The global catalogs, cached after the first successful load.
     func catalog(forceRefresh: Bool) async throws -> Catalog
@@ -52,6 +61,15 @@ public protocol RecipeRepository: Sendable {
     func recipe(id: UUID) async throws -> Recipe
     func create(_ input: RecipeInput) async throws -> Recipe
     func update(id: UUID, _ input: RecipeInput) async throws -> Recipe
+    func delete(id: UUID) async throws
+}
+
+/// The brew journal.
+public protocol BrewLogRepository: Sendable {
+    func myBrews(filter: BrewLogFilter, cursor: String?) async throws -> PagedResult<BrewLog>
+    func brew(id: UUID) async throws -> BrewLog
+    /// Uploads `draft.newPhotoData` if any, then creates the brew (or replaces it when `id` is given).
+    func save(_ draft: BrewLogDraft, beanID: UUID, methodSlug: String, id: UUID?) async throws -> BrewLog
     func delete(id: UUID) async throws
 }
 

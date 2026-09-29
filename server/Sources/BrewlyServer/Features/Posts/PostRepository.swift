@@ -272,13 +272,14 @@ struct PostgresPostRepository: PostRepository {
             let id = try row.decode(column: "id", as: UUID.self)
 
             if !request.mediaIds.isEmpty {
-                // Only the author's uploads that are not an avatar can be attached.
+                // Only the author's uploads that are not an avatar or a brew photo can be attached.
                 let attached = try await sql.raw("""
                     INSERT INTO post_media (post_id, position, media_id)
                     SELECT \(bind: id), x.position::smallint, m.id
                     FROM unnest(\(bind: request.mediaIds)::uuid[]) WITH ORDINALITY AS x(media_id, position)
                     JOIN media m ON m.id = x.media_id AND m.owner_id = \(bind: authorID)
                     WHERE NOT EXISTS (SELECT 1 FROM users u WHERE u.avatar_media_id = m.id)
+                      AND NOT EXISTS (SELECT 1 FROM brew_logs bl WHERE bl.photo_media_id = m.id)
                     RETURNING media_id
                     """).all()
                 guard attached.count == request.mediaIds.count else { throw UnavailableMediaError() }

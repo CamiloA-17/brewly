@@ -103,6 +103,19 @@ public struct RecipeDraft: Hashable, Sendable {
         doseG.flatMap { BrewMath.extractionYield(doseG: $0, beverageG: yieldG, tdsPercent: tdsPercent) }
     }
 
+    /// Pre-fills the grinder and its usual setting for the selected method from the member's default
+    /// grinder. Values the member already entered are kept.
+    public mutating func applyUsualGrind(from equipment: [Equipment]) {
+        guard let grinder = equipment.first(where: { $0.kind == .grinder && $0.isDefault }) else { return }
+        if grinderSlug == nil, let slug = grinder.grinderSlug {
+            grinderSlug = slug
+        }
+        guard grinderSlug == grinder.grinderSlug, grindSetting.trimmingWhitespace.isEmpty,
+              let methodSlug, let setting = grinder.grindSettings[methodSlug]
+        else { return }
+        grindSetting = setting
+    }
+
     /// Fills empty parameters with the brew method's suggestions.
     public mutating func applyDefaults(of method: BrewMethod) {
         methodSlug = method.slug

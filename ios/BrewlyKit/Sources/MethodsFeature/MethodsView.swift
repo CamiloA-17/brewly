@@ -72,6 +72,7 @@ final class MethodsViewModel {
 }
 
 /// The global catalog of brew methods; users mark the ones they use.
+/// Pushed from the profile through `AppRoute.methods`, so it has no navigation stack of its own.
 public struct MethodsView: View {
     @State private var model: MethodsViewModel
 
@@ -80,32 +81,30 @@ public struct MethodsView: View {
     }
 
     public var body: some View {
-        NavigationStack {
-            AsyncContentView(model.state, retry: model.load) { _ in
-                List {
+        AsyncContentView(model.state, retry: model.load) { _ in
+            List {
+                Section {
+                    Text("Mark the methods you use. They appear first when you create a recipe.", bundle: .module)
+                        .font(.subheadline)
+                        .foregroundStyle(.secondary)
+                    FieldErrorText(model.errorMessage)
+                }
+                ForEach(model.sections) { section in
                     Section {
-                        Text("Mark the methods you use. They appear first when you create a recipe.", bundle: .module)
-                            .font(.subheadline)
-                            .foregroundStyle(.secondary)
-                        FieldErrorText(model.errorMessage)
-                    }
-                    ForEach(model.sections) { section in
-                        Section {
-                            ForEach(section.methods) { method in
-                                MethodRow(method: method, isUsing: model.isUsing(method)) {
-                                    Task { await model.toggle(method) }
-                                }
+                        ForEach(section.methods) { method in
+                            MethodRow(method: method, isUsing: model.isUsing(method)) {
+                                Task { await model.toggle(method) }
                             }
-                        } header: {
-                            Text(section.category.localizedName)
                         }
+                    } header: {
+                        Text(section.category.localizedName)
                     }
                 }
-                .refreshable { await model.load() }
             }
-            .navigationTitle(Text("Brew methods", bundle: .module))
-            .task { await model.load() }
+            .refreshable { await model.load() }
         }
+        .navigationTitle(Text("Brew methods", bundle: .module))
+        .task { await model.load() }
     }
 }
 

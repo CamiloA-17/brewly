@@ -71,6 +71,50 @@ public enum Endpoints {
         Endpoint(.delete, "v1/beans/\(id.uuidString)")
     }
 
+    // MARK: Brew journal
+
+    public static func myBrews(beanID: UUID?, methodSlug: String?, cursor: String?) -> Endpoint<Page<BrewLogDTO>> {
+        Endpoint(.get, "v1/me/brews", queryItems: queryItems([
+            "beanId": beanID?.uuidString, "methodSlug": methodSlug, "cursor": cursor,
+        ]))
+    }
+
+    public static func brew(id: UUID) -> Endpoint<BrewLogDTO> {
+        Endpoint(.get, "v1/brews/\(id.uuidString)")
+    }
+
+    public static func createBrew(_ body: UpsertBrewLogRequest) -> Endpoint<BrewLogDTO> {
+        Endpoint(.post, "v1/me/brews", body: body)
+    }
+
+    public static func updateBrew(id: UUID, _ body: UpsertBrewLogRequest) -> Endpoint<BrewLogDTO> {
+        Endpoint(.put, "v1/brews/\(id.uuidString)", body: body)
+    }
+
+    public static func deleteBrew(id: UUID) -> Endpoint<EmptyResponse> {
+        Endpoint(.delete, "v1/brews/\(id.uuidString)")
+    }
+
+    // MARK: Equipment
+
+    public static let myEquipment = Endpoint<[EquipmentDTO]>(.get, "v1/me/equipment")
+
+    public static func memberEquipment(id: UUID) -> Endpoint<[EquipmentDTO]> {
+        Endpoint(.get, "v1/users/\(id.uuidString)/equipment")
+    }
+
+    public static func createEquipment(_ body: UpsertEquipmentRequest) -> Endpoint<EquipmentDTO> {
+        Endpoint(.post, "v1/me/equipment", body: body)
+    }
+
+    public static func updateEquipment(id: UUID, _ body: UpsertEquipmentRequest) -> Endpoint<EquipmentDTO> {
+        Endpoint(.put, "v1/me/equipment/\(id.uuidString)", body: body)
+    }
+
+    public static func deleteEquipment(id: UUID) -> Endpoint<EmptyResponse> {
+        Endpoint(.delete, "v1/me/equipment/\(id.uuidString)")
+    }
+
     // MARK: Recipes
 
     public static func myRecipes(cursor: String?) -> Endpoint<Page<RecipeSummaryDTO>> {

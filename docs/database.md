@@ -14,6 +14,15 @@ erDiagram
     users ||--o{ recipes : writes
     users ||--o{ user_brew_methods : uses
     brew_methods ||--o{ user_brew_methods : "used by"
+    users ||--o{ user_equipment : owns
+    grinders |o--o{ user_equipment : "model of"
+    user_equipment ||--o{ equipment_grind_settings : "usual setting"
+    users ||--o{ brew_logs : journals
+    coffee_beans ||--o{ brew_logs : "brewed in"
+    recipes |o--o{ brew_logs : "followed by"
+    user_equipment |o--o{ brew_logs : "used in"
+    brew_logs ||--o{ brew_log_flavor_notes : has
+    brew_methods ||--o{ equipment_grind_settings : "for method"
 
     countries ||--o{ coffee_beans : "origin of"
     processing_methods ||--o{ coffee_beans : "processed with"
@@ -115,6 +124,8 @@ erDiagram
 | `media` | `media` (and changes to `post_media`, `posts`, `users`) | Uploaded JPEG images stored as `bytea`; post photos and avatars reference them. |
 | `notification_delivery` | — | Deduplication and pagination indexes for `notifications`. |
 | `profile_details` | — (changes to `users`, `auth_identities`) | Private details (first and last name, birth date), country and city, role, onboarding and activity timestamps; Sign in with Apple fields. |
+| `user_equipment` | `user_equipment`, `equipment_grind_settings` | Members' gear (grinders, brewers, kettles, scales, espresso machines) and each grinder's usual setting per brew method. |
+| `brew_journal` | `brew_logs`, `brew_log_flavor_notes` (and `coffee_beans.remaining_g`) | The brew journal: each cup with its real parameters, tasting scores (1–5), notes and photo; how much coffee is left in each bag. |
 
 ## Integrity rules
 
@@ -162,6 +173,18 @@ erDiagram
 - **Sign in with Apple.** `auth_identities.provider_refresh_token` (encrypted by the API) and
   `provider_email` are only allowed on `apple` identities; the token is needed to revoke the
   authorization when the account is deleted.
+- **Equipment.** A `grinder` item can name a catalog grinder (`grinder_slug`); anything else
+  needs a brand, model or nickname (`user_equipment_named`). `user_equipment_one_default_idx`
+  allows one default item per kind, and the API clears the previous default in the same
+  transaction. `equipment_grind_settings` keeps a grinder's usual setting per brew method (the
+  API only accepts them on grinders); the default grinder and that setting pre-fill new recipes.
+- **Brew journal.** `brew_logs` reuses the recipe limits and generated `ratio` and
+  `extraction_yield_percent`. Composite foreign keys keep the bean and equipment the member's
+  own; deleting the equipment keeps the brew (`ON DELETE SET NULL (equipment_id)`), deleting the
+  followed recipe keeps it too, and a bean with brews can't be deleted (archive it). Brews are
+  `private` by default. The API subtracts each brew's dose from `coffee_beans.remaining_g` in the
+  same transaction, and gives it back when the brew is edited or deleted. A brew photo is
+  exclusive: it can't also be a post photo or an avatar.
 - **Remixes.** `recipes.forked_from_id` points to the original recipe and becomes `NULL` when the
   original is deleted, so a remix survives its original.
 

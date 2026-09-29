@@ -12,6 +12,12 @@ public enum AppRoute: Hashable, Sendable {
     case followers(of: UUID)
     case following(of: UUID)
     case notifications
+    /// A journal entry.
+    case brew(UUID)
+    /// A new journal entry that follows a recipe.
+    case newBrew(recipeID: UUID)
+    /// The brew methods the user marks as theirs.
+    case methods
 }
 
 /// Builds the view for each `AppRoute`.
