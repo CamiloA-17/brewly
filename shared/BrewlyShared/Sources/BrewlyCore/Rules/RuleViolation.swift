@@ -20,6 +20,8 @@ public struct RuleViolation: Hashable, Sendable {
         case inFuture
         /// A list has more than `max` items.
         case tooMany(max: Int)
+        /// The person is younger than `minimumAge` years.
+        case tooYoung(minimumAge: Int)
     }
 
     /// JSON key of the offending request property, e.g. `"doseG"` or `"steps[2].startS"`.
@@ -42,6 +44,7 @@ public struct RuleViolation: Hashable, Sendable {
         case .exceeds: "exceeds"
         case .inFuture: "in_future"
         case .tooMany: "too_many"
+        case .tooYoung: "too_young"
         }
     }
 
@@ -64,6 +67,8 @@ public struct RuleViolation: Hashable, Sendable {
             "Must not be in the future."
         case let .tooMany(max):
             "Must have at most \(max) items."
+        case let .tooYoung(minimumAge):
+            "You must be at least \(minimumAge) years old."
         }
     }
 

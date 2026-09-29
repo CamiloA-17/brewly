@@ -31,7 +31,7 @@ struct BeanDetailView: View {
             }
 
             Section {
-                row("Varietals", bean.varietalSlugs.compactMap { catalog.varietal($0)?.name }.joined(separator: ", "))
+                row("Varietals", bean.varietalSlugs.compactMap { catalog.varietal($0)?.localizedName }.joined(separator: ", "))
                 row("Process", catalog.processingMethod(bean.processingMethodSlug)?.localizedName)
                 row("Harvest", bean.harvestYear.map { String($0) })
                 row("SCA score", bean.scaScore.map { BrewFormat.number($0, maxFractionDigits: 2) })

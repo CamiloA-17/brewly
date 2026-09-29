@@ -1,6 +1,16 @@
 {
   "sourceLanguage": "en",
   "strings": {
+    "Add": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Agregar"
+          }
+        }
+      }
+    },
     "An account with that email already exists.": {
       "localizations": {
         "es": {
@@ -21,12 +31,32 @@
         }
       }
     },
+    "Birth date": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Fecha de nacimiento"
+          }
+        }
+      }
+    },
     "Bloom": {
       "localizations": {
         "es": {
           "stringUnit": {
             "state": "translated",
             "value": "Preinfusión (bloom)"
+          }
+        }
+      }
+    },
+    "Brewer": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cafetera"
           }
         }
       }
@@ -91,12 +121,32 @@
         }
       }
     },
+    "Country": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "País"
+          }
+        }
+      }
+    },
     "Dark": {
       "localizations": {
         "es": {
           "stringUnit": {
             "state": "translated",
             "value": "Oscura"
+          }
+        }
+      }
+    },
+    "Default": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Predeterminado"
           }
         }
       }
@@ -117,6 +167,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Espresso"
+          }
+        }
+      }
+    },
+    "Espresso machine": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Máquina de espresso"
           }
         }
       }
@@ -201,6 +261,16 @@
         }
       }
     },
+    "Grinder": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Molino"
+          }
+        }
+      }
+    },
     "Immersion": {
       "localizations": {
         "es": {
@@ -237,6 +307,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Es mayor que el valor relacionado."
+          }
+        }
+      }
+    },
+    "Kettle": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hervidor"
           }
         }
       }
@@ -381,6 +461,16 @@
         }
       }
     },
+    "Not set": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sin especificar"
+          }
+        }
+      }
+    },
     "Nutty / Cocoa": {
       "localizations": {
         "es": {
@@ -407,6 +497,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Otro"
+          }
+        }
+      }
+    },
+    "Other equipment": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Otro equipo"
           }
         }
       }
@@ -497,6 +597,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Robusta"
+          }
+        }
+      }
+    },
+    "Scale": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Balanza"
           }
         }
       }
@@ -677,6 +787,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "No encontramos lo que buscabas."
+          }
+        }
+      }
+    },
+    "You must be at least %lld years old.": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Debes tener al menos %lld años."
           }
         }
       }

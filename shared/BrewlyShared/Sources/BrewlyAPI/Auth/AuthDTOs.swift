@@ -4,13 +4,32 @@ public struct RegisterRequest: Codable, Sendable, Equatable {
     public var email: String
     public var password: String
     public var username: String
-    public var displayName: String
+    /// Public name; defaults to "First Last" when omitted.
+    public var displayName: String?
+    public var firstName: String
+    public var lastName: String
+    /// Private. Members must be at least `AccountRules.minimumAge` years old.
+    public var birthDate: CalendarDate?
+    public var acceptedTerms: Bool
 
-    public init(email: String, password: String, username: String, displayName: String) {
+    public init(
+        email: String,
+        password: String,
+        username: String,
+        displayName: String? = nil,
+        firstName: String,
+        lastName: String,
+        birthDate: CalendarDate?,
+        acceptedTerms: Bool
+    ) {
         self.email = email
         self.password = password
         self.username = username
         self.displayName = displayName
+        self.firstName = firstName
+        self.lastName = lastName
+        self.birthDate = birthDate
+        self.acceptedTerms = acceptedTerms
     }
 }
 

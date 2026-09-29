@@ -72,8 +72,8 @@ public struct MemberProfileView: View {
                 if let bio = profile.bio {
                     Text(bio).padding(.top, Spacing.xs)
                 }
-                if let location = profile.location {
-                    Label(location, systemImage: "mappin.and.ellipse")
+                if let place = memberPlace(city: profile.city, countryCode: profile.countryCode) {
+                    Label(place, systemImage: "mappin.and.ellipse")
                         .font(.subheadline)
                         .foregroundStyle(.secondary)
                 }

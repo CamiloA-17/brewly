@@ -8,11 +8,12 @@ BEGIN;
 
 CREATE EXTENSION IF NOT EXISTS pgcrypto;
 
-INSERT INTO users (id, username, display_name, email, bio, location) VALUES
+INSERT INTO users (id, username, display_name, email, bio, first_name, last_name, birth_date,
+                   country_code, city, terms_accepted_at, onboarding_completed_at) VALUES
     ('11111111-1111-4111-8111-111111111111', 'ana.barista', 'Ana', 'ana@example.com',
-     'Home barista. Pour-over nerd.', 'Bogotá, CO'),
+     'Home barista. Pour-over nerd.', 'Ana', 'Demo', '1995-04-12', 'CO', 'Bogotá', now(), now()),
     ('22222222-2222-4222-8222-222222222222', 'leo.roaster', 'Leo', 'leo@example.com',
-     'Small-batch roaster. Espresso every morning.', 'Medellín, CO')
+     'Small-batch roaster. Espresso every morning.', 'Leo', 'Demo', '1990-11-03', 'CO', 'Medellín', now(), now())
 ON CONFLICT (id) DO NOTHING;
 
 INSERT INTO auth_identities (user_id, provider, subject, password_hash) VALUES
@@ -94,5 +95,20 @@ VALUES
      'bbbbbbbb-0000-4000-8000-000000000002', 'Fruity espresso', 'Pink Bourbon Natural (demo)', 'espresso',
      18, NULL, 40, '12', 93, 30, 9.5, 4, 'Bright fruit and sweetness.')
 ON CONFLICT (id) DO NOTHING;
+
+INSERT INTO user_equipment (id, owner_id, kind, grinder_slug, brand, model, is_default) VALUES
+    ('eeeeeeee-0000-4000-8000-000000000001', '11111111-1111-4111-8111-111111111111',
+     'grinder', 'comandante_c40_mk4', NULL, NULL, true),
+    ('eeeeeeee-0000-4000-8000-000000000002', '11111111-1111-4111-8111-111111111111',
+     'kettle', NULL, 'Fellow', 'Stagg EKG', true),
+    ('eeeeeeee-0000-4000-8000-000000000003', '22222222-2222-4222-8222-222222222222',
+     'grinder', 'niche_zero', NULL, NULL, true)
+ON CONFLICT (id) DO NOTHING;
+
+INSERT INTO equipment_grind_settings (equipment_id, method_slug, grind_setting) VALUES
+    ('eeeeeeee-0000-4000-8000-000000000001', 'v60', '24 clicks'),
+    ('eeeeeeee-0000-4000-8000-000000000001', 'aeropress', '18 clicks'),
+    ('eeeeeeee-0000-4000-8000-000000000003', 'espresso', '12')
+ON CONFLICT DO NOTHING;
 
 COMMIT;

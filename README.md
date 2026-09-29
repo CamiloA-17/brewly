@@ -62,8 +62,9 @@ open ios/Brewly.xcodeproj
 ```
 
 Run the **Brewly** scheme on an iOS simulator. Debug builds talk to `http://localhost:8080`
-(`BREWLY_API_BASE_URL` in [`ios/project.yml`](ios/project.yml)). To run on a device, set your
-`DEVELOPMENT_TEAM` and point the base URL to your Mac's LAN address.
+(`BREWLY_API_BASE_URL` in `ios/Config/Brewly.xcconfig`). Release builds use
+`https://brewly.camilomolano.dev` from [`ios/project.yml`](ios/project.yml). To run on a device,
+set your `DEVELOPMENT_TEAM` and override the Debug URL in `ios/Config/Local.xcconfig`.
 
 ## Tests
 
@@ -83,6 +84,7 @@ Server integration tests truncate every table, so they only run against `TEST_DA
 - [Architecture](docs/architecture.md): system overview, iOS and server layers, auth flow, roadmap.
 - [Database](docs/database.md): entity-relationship diagram and integrity rules.
 - [API](docs/api.md): endpoints, errors and pagination.
+- [Deployment](docs/deployment.md): Railway configuration, domain, migrations and smoke tests.
 - [Decision records](docs/adr): why things are the way they are.
 - [Contributing](CONTRIBUTING.md): branches, commits and conventions.
 

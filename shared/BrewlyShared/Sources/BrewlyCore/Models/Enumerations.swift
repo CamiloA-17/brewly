@@ -112,3 +112,13 @@ public enum NotificationKind: String, Codable, CaseIterable, Hashable, Sendable 
     /// Someone remixed the member's recipe; the notification links to the remix.
     case recipeFork = "recipe_fork"
 }
+
+/// Kind of gear a member owns (`user_equipment.kind`).
+public enum EquipmentKind: String, Codable, CaseIterable, Hashable, Sendable {
+    case grinder
+    case brewer
+    case kettle
+    case scale
+    case espressoMachine = "espresso_machine"
+    case other
+}

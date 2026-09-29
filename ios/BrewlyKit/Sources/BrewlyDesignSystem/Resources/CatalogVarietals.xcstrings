@@ -1,0 +1,413 @@
+{
+  "sourceLanguage": "en",
+  "strings": {
+    "Typica": {
+      "extractionState": "stale",
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Typica"
+          }
+        }
+      }
+    },
+    "Bourbon": {
+      "extractionState": "stale",
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bourbon"
+          }
+        }
+      }
+    },
+    "Yellow Bourbon": {
+      "extractionState": "stale",
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bourbon amarillo"
+          }
+        }
+      }
+    },
+    "Pink Bourbon": {
+      "extractionState": "stale",
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bourbon rosado"
+          }
+        }
+      }
+    },
+    "Caturra": {
+      "extractionState": "stale",
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Caturra"
+          }
+        }
+      }
+    },
+    "Catuai": {
+      "extractionState": "stale",
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Catuai"
+          }
+        }
+      }
+    },
+    "Castillo": {
+      "extractionState": "stale",
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Castillo"
+          }
+        }
+      }
+    },
+    "Colombia": {
+      "extractionState": "stale",
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Colombia"
+          }
+        }
+      }
+    },
+    "Cenicafé 1": {
+      "extractionState": "stale",
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cenicafé 1"
+          }
+        }
+      }
+    },
+    "Tabi": {
+      "extractionState": "stale",
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tabi"
+          }
+        }
+      }
+    },
+    "Geisha": {
+      "extractionState": "stale",
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Geisha"
+          }
+        }
+      }
+    },
+    "SL28": {
+      "extractionState": "stale",
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "SL28"
+          }
+        }
+      }
+    },
+    "SL34": {
+      "extractionState": "stale",
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "SL34"
+          }
+        }
+      }
+    },
+    "Ruiru 11": {
+      "extractionState": "stale",
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ruiru 11"
+          }
+        }
+      }
+    },
+    "Batian": {
+      "extractionState": "stale",
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Batian"
+          }
+        }
+      }
+    },
+    "Pacamara": {
+      "extractionState": "stale",
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pacamara"
+          }
+        }
+      }
+    },
+    "Pacas": {
+      "extractionState": "stale",
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pacas"
+          }
+        }
+      }
+    },
+    "Maragogype": {
+      "extractionState": "stale",
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Maragogype"
+          }
+        }
+      }
+    },
+    "Mundo Novo": {
+      "extractionState": "stale",
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mundo Novo"
+          }
+        }
+      }
+    },
+    "Villa Sarchi": {
+      "extractionState": "stale",
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Villa Sarchi"
+          }
+        }
+      }
+    },
+    "Sidra": {
+      "extractionState": "stale",
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sidra"
+          }
+        }
+      }
+    },
+    "Wush Wush": {
+      "extractionState": "stale",
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Wush Wush"
+          }
+        }
+      }
+    },
+    "Java": {
+      "extractionState": "stale",
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Java"
+          }
+        }
+      }
+    },
+    "Laurina": {
+      "extractionState": "stale",
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Laurina"
+          }
+        }
+      }
+    },
+    "Mokka": {
+      "extractionState": "stale",
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mokka"
+          }
+        }
+      }
+    },
+    "Ethiopian Landrace": {
+      "extractionState": "stale",
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Variedades tradicionales etíopes"
+          }
+        }
+      }
+    },
+    "Catimor": {
+      "extractionState": "stale",
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Catimor"
+          }
+        }
+      }
+    },
+    "Sarchimor": {
+      "extractionState": "stale",
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sarchimor"
+          }
+        }
+      }
+    },
+    "Parainema": {
+      "extractionState": "stale",
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Parainema"
+          }
+        }
+      }
+    },
+    "Marsellesa": {
+      "extractionState": "stale",
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Marsellesa"
+          }
+        }
+      }
+    },
+    "Obatã": {
+      "extractionState": "stale",
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Obatã"
+          }
+        }
+      }
+    },
+    "Icatu": {
+      "extractionState": "stale",
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Icatu"
+          }
+        }
+      }
+    },
+    "Centroamericano (H1)": {
+      "extractionState": "stale",
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Centroamericano (H1)"
+          }
+        }
+      }
+    },
+    "Chiroso": {
+      "extractionState": "stale",
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Chiroso"
+          }
+        }
+      }
+    },
+    "Robusta": {
+      "extractionState": "stale",
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Robusta"
+          }
+        }
+      }
+    },
+    "Liberica": {
+      "extractionState": "stale",
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Liberica"
+          }
+        }
+      }
+    },
+    "Excelsa": {
+      "extractionState": "stale",
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Excelsa"
+          }
+        }
+      }
+    }
+  },
+  "version": "1.0"
+}

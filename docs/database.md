@@ -14,6 +14,10 @@ erDiagram
     users ||--o{ recipes : writes
     users ||--o{ user_brew_methods : uses
     brew_methods ||--o{ user_brew_methods : "used by"
+    users ||--o{ user_equipment : owns
+    grinders |o--o{ user_equipment : "model of"
+    user_equipment ||--o{ equipment_grind_settings : "usual setting"
+    brew_methods ||--o{ equipment_grind_settings : "for method"
 
     countries ||--o{ coffee_beans : "origin of"
     processing_methods ||--o{ coffee_beans : "processed with"
@@ -117,8 +121,10 @@ erDiagram
 | `catalog_seed` | — | ~46 countries, ~37 varietals, 20 processes, 18 brew methods, 20 grinders, 51 flavor notes. |
 | `coffee_beans` | `coffee_beans`, `bean_varietals`, `bean_flavor_notes` | The user's beans; blends have several varietals. |
 | `recipes` | `recipes`, `recipe_steps`, `recipe_flavor_notes`, `user_brew_methods` | Private reusable preparation plans and their steps. |
-| `brew_sessions` | `brew_sessions` | Actual cups with measured parameters and taste scores; existing recipe results are backfilled. |
 | `media` | `media` (and changes to `users`) | Uploaded JPEG images stored as `bytea`; avatars reference them. |
+| `profile_details` | — (changes to `users`, `auth_identities`) | Private details (first and last name, birth date), country and city, role, onboarding and activity timestamps; Sign in with Apple fields. |
+| `user_equipment` | `user_equipment`, `equipment_grind_settings` | Members' gear (grinders, brewers, kettles, scales, espresso machines) and each grinder's usual setting per brew method. |
+| `brew_sessions` | `brew_sessions` | Actual cups with measured parameters and taste scores; existing recipe results are backfilled. |
 | `remove_social_data` | — | Removes the former social tables and makes every recipe private. |
 
 ## Integrity rules
@@ -153,6 +159,20 @@ erDiagram
   recipe title, bean, method and actual parameters. Extraction yield is generated from dose,
   beverage weight and TDS. Deleting or editing a recipe does not erase
   recorded cups; the optional recipe link is cleared on deletion.
+- **Personal details.** `users.first_name`, `last_name` and `birth_date` are private (only
+  `/v1/me` returns them). They are nullable because Sign in with Apple may not provide them, but
+  `users_onboarding_complete` requires them, plus `terms_accepted_at`, once
+  `onboarding_completed_at` is set. The minimum age (13) depends on today's date, so
+  `AccountRules` enforces it instead of a CHECK. `country_code` is any ISO 3166-1 alpha-2 code
+  (not a coffee origin from `countries`) and `city` is optional.
+- **Sign in with Apple.** `auth_identities.provider_refresh_token` (encrypted by the API) and
+  `provider_email` are only allowed on `apple` identities; the token is needed to revoke the
+  authorization when the account is deleted.
+- **Equipment.** A `grinder` item can name a catalog grinder (`grinder_slug`); anything else
+  needs a brand, model or nickname (`user_equipment_named`). `user_equipment_one_default_idx`
+  allows one default item per kind, and the API clears the previous default in the same
+  transaction. `equipment_grind_settings` keeps a grinder's usual setting per brew method (the
+  API only accepts them on grinders); the default grinder and that setting pre-fill new recipes.
 
 ## Conventions
 

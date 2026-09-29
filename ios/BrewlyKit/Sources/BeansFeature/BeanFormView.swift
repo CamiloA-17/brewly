@@ -102,14 +102,14 @@ struct BeanFormView: View {
         Section {
             NavigationLink {
                 MultiSelectionList(items: model.catalog.varietals, selection: $model.draft.varietalSlugs) {
-                    $0.name
+                    $0.localizedName
                 } subtitle: {
                     $0.species.localizedName
                 }
                 .navigationTitle(Text("Varietals", bundle: .module))
             } label: {
                 LabeledContent {
-                    Text(selectedNames(model.draft.varietalSlugs) { model.catalog.varietal($0)?.name })
+                    Text(selectedNames(model.draft.varietalSlugs) { model.catalog.varietal($0)?.localizedName })
                 } label: {
                     Text("Varietals", bundle: .module)
                 }

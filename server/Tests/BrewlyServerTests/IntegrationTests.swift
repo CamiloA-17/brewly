@@ -62,14 +62,66 @@ final class IntegrationTests: XCTestCase {
     func testRegistrationConflictsAndValidation() async throws {
         _ = try await register("ana.barista")
         try await expectError(.POST, "v1/auth/register",
-            body: RegisterRequest(email: "other@example.com", password: "test-password", username: "ana.barista", displayName: "Ana"),
+            body: Self.signUp(email: "other@example.com", username: "ana.barista"),
             status: .conflict, code: APIErrorCode.usernameTaken)
         try await expectError(.POST, "v1/auth/register",
-            body: RegisterRequest(email: "ana.barista@example.com", password: "test-password", username: "ana2", displayName: "Ana"),
+            body: Self.signUp(email: "ana.barista@example.com", username: "ana2"),
             status: .conflict, code: APIErrorCode.emailTaken)
         try await expectError(.POST, "v1/auth/register",
-            body: RegisterRequest(email: "nope", password: "short", username: "A", displayName: ""),
+            body: RegisterRequest(email: "nope", password: "short", username: "A", firstName: "", lastName: "",
+                                  birthDate: nil, acceptedTerms: false),
             status: .unprocessableEntity, code: APIErrorCode.validationFailed)
+    }
+
+    func testRegistrationStoresPrivateDetails() async throws {
+        let ana = try await register("ana.barista")
+        XCTAssertEqual(ana.user.displayName, "Ana Rojas")
+        XCTAssertEqual(ana.user.firstName, "Ana")
+        XCTAssertEqual(ana.user.birthDate, CalendarDate(year: 1995, month: 4, day: 12))
+        XCTAssertFalse(ana.user.needsOnboarding)
+
+        // Too young to sign up.
+        let today = CalendarDate.today()
+        let tooYoung = CalendarDate(year: today.year - 12, month: 1, day: 1)
+        try await expectError(.POST, "v1/auth/register",
+            body: Self.signUp(email: "kid@example.com", username: "kid", birthDate: tooYoung),
+            status: .unprocessableEntity, code: APIErrorCode.validationFailed)
+
+        // The profile can be edited; another member's profile route remains retired.
+        let updated: CurrentUserDTO = try await send(.PATCH, "v1/me", token: ana.accessToken, body: UpdateProfileRequest(
+            displayName: "Ana R.", firstName: "Ana María", lastName: "Rojas",
+            birthDate: CalendarDate(year: 1995, month: 4, day: 12), countryCode: "de", city: " Berlin "
+        ))
+        XCTAssertEqual(updated.countryCode, "DE")
+        XCTAssertEqual(updated.city, "Berlin")
+        XCTAssertEqual(updated.firstName, "Ana María")
+
+        let leo = try await register("leo.roaster")
+        try await expectError(.GET, "v1/users/\(ana.user.id)", token: leo.accessToken, status: .notFound)
+    }
+
+    func testOnboardingCompletesOlderAccounts() async throws {
+        let ana = try await register("ana.barista")
+        // Accounts created before personal details were required have none.
+        try await app.db.sql.raw("""
+            UPDATE users SET first_name = NULL, last_name = NULL, birth_date = NULL,
+                             terms_accepted_at = NULL, onboarding_completed_at = NULL
+            """).run()
+        let before: CurrentUserDTO = try await send(.GET, "v1/me", token: ana.accessToken)
+        XCTAssertTrue(before.needsOnboarding)
+
+        try await expectError(.PUT, "v1/me/onboarding", token: ana.accessToken, body: CompleteOnboardingRequest(
+            firstName: "Ana", lastName: "Rojas", birthDate: CalendarDate(year: 1995, month: 4, day: 12),
+            acceptedTerms: false
+        ), status: .unprocessableEntity, code: APIErrorCode.validationFailed)
+
+        let after: CurrentUserDTO = try await send(.PUT, "v1/me/onboarding", token: ana.accessToken,
+            body: CompleteOnboardingRequest(
+                firstName: "Ana", lastName: "Rojas", birthDate: CalendarDate(year: 1995, month: 4, day: 12),
+                acceptedTerms: true
+            ))
+        XCTAssertFalse(after.needsOnboarding)
+        XCTAssertEqual(after.lastName, "Rojas")
     }
 
     func testProtectedRoutesRequireAToken() async throws {
@@ -90,6 +142,44 @@ final class IntegrationTests: XCTestCase {
         try await expectError(.PUT, "v1/me/methods/teapot", token: ana.accessToken, status: .notFound)
         let methods: UserMethodsDTO = try await send(.GET, "v1/me/methods", token: ana.accessToken)
         XCTAssertEqual(methods.methodSlugs, ["v60"])
+    }
+
+    // MARK: - Equipment
+
+    func testEquipmentDefaultsSettingsAndPrivacy() async throws {
+        let ana = try await register("ana.barista")
+        let leo = try await register("leo.roaster")
+
+        let c40: EquipmentDTO = try await send(.POST, "v1/me/equipment", token: ana.accessToken,
+            body: UpsertEquipmentRequest(
+                kind: .grinder, grinderSlug: "comandante_c40_mk4", isDefault: true,
+                grindSettings: [GrindSettingInput(methodSlug: "v60", grindSetting: "24 clicks")]
+            ))
+        XCTAssertTrue(c40.isDefault)
+        XCTAssertEqual(c40.grindSettings, [GrindSettingInput(methodSlug: "v60", grindSetting: "24 clicks")])
+
+        // A new default grinder replaces the previous one.
+        let k6: EquipmentDTO = try await send(.POST, "v1/me/equipment", token: ana.accessToken,
+            body: UpsertEquipmentRequest(kind: .grinder, brand: "Kingrinder", model: "K6", isDefault: true))
+        let _: EquipmentDTO = try await send(.POST, "v1/me/equipment", token: ana.accessToken,
+            body: UpsertEquipmentRequest(kind: .kettle, brand: "Fellow", model: "Stagg EKG", isDefault: true))
+        let mine: [EquipmentDTO] = try await send(.GET, "v1/me/equipment", token: ana.accessToken)
+        XCTAssertEqual(mine.filter(\.isDefault).map(\.kind), [.grinder, .kettle])
+        XCTAssertEqual(mine.first { $0.isDefault && $0.kind == .grinder }?.id, k6.id)
+
+        // Unknown catalog references and other members' items.
+        try await expectError(.POST, "v1/me/equipment", token: ana.accessToken,
+            body: UpsertEquipmentRequest(kind: .grinder, grinderSlug: "teapot"),
+            status: .unprocessableEntity, code: APIErrorCode.validationFailed)
+        try await expectError(.PUT, "v1/me/equipment/\(c40.id)", token: leo.accessToken,
+            body: UpsertEquipmentRequest(kind: .grinder, brand: "Stolen"), status: .notFound)
+
+        // Only the owner can access their gear; member profile routes remain retired.
+        try await expectError(.GET, "v1/users/\(ana.user.id)/equipment", token: leo.accessToken, status: .notFound)
+
+        try await expectStatus(.DELETE, "v1/me/equipment/\(c40.id)", token: ana.accessToken, status: .noContent)
+        let remaining: [EquipmentDTO] = try await send(.GET, "v1/me/equipment", token: ana.accessToken)
+        XCTAssertEqual(remaining.count, 2)
     }
 
     // MARK: - Beans and recipes
@@ -335,9 +425,18 @@ final class IntegrationTests: XCTestCase {
     private struct Empty: Encodable {}
 
     private func register(_ username: String) async throws -> AuthResponse {
-        try await send(.POST, "v1/auth/register", body: RegisterRequest(
-            email: "\(username)@example.com", password: "test-password", username: username, displayName: username
-        ))
+        try await send(.POST, "v1/auth/register", body: Self.signUp(email: "\(username)@example.com", username: username))
+    }
+
+    private static func signUp(
+        email: String,
+        username: String,
+        birthDate: CalendarDate? = CalendarDate(year: 1995, month: 4, day: 12)
+    ) -> RegisterRequest {
+        RegisterRequest(
+            email: email, password: "test-password", username: username, firstName: "Ana", lastName: "Rojas",
+            birthDate: birthDate, acceptedTerms: true
+        )
     }
 
     private func upload(_ jpeg: Data, token: String, file: StaticString = #filePath, line: UInt = #line) async throws -> MediaDTO {
