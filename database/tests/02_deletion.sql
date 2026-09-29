@@ -7,12 +7,6 @@ INSERT INTO recipes (id, author_id, bean_id, method_slug, title, dose_g, water_g
 VALUES ('00000000-0000-0000-0000-0000000000c1', '00000000-0000-0000-0000-00000000000a',
         '00000000-0000-0000-0000-0000000000b1', 'v60', 'Morning V60', 15, 250, 'medium_fine');
 INSERT INTO recipe_steps (recipe_id, position, kind) VALUES ('00000000-0000-0000-0000-0000000000c1', 1, 'bloom');
-INSERT INTO posts (author_id, kind, recipe_id) VALUES
-    ('00000000-0000-0000-0000-00000000000a', 'recipe', '00000000-0000-0000-0000-0000000000c1');
-INSERT INTO follows (follower_id, followed_id) VALUES
-    ('00000000-0000-0000-0000-00000000000b', '00000000-0000-0000-0000-00000000000a');
-INSERT INTO recipe_saves (user_id, recipe_id) VALUES
-    ('00000000-0000-0000-0000-00000000000b', '00000000-0000-0000-0000-0000000000c1');
 INSERT INTO user_brew_methods (user_id, method_slug) VALUES ('00000000-0000-0000-0000-00000000000a', 'v60');
 
 -- A bean used by a recipe cannot be deleted (it can be archived instead).
@@ -23,23 +17,13 @@ UPDATE coffee_beans SET archived_at = now() WHERE id = '00000000-0000-0000-0000-
 -- A catalog entry in use cannot be deleted.
 SELECT pg_temp.expect_error($$DELETE FROM brew_methods WHERE slug = 'v60'$$, '23503');
 
--- Posts can only share the author's own content.
-SELECT pg_temp.expect_error($$
-    INSERT INTO posts (author_id, kind, recipe_id)
-    VALUES ('00000000-0000-0000-0000-00000000000e', 'recipe', '00000000-0000-0000-0000-0000000000c1')$$, '23503');
--- A post's kind matches what it shares.
-SELECT pg_temp.expect_error($$
-    INSERT INTO posts (author_id, kind) VALUES ('00000000-0000-0000-0000-00000000000e', 'recipe')$$, '23514');
-
--- Deleting a recipe removes its steps, saves and the posts that shared it.
+-- Deleting a recipe removes its steps.
 INSERT INTO recipes (id, author_id, bean_id, method_slug, title, dose_g, water_g, grind_size)
 VALUES ('00000000-0000-0000-0000-0000000000c2', '00000000-0000-0000-0000-00000000000b',
         '00000000-0000-0000-0000-0000000000b2', 'chemex', 'Leo Chemex', 30, 500, 'medium_coarse');
-INSERT INTO posts (author_id, kind, recipe_id) VALUES
-    ('00000000-0000-0000-0000-00000000000b', 'recipe', '00000000-0000-0000-0000-0000000000c2');
 DELETE FROM recipes WHERE id = '00000000-0000-0000-0000-0000000000c2';
-SELECT pg_temp.expect_equal((SELECT count(*) FROM posts WHERE author_id = '00000000-0000-0000-0000-00000000000b'),
-                            0::bigint, 'posts of a deleted recipe are removed');
+SELECT pg_temp.expect_equal((SELECT count(*) FROM recipe_steps WHERE recipe_id = '00000000-0000-0000-0000-0000000000c2'),
+                            0::bigint, 'steps of a deleted recipe are removed');
 
 -- Deleting an account removes everything the user owns, in one statement.
 DELETE FROM users WHERE id = '00000000-0000-0000-0000-00000000000a';
@@ -50,11 +34,6 @@ SELECT pg_temp.expect_equal((SELECT count(*) FROM recipes WHERE author_id = '000
 -- Counts are scoped to the fixture rows so the tests also pass on a seeded database.
 SELECT pg_temp.expect_equal((SELECT count(*) FROM recipe_steps WHERE recipe_id = '00000000-0000-0000-0000-0000000000c1'),
                             0::bigint, 'steps deleted with account');
-SELECT pg_temp.expect_equal((SELECT count(*) FROM recipe_saves WHERE recipe_id = '00000000-0000-0000-0000-0000000000c1'),
-                            0::bigint, 'saves deleted with account');
-SELECT pg_temp.expect_equal((SELECT count(*) FROM follows
-                             WHERE '00000000-0000-0000-0000-00000000000a' IN (follower_id, followed_id)),
-                            0::bigint, 'follows deleted with account');
 SELECT pg_temp.expect_equal((SELECT count(*) FROM bean_varietals WHERE bean_id = '00000000-0000-0000-0000-0000000000b1'),
                             0::bigint, 'bean varietals deleted with account');
 SELECT pg_temp.expect_equal((SELECT count(*) FROM users WHERE id IN ('00000000-0000-0000-0000-00000000000a',

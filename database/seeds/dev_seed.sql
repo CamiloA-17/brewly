@@ -20,11 +20,6 @@ INSERT INTO auth_identities (user_id, provider, subject, password_hash) VALUES
     ('22222222-2222-4222-8222-222222222222', 'password', 'leo@example.com', crypt(:'demo_password', gen_salt('bf', 10)))
 ON CONFLICT (provider, subject) DO NOTHING;
 
-INSERT INTO follows (follower_id, followed_id) VALUES
-    ('11111111-1111-4111-8111-111111111111', '22222222-2222-4222-8222-222222222222'),
-    ('22222222-2222-4222-8222-222222222222', '11111111-1111-4111-8111-111111111111')
-ON CONFLICT DO NOTHING;
-
 INSERT INTO user_brew_methods (user_id, method_slug) VALUES
     ('11111111-1111-4111-8111-111111111111', 'v60'),
     ('11111111-1111-4111-8111-111111111111', 'aeropress'),
@@ -65,11 +60,11 @@ VALUES
     ('bbbbbbbb-0000-4000-8000-000000000001', '11111111-1111-4111-8111-111111111111',
      'aaaaaaaa-0000-4000-8000-000000000001', 'v60', 'Floral V60',
      'Gentle pours to keep the florals.', 15, 250, 215, 'medium_fine',
-     'comandante_c40_mk4', '24 clicks', 93, 45, 45, 180, 'paper', 'Filtered water', 80, 1.38, 5, 'public'),
+     'comandante_c40_mk4', '24 clicks', 93, 45, 45, 180, 'paper', 'Filtered water', 80, 1.38, 5, 'private'),
     ('bbbbbbbb-0000-4000-8000-000000000002', '22222222-2222-4222-8222-222222222222',
      'aaaaaaaa-0000-4000-8000-000000000002', 'espresso', 'Fruity espresso',
      NULL, 18, NULL, 40, 'fine',
-     'niche_zero', '12', 93, NULL, NULL, 30, NULL, NULL, NULL, 9.5, 4, 'followers')
+     'niche_zero', '12', 93, NULL, NULL, 30, NULL, NULL, NULL, 9.5, 4, 'private')
 ON CONFLICT (id) DO NOTHING;
 
 UPDATE recipes SET pressure_bar = 9 WHERE id = 'bbbbbbbb-0000-4000-8000-000000000002';
@@ -88,55 +83,16 @@ INSERT INTO recipe_flavor_notes (recipe_id, flavor_note_slug) VALUES
     ('bbbbbbbb-0000-4000-8000-000000000002', 'milk_chocolate')
 ON CONFLICT DO NOTHING;
 
--- Leo remixed Ana's V60 with his own bean, and saved the original.
-INSERT INTO recipes
-    (id, author_id, bean_id, forked_from_id, method_slug, title, description, dose_g, water_g, grind_size,
-     water_temp_c, total_time_s, filter_type, rating, visibility)
+INSERT INTO brew_sessions
+    (id, user_id, recipe_id, recipe_title, bean_name, method_slug, dose_g, water_g,
+     yield_g, grind_setting, water_temp_c, elapsed_s, tds_percent, rating, notes)
 VALUES
-    ('bbbbbbbb-0000-4000-8000-000000000003', '22222222-2222-4222-8222-222222222222',
-     'aaaaaaaa-0000-4000-8000-000000000002', 'bbbbbbbb-0000-4000-8000-000000000001', 'v60',
-     'Floral V60, hotter', 'Same pours, 96 °C for a denser natural.', 15, 250, 'medium_fine',
-     96, 200, 'paper', 4, 'public')
+    ('eeeeeeee-0000-4000-8000-000000000001', '11111111-1111-4111-8111-111111111111',
+     'bbbbbbbb-0000-4000-8000-000000000001', 'Floral V60', 'Geisha Washed (demo)', 'v60',
+     15, 250, 215, '24 clicks', 93, 180, 1.38, 5, 'Floral and balanced.'),
+    ('eeeeeeee-0000-4000-8000-000000000002', '22222222-2222-4222-8222-222222222222',
+     'bbbbbbbb-0000-4000-8000-000000000002', 'Fruity espresso', 'Pink Bourbon Natural (demo)', 'espresso',
+     18, NULL, 40, '12', 93, 30, 9.5, 4, 'Bright fruit and sweetness.')
 ON CONFLICT (id) DO NOTHING;
-
-INSERT INTO recipe_saves (user_id, recipe_id) VALUES
-    ('22222222-2222-4222-8222-222222222222', 'bbbbbbbb-0000-4000-8000-000000000001')
-ON CONFLICT DO NOTHING;
-
-INSERT INTO posts (id, author_id, kind, body, recipe_id) VALUES
-    ('cccccccc-0000-4000-8000-000000000001', '11111111-1111-4111-8111-111111111111', 'recipe',
-     'My go-to recipe for washed Geishas.', 'bbbbbbbb-0000-4000-8000-000000000001')
-ON CONFLICT (id) DO NOTHING;
-
-INSERT INTO post_likes (post_id, user_id) VALUES
-    ('cccccccc-0000-4000-8000-000000000001', '22222222-2222-4222-8222-222222222222')
-ON CONFLICT DO NOTHING;
-
-INSERT INTO comments (id, post_id, author_id, parent_id, body) VALUES
-    ('dddddddd-0000-4000-8000-000000000001', 'cccccccc-0000-4000-8000-000000000001',
-     '22222222-2222-4222-8222-222222222222', NULL, 'What grind setting on the Comandante?'),
-    ('dddddddd-0000-4000-8000-000000000002', 'cccccccc-0000-4000-8000-000000000001',
-     '11111111-1111-4111-8111-111111111111', 'dddddddd-0000-4000-8000-000000000001', '24 clicks, then adjust by taste.')
-ON CONFLICT (id) DO NOTHING;
-
--- What Ana sees in her notifications.
-INSERT INTO notifications (recipient_id, actor_id, kind, post_id, comment_id, recipe_id) VALUES
-    ('11111111-1111-4111-8111-111111111111', '22222222-2222-4222-8222-222222222222', 'follow', NULL, NULL, NULL),
-    ('11111111-1111-4111-8111-111111111111', '22222222-2222-4222-8222-222222222222', 'recipe_save', NULL, NULL,
-     'bbbbbbbb-0000-4000-8000-000000000001'),
-    ('11111111-1111-4111-8111-111111111111', '22222222-2222-4222-8222-222222222222', 'post_like',
-     'cccccccc-0000-4000-8000-000000000001', NULL, NULL)
-ON CONFLICT DO NOTHING;
-
-INSERT INTO notifications (recipient_id, actor_id, kind, post_id, comment_id)
-SELECT '11111111-1111-4111-8111-111111111111', '22222222-2222-4222-8222-222222222222', 'comment',
-       'cccccccc-0000-4000-8000-000000000001', 'dddddddd-0000-4000-8000-000000000001'
-WHERE NOT EXISTS (SELECT 1 FROM notifications WHERE comment_id = 'dddddddd-0000-4000-8000-000000000001');
-
-INSERT INTO notifications (recipient_id, actor_id, kind, recipe_id)
-SELECT '11111111-1111-4111-8111-111111111111', '22222222-2222-4222-8222-222222222222', 'recipe_fork',
-       'bbbbbbbb-0000-4000-8000-000000000003'
-WHERE NOT EXISTS (SELECT 1 FROM notifications
-                  WHERE kind = 'recipe_fork' AND recipe_id = 'bbbbbbbb-0000-4000-8000-000000000003');
 
 COMMIT;
