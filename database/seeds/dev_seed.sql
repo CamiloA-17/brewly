@@ -96,4 +96,19 @@ VALUES
      18, NULL, 40, '12', 93, 30, 9.5, 4, 'Bright fruit and sweetness.')
 ON CONFLICT (id) DO NOTHING;
 
+INSERT INTO user_equipment (id, owner_id, kind, grinder_slug, brand, model, is_default) VALUES
+    ('eeeeeeee-0000-4000-8000-000000000001', '11111111-1111-4111-8111-111111111111',
+     'grinder', 'comandante_c40_mk4', NULL, NULL, true),
+    ('eeeeeeee-0000-4000-8000-000000000002', '11111111-1111-4111-8111-111111111111',
+     'kettle', NULL, 'Fellow', 'Stagg EKG', true),
+    ('eeeeeeee-0000-4000-8000-000000000003', '22222222-2222-4222-8222-222222222222',
+     'grinder', 'niche_zero', NULL, NULL, true)
+ON CONFLICT (id) DO NOTHING;
+
+INSERT INTO equipment_grind_settings (equipment_id, method_slug, grind_setting) VALUES
+    ('eeeeeeee-0000-4000-8000-000000000001', 'v60', '24 clicks'),
+    ('eeeeeeee-0000-4000-8000-000000000001', 'aeropress', '18 clicks'),
+    ('eeeeeeee-0000-4000-8000-000000000003', 'espresso', '12')
+ON CONFLICT DO NOTHING;
+
 COMMIT;

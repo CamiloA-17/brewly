@@ -265,7 +265,41 @@ extension RecipeSummary {
     }
 }
 
+extension Equipment {
+    init(_ dto: EquipmentDTO) {
+        self.init(
+            id: dto.id,
+            kind: dto.kind,
+            grinderSlug: dto.grinderSlug,
+            brand: dto.brand,
+            model: dto.model,
+            nickname: dto.nickname,
+            notes: dto.notes,
+            isDefault: dto.isDefault,
+            grindSettings: Dictionary(
+                dto.grindSettings.map { ($0.methodSlug, $0.grindSetting) }, uniquingKeysWith: { _, last in last }
+            ),
+            createdAt: dto.createdAt
+        )
+    }
+}
+
 // MARK: - Domain → API
+
+extension UpsertEquipmentRequest {
+    init(_ draft: EquipmentDraft) {
+        self.init(
+            kind: draft.kind,
+            grinderSlug: draft.kind == .grinder ? draft.grinderSlug : nil,
+            brand: draft.brand.nilIfBlank,
+            model: draft.model.nilIfBlank,
+            nickname: draft.nickname.nilIfBlank,
+            notes: draft.notes.nilIfBlank,
+            isDefault: draft.isDefault,
+            grindSettings: draft.settingInputs
+        )
+    }
+}
 
 extension UpsertBeanRequest {
     init(_ draft: BeanDraft) {

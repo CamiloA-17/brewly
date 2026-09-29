@@ -3,7 +3,11 @@ BEGIN;
 SELECT pg_temp.create_fixture_users();
 
 -- Fixture users have no private details yet, so they still need onboarding.
-SELECT pg_temp.expect_equal((SELECT count(*) FROM users WHERE onboarding_completed_at IS NULL),
+SELECT pg_temp.expect_equal((SELECT count(*) FROM users
+                             WHERE id IN ('00000000-0000-0000-0000-00000000000a',
+                                          '00000000-0000-0000-0000-00000000000b',
+                                          '00000000-0000-0000-0000-00000000000e')
+                               AND onboarding_completed_at IS NULL),
                             3::bigint, 'fixture users need onboarding');
 SELECT pg_temp.expect_equal((SELECT role FROM users WHERE id = '00000000-0000-0000-0000-00000000000a'),
                             'user', 'default role');

@@ -87,7 +87,7 @@ final class IntegrationTests: XCTestCase {
             body: Self.signUp(email: "kid@example.com", username: "kid", birthDate: tooYoung),
             status: .unprocessableEntity, code: APIErrorCode.validationFailed)
 
-        // The profile can be edited; private details never appear on the public profile.
+        // The profile can be edited; another member's profile route remains retired.
         let updated: CurrentUserDTO = try await send(.PATCH, "v1/me", token: ana.accessToken, body: UpdateProfileRequest(
             displayName: "Ana R.", firstName: "Ana María", lastName: "Rojas",
             birthDate: CalendarDate(year: 1995, month: 4, day: 12), countryCode: "de", city: " Berlin "
@@ -97,13 +97,7 @@ final class IntegrationTests: XCTestCase {
         XCTAssertEqual(updated.firstName, "Ana María")
 
         let leo = try await register("leo.roaster")
-        try await app.test(.GET, "v1/users/\(ana.user.id)", beforeRequest: { req in
-            req.headers.bearerAuthorization = BearerAuthorization(token: leo.accessToken)
-        }, afterResponse: { res in
-            XCTAssertTrue(res.body.string.contains("\"city\":\"Berlin\""))
-            XCTAssertFalse(res.body.string.contains("birthDate"))
-            XCTAssertFalse(res.body.string.contains("firstName"))
-        })
+        try await expectError(.GET, "v1/users/\(ana.user.id)", token: leo.accessToken, status: .notFound)
     }
 
     func testOnboardingCompletesOlderAccounts() async throws {
@@ -148,6 +142,44 @@ final class IntegrationTests: XCTestCase {
         try await expectError(.PUT, "v1/me/methods/teapot", token: ana.accessToken, status: .notFound)
         let methods: UserMethodsDTO = try await send(.GET, "v1/me/methods", token: ana.accessToken)
         XCTAssertEqual(methods.methodSlugs, ["v60"])
+    }
+
+    // MARK: - Equipment
+
+    func testEquipmentDefaultsSettingsAndPrivacy() async throws {
+        let ana = try await register("ana.barista")
+        let leo = try await register("leo.roaster")
+
+        let c40: EquipmentDTO = try await send(.POST, "v1/me/equipment", token: ana.accessToken,
+            body: UpsertEquipmentRequest(
+                kind: .grinder, grinderSlug: "comandante_c40_mk4", isDefault: true,
+                grindSettings: [GrindSettingInput(methodSlug: "v60", grindSetting: "24 clicks")]
+            ))
+        XCTAssertTrue(c40.isDefault)
+        XCTAssertEqual(c40.grindSettings, [GrindSettingInput(methodSlug: "v60", grindSetting: "24 clicks")])
+
+        // A new default grinder replaces the previous one.
+        let k6: EquipmentDTO = try await send(.POST, "v1/me/equipment", token: ana.accessToken,
+            body: UpsertEquipmentRequest(kind: .grinder, brand: "Kingrinder", model: "K6", isDefault: true))
+        let _: EquipmentDTO = try await send(.POST, "v1/me/equipment", token: ana.accessToken,
+            body: UpsertEquipmentRequest(kind: .kettle, brand: "Fellow", model: "Stagg EKG", isDefault: true))
+        let mine: [EquipmentDTO] = try await send(.GET, "v1/me/equipment", token: ana.accessToken)
+        XCTAssertEqual(mine.filter(\.isDefault).map(\.kind), [.grinder, .kettle])
+        XCTAssertEqual(mine.first { $0.isDefault && $0.kind == .grinder }?.id, k6.id)
+
+        // Unknown catalog references and other members' items.
+        try await expectError(.POST, "v1/me/equipment", token: ana.accessToken,
+            body: UpsertEquipmentRequest(kind: .grinder, grinderSlug: "teapot"),
+            status: .unprocessableEntity, code: APIErrorCode.validationFailed)
+        try await expectError(.PUT, "v1/me/equipment/\(c40.id)", token: leo.accessToken,
+            body: UpsertEquipmentRequest(kind: .grinder, brand: "Stolen"), status: .notFound)
+
+        // Only the owner can access their gear; member profile routes remain retired.
+        try await expectError(.GET, "v1/users/\(ana.user.id)/equipment", token: leo.accessToken, status: .notFound)
+
+        try await expectStatus(.DELETE, "v1/me/equipment/\(c40.id)", token: ana.accessToken, status: .noContent)
+        let remaining: [EquipmentDTO] = try await send(.GET, "v1/me/equipment", token: ana.accessToken)
+        XCTAssertEqual(remaining.count, 2)
     }
 
     // MARK: - Beans and recipes

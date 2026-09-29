@@ -23,6 +23,7 @@ public final class AppContainer {
     let recipes: any RecipeRepository
     let sessions: any BrewSessionRepository
     let imageLoader: any ImageLoader
+    let equipment: any EquipmentRepository
 
     public init(apiBaseURL: URL, tokenStore: any TokenStore = KeychainTokenStore()) {
         let publicClient = APIClient(baseURL: apiBaseURL)
@@ -39,6 +40,7 @@ public final class AppContainer {
         recipes = recipeRepository
         sessions = APIBrewSessionRepository(client: client)
         imageLoader = APIImageLoader(client: client)
+        equipment = APIEquipmentRepository(client: client)
     }
 
     var authDependencies: AuthDependencies {
@@ -60,6 +62,7 @@ public final class AppContainer {
             beans: beans,
             catalog: catalog,
             userMethods: userMethods,
+            equipment: equipment,
             saveRecipe: SaveRecipeUseCase(recipes: recipes),
             currentUserID: currentUserID
         )
@@ -70,7 +73,7 @@ public final class AppContainer {
     }
 
     var profileDependencies: ProfileDependencies {
-        ProfileDependencies(profile: profile, auth: auth)
+        ProfileDependencies(profile: profile, auth: auth, equipment: equipment, catalog: catalog)
     }
 
     /// The screen each `AppRoute` opens, shared by every tab.

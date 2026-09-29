@@ -7,10 +7,19 @@ import SwiftUI
 public struct ProfileDependencies: Sendable {
     public var profile: any ProfileRepository
     public var auth: any AuthRepository
+    public var equipment: any EquipmentRepository
+    public var catalog: any CatalogRepository
 
-    public init(profile: any ProfileRepository, auth: any AuthRepository) {
+    public init(
+        profile: any ProfileRepository,
+        auth: any AuthRepository,
+        equipment: any EquipmentRepository,
+        catalog: any CatalogRepository
+    ) {
         self.profile = profile
         self.auth = auth
+        self.equipment = equipment
+        self.catalog = catalog
     }
 }
 
@@ -29,7 +38,7 @@ final class ProfileViewModel {
     var countryCode: String?
     var city = ""
 
-    private let dependencies: ProfileDependencies
+    let dependencies: ProfileDependencies
 
     init(user: UserProfile, dependencies: ProfileDependencies) {
         self.dependencies = dependencies
@@ -161,6 +170,20 @@ public struct ProfileView: View {
                             isEditing = true
                         } label: {
                             Text("Edit profile", bundle: .module)
+                        }
+                    }
+
+                    Section {
+                        NavigationLink {
+                            EquipmentListView(
+                                equipment: model.dependencies.equipment, catalog: model.dependencies.catalog
+                            )
+                        } label: {
+                            Label {
+                                Text("My equipment", bundle: .module)
+                            } icon: {
+                                Image(systemName: "gearshape.2")
+                            }
                         }
                     }
 
