@@ -205,8 +205,6 @@ struct UnreachableRecipeRepository: RecipeRepository {
         fatalError("Not used in unit tests")
     }
     func delete(id: UUID, authorID: UUID) async throws -> Bool { fatalError("Not used in unit tests") }
-    func save(id: UUID, userID: UUID) async throws -> SaveStateDTO? { fatalError("Not used in unit tests") }
-    func unsave(id: UUID, userID: UUID) async throws -> SaveStateDTO { fatalError("Not used in unit tests") }
 }
 
 struct UnreachableBeanRepository: BeanRepository {

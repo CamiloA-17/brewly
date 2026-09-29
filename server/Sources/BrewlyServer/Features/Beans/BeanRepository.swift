@@ -104,7 +104,7 @@ struct PostgresBeanRepository: BeanRepository {
     private static func find(id: UUID, viewerID: UUID, sql: any SQLDatabase) async throws -> BeanDTO? {
         try await sql.raw("""
             \(unsafeRaw: Self.select)
-            WHERE b.id = \(bind: id) AND can_view_content(\(bind: viewerID), b.owner_id, b.visibility)
+            WHERE b.id = \(bind: id) AND b.owner_id = \(bind: viewerID)
             """).first().map { try $0.decodeSnakeCase(BeanRow.self).dto }
     }
 
@@ -121,7 +121,7 @@ struct PostgresBeanRepository: BeanRepository {
                      \(bind: bean.region), \(bind: bean.farm), \(bind: bean.producer), \(bind: bean.altitudeMinM),
                      \(bind: bean.altitudeMaxM), \(bind: bean.processingMethodSlug), \(bind: bean.roastLevel?.rawValue),
                      \(bind: bean.roastDate?.isoString)::date, \(bind: bean.harvestYear), \(bind: bean.scaScore),
-                     \(bind: bean.weightG), \(bind: bean.isDecaf), \(bind: bean.notes), \(bind: bean.visibility.rawValue),
+                     \(bind: bean.weightG), \(bind: bean.isDecaf), \(bind: bean.notes), 'private',
                      CASE WHEN \(bind: bean.isArchived) THEN now() END)
                 RETURNING id
                 """).first()
@@ -147,7 +147,7 @@ struct PostgresBeanRepository: BeanRepository {
                     roast_level = \(bind: bean.roastLevel?.rawValue),
                     roast_date = \(bind: bean.roastDate?.isoString)::date, harvest_year = \(bind: bean.harvestYear),
                     sca_score = \(bind: bean.scaScore), weight_g = \(bind: bean.weightG), is_decaf = \(bind: bean.isDecaf),
-                    notes = \(bind: bean.notes), visibility = \(bind: bean.visibility.rawValue),
+                    notes = \(bind: bean.notes), visibility = 'private',
                     archived_at = CASE WHEN \(bind: bean.isArchived) THEN coalesce(archived_at, now()) END
                 WHERE id = \(bind: id) AND owner_id = \(bind: ownerID)
                 RETURNING id
