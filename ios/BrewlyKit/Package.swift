@@ -64,10 +64,7 @@ let package = Package(
                 "BeansFeature",
                 "RecipesFeature",
                 "MethodsFeature",
-                "FeedFeature",
                 "ProfileFeature",
-                "PeopleFeature",
-                "NotificationsFeature",
             ],
             resources: [.process("Resources")]
         ),

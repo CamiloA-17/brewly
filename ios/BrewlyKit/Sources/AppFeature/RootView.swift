@@ -2,7 +2,6 @@ import AuthFeature
 import BeansFeature
 import BrewlyDesignSystem
 import BrewlyDomain
-import FeedFeature
 import MethodsFeature
 import ProfileFeature
 import RecipesFeature
@@ -47,12 +46,12 @@ struct MainTabView: View {
 
     var body: some View {
         TabView {
-            FeedView(dependencies: container.feedDependencies(currentUserID: user.id))
+            BrewHomeView(dependencies: container.recipesDependencies(currentUserID: user.id))
                 .tabItem {
                     Label {
-                        Text("Home", bundle: .module)
+                        Text("Brew", bundle: .module)
                     } icon: {
-                        Image(systemName: "house")
+                        Image(systemName: "timer")
                     }
                 }
             RecipesRootView(dependencies: container.recipesDependencies(currentUserID: user.id))

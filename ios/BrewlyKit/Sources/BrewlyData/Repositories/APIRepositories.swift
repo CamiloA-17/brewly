@@ -200,6 +200,32 @@ extension APIRecipeRepository: RecipeSavesRepository {
     }
 }
 
+public struct APIBrewSessionRepository: BrewSessionRepository {
+    private let client: APIClient
+
+    public init(client: APIClient) { self.client = client }
+
+    public func sessions(recipeID: UUID?, cursor: String?) async throws -> PagedResult<BrewSession> {
+        try await mappingErrors {
+            let page = try await client.send(Endpoints.brewSessions(recipeID: recipeID, cursor: cursor))
+            return PagedResult(items: page.items.map(BrewSession.init), nextCursor: page.nextCursor)
+        }
+    }
+
+    public func create(_ draft: BrewSessionDraft) async throws -> BrewSession {
+        try await mappingErrors {
+            BrewSession(try await client.send(Endpoints.createBrewSession(CreateBrewSessionRequest(
+                recipeId: draft.recipeID, doseG: draft.doseG, waterG: draft.waterG,
+                yieldG: draft.yieldG, grindSetting: draft.grindSetting,
+                waterTempC: draft.waterTempC, elapsedS: draft.elapsedS,
+                tdsPercent: draft.tdsPercent,
+                rating: draft.rating, acidity: draft.acidity,
+                bitterness: draft.bitterness, body: draft.body, notes: draft.notes
+            ))))
+        }
+    }
+}
+
 public struct APIPeopleRepository: PeopleRepository {
     private let client: APIClient
 

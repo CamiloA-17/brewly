@@ -100,6 +100,16 @@ public enum Endpoints {
         Endpoint(.delete, "v1/recipes/\(id.uuidString)")
     }
 
+    public static func brewSessions(recipeID: UUID?, cursor: String?) -> Endpoint<Page<BrewSessionDTO>> {
+        Endpoint(.get, "v1/me/brew-sessions", queryItems: queryItems([
+            "recipeId": recipeID?.uuidString, "cursor": cursor,
+        ]))
+    }
+
+    public static func createBrewSession(_ body: CreateBrewSessionRequest) -> Endpoint<BrewSessionDTO> {
+        Endpoint(.post, "v1/me/brew-sessions", body: body)
+    }
+
     public static func savedRecipes(cursor: String?) -> Endpoint<Page<RecipeSummaryDTO>> {
         Endpoint(.get, "v1/me/saved-recipes", queryItems: queryItems(["cursor": cursor]))
     }

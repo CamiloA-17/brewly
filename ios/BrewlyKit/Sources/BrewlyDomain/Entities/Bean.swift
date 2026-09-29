@@ -140,7 +140,7 @@ public struct BeanDraft: Hashable, Sendable {
     public var weightG: Int?
     public var isDecaf = false
     public var notes = ""
-    public var visibility: Visibility = .public
+    public var visibility: Visibility = .private
     public var isArchived = false
 
     public init() {}
