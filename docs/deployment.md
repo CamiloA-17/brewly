@@ -14,9 +14,13 @@ database: dbmate migrations create the schema and six global catalogs. Never run
 2. In one Railway project and environment, create a PostgreSQL service and an API service in
    the same region. Set the API builder to Dockerfile and its path to `server/Dockerfile`.
 3. Give the API service `DATABASE_URL` as a reference to the PostgreSQL service's private
-   `DATABASE_URL` (for example `${{Postgres.DATABASE_URL}}`, if the service is named `Postgres`).
-   Set `JWT_SECRET` to a new random value of at least 32 characters, `LOG_LEVEL=info`, and
-   `PORT=8080` if Railway did not inject it. Keep secrets in Railway only.
+   `DATABASE_URL`. With the `Postgres` service, use
+   `${{Postgres.DATABASE_URL}}?sslmode=disable`. PostgresKit otherwise tries to verify the
+   template's internal certificate and fails the TLS handshake. This setting is only for the
+   `.railway.internal` endpoint: Railway encrypts private service traffic with WireGuard.
+   Never use it with a public database URL. Set `JWT_SECRET` to a new random value of at least
+   32 characters, `LOG_LEVEL=info`, and `PORT=8080` if Railway did not inject it. Keep secrets
+   in Railway only.
 4. Set the API pre-deploy command to `dbmate --wait migrate`, with a 300-second timeout. The
    image contains dbmate and `/app/database/migrations`; the command must finish successfully
    before the API starts. Set the healthcheck path to `/health` with a 300-second timeout.
