@@ -21,12 +21,12 @@
         }
       }
     },
-    "Methods": {
+    "Journal": {
       "localizations": {
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Métodos"
+            "value": "Diario"
           }
         }
       }

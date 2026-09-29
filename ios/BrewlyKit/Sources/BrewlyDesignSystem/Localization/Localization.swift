@@ -142,6 +142,18 @@ public extension EquipmentKind {
     }
 }
 
+public extension Tasting.Attribute {
+    var localizedName: String {
+        switch self {
+        case .acidity: String(localized: "Acidity", bundle: .module)
+        case .sweetness: String(localized: "Sweetness", bundle: .module)
+        case .body: String(localized: "Body", bundle: .module)
+        case .bitterness: String(localized: "Bitterness", bundle: .module)
+        case .aftertaste: String(localized: "Aftertaste", bundle: .module)
+        }
+    }
+}
+
 public extension BrewMethod {
     var localizedName: String {
         Bundle.module.localizedString(forKey: name, value: name, table: "CatalogMethods")
@@ -211,7 +223,7 @@ public extension DomainError {
         case .notFound:
             String(localized: "We couldn't find what you were looking for.", bundle: .module)
         case let .conflict(code) where code == "bean_in_use":
-            String(localized: "This bean is used by one or more recipes. Archive it instead.", bundle: .module)
+            String(localized: "This bean is used by recipes or brews. Archive it instead.", bundle: .module)
         case let .conflict(code) where code == "username_taken":
             String(localized: "That username is already taken.", bundle: .module)
         case let .conflict(code) where code == "email_taken":

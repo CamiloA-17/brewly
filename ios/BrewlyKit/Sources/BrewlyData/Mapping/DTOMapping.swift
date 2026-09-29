@@ -74,6 +74,7 @@ extension Bean {
             harvestYear: dto.harvestYear,
             scaScore: dto.scaScore,
             weightG: dto.weightG,
+            remainingG: dto.remainingG,
             isDecaf: dto.isDecaf,
             notes: dto.notes,
             photoURL: dto.photoURL.flatMap(URL.init(string:)),
@@ -284,7 +285,70 @@ extension Equipment {
     }
 }
 
+extension BrewLog {
+    init(_ dto: BrewLogDTO) {
+        self.init(
+            id: dto.id,
+            user: UserSummary(dto.user),
+            recipe: dto.recipe.map { RecipeReference(id: $0.id, title: $0.title, author: UserSummary($0.author)) },
+            bean: BeanSummary(dto.bean),
+            methodSlug: dto.methodSlug,
+            equipmentID: dto.equipmentId,
+            brewedAt: dto.brewedAt,
+            doseG: dto.doseG,
+            waterG: dto.waterG,
+            yieldG: dto.yieldG,
+            ratio: dto.ratio,
+            grindSize: dto.grindSize,
+            grindSetting: dto.grindSetting,
+            waterTempC: dto.waterTempC,
+            totalTimeS: dto.totalTimeS,
+            tasting: Tasting(
+                rating: dto.rating, acidity: dto.acidity, sweetness: dto.sweetness, body: dto.body,
+                bitterness: dto.bitterness, aftertaste: dto.aftertaste
+            ),
+            tdsPercent: dto.tdsPercent,
+            extractionYieldPercent: dto.extractionYieldPercent,
+            flavorNoteSlugs: dto.flavorNoteSlugs,
+            notes: dto.notes,
+            photoURL: dto.photoURL.flatMap(URL.init(string:)),
+            visibility: dto.visibility,
+            createdAt: dto.createdAt
+        )
+    }
+}
+
 // MARK: - Domain → API
+
+extension UpsertBrewLogRequest {
+    init(_ draft: BrewLogDraft, beanID: UUID, methodSlug: String, photoMediaID: UUID?) {
+        self.init(
+            recipeId: draft.recipeID,
+            beanId: beanID,
+            methodSlug: methodSlug,
+            equipmentId: draft.equipmentID,
+            brewedAt: draft.brewedAt,
+            doseG: draft.doseG ?? 0,
+            waterG: draft.waterG,
+            yieldG: draft.yieldG,
+            grindSize: draft.grindSize,
+            grindSetting: draft.grindSetting.nilIfBlank,
+            waterTempC: draft.waterTempC,
+            totalTimeS: draft.totalTimeS,
+            rating: draft.tasting.rating,
+            acidity: draft.tasting.acidity,
+            sweetness: draft.tasting.sweetness,
+            body: draft.tasting.body,
+            bitterness: draft.tasting.bitterness,
+            aftertaste: draft.tasting.aftertaste,
+            tdsPercent: draft.tdsPercent,
+            flavorNoteSlugs: draft.flavorNoteSlugs.sorted(),
+            notes: draft.notes.nilIfBlank,
+            photoMediaId: photoMediaID,
+            visibility: draft.visibility
+        )
+    }
+}
 
 extension UpsertEquipmentRequest {
     init(_ draft: EquipmentDraft) {
@@ -320,6 +384,7 @@ extension UpsertBeanRequest {
             harvestYear: draft.harvestYear,
             scaScore: draft.scaScore,
             weightG: draft.weightG,
+            remainingG: draft.remainingG,
             isDecaf: draft.isDecaf,
             notes: draft.notes.nilIfBlank,
             visibility: draft.visibility,

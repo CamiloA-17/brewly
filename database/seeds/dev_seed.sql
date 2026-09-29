@@ -35,14 +35,14 @@ ON CONFLICT DO NOTHING;
 
 INSERT INTO coffee_beans
     (id, owner_id, name, roaster, country_code, region, farm, producer, altitude_min_m, altitude_max_m,
-     processing_method_slug, roast_level, roast_date, harvest_year, sca_score, weight_g, notes)
+     processing_method_slug, roast_level, roast_date, harvest_year, sca_score, weight_g, remaining_g, notes)
 VALUES
     ('aaaaaaaa-0000-4000-8000-000000000001', '11111111-1111-4111-8111-111111111111',
      'Geisha Washed (demo)', 'Demo Roasters', 'CO', 'Huila', 'Finca Las Nubes (demo)', 'Demo Producer',
-     1750, 1900, 'washed', 'light', current_date - 12, 2025, 88.5, 250, 'Delicate and floral.'),
+     1750, 1900, 'washed', 'light', current_date - 12, 2025, 88.5, 250, 220, 'Delicate and floral.'),
     ('aaaaaaaa-0000-4000-8000-000000000002', '22222222-2222-4222-8222-222222222222',
      'Pink Bourbon Natural (demo)', 'Leo Roasts', 'CO', 'Antioquia', 'Finca El Mirador (demo)', 'Demo Producer',
-     1800, 2000, 'natural', 'medium_light', current_date - 8, 2025, 87.0, 340, NULL)
+     1800, 2000, 'natural', 'medium_light', current_date - 8, 2025, 87.0, 340, 304, NULL)
 ON CONFLICT (id) DO NOTHING;
 
 INSERT INTO bean_varietals (bean_id, varietal_slug) VALUES
@@ -153,6 +153,31 @@ INSERT INTO equipment_grind_settings (equipment_id, method_slug, grind_setting) 
     ('eeeeeeee-0000-4000-8000-000000000001', 'v60', '24 clicks'),
     ('eeeeeeee-0000-4000-8000-000000000001', 'aeropress', '18 clicks'),
     ('eeeeeeee-0000-4000-8000-000000000003', 'espresso', '12')
+ON CONFLICT DO NOTHING;
+
+INSERT INTO brew_logs
+    (id, user_id, recipe_id, bean_id, method_slug, equipment_id, brewed_at, dose_g, water_g, yield_g,
+     grind_size, grind_setting, water_temp_c, total_time_s, rating, acidity, sweetness, body, bitterness,
+     aftertaste, tds_percent, notes, visibility)
+VALUES
+    ('ffffffff-0000-4000-8000-000000000001', '11111111-1111-4111-8111-111111111111',
+     'bbbbbbbb-0000-4000-8000-000000000001', 'aaaaaaaa-0000-4000-8000-000000000001', 'v60',
+     'eeeeeeee-0000-4000-8000-000000000001', now() - interval '1 day', 15, 250, 215, 'medium_fine',
+     '24 clicks', 93, 180, 5, 4, 4, 3, 1, 4, 1.38, 'Jasmine up front, peach as it cools.', 'private'),
+    ('ffffffff-0000-4000-8000-000000000002', '11111111-1111-4111-8111-111111111111',
+     'bbbbbbbb-0000-4000-8000-000000000001', 'aaaaaaaa-0000-4000-8000-000000000001', 'v60',
+     'eeeeeeee-0000-4000-8000-000000000001', now() - interval '3 hours', 15, 250, 212, 'medium_fine',
+     '22 clicks', 94, 165, 3, 5, 2, 2, 3, 3, NULL, 'Finer grind: sharper and a bit bitter.', 'followers'),
+    ('ffffffff-0000-4000-8000-000000000003', '22222222-2222-4222-8222-222222222222',
+     'bbbbbbbb-0000-4000-8000-000000000002', 'aaaaaaaa-0000-4000-8000-000000000002', 'espresso',
+     'eeeeeeee-0000-4000-8000-000000000003', now() - interval '5 hours', 18, NULL, 40, 'fine',
+     '12', 93, 30, 4, 4, 4, 4, 2, 4, 9.5, NULL, 'public')
+ON CONFLICT (id) DO NOTHING;
+
+INSERT INTO brew_log_flavor_notes (brew_log_id, flavor_note_slug) VALUES
+    ('ffffffff-0000-4000-8000-000000000001', 'jasmine'),
+    ('ffffffff-0000-4000-8000-000000000001', 'peach'),
+    ('ffffffff-0000-4000-8000-000000000003', 'strawberry')
 ON CONFLICT DO NOTHING;
 
 COMMIT;

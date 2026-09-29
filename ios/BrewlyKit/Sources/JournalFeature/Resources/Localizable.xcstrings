@@ -1,62 +1,102 @@
 {
   "sourceLanguage": "en",
   "strings": {
-    "Add bean": {
+    "%@ · %@ left": {
       "localizations": {
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Agregar grano"
+            "value": "%@ · quedan %@"
           }
         }
       }
     },
-    "Add the coffees you are brewing: farm, altitude, varietal and more.": {
+    "Add a bean first": {
       "localizations": {
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Agrega los cafés que estás preparando: finca, altitud, varietal y más."
+            "value": "Primero agrega un grano"
           }
         }
       }
     },
-    "Altitude": {
+    "Add a photo": {
       "localizations": {
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Altitud"
+            "value": "Agregar una foto"
           }
         }
       }
     },
-    "Archive (bag finished)": {
+    "All beans": {
       "localizations": {
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Archivar (bolsa terminada)"
+            "value": "Todos los granos"
           }
         }
       }
     },
-    "Archived": {
+    "Bean": {
       "localizations": {
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Archivado"
+            "value": "Grano"
           }
         }
       }
     },
-    "Bag weight (g)": {
+    "Beverage": {
       "localizations": {
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Peso de la bolsa (g)"
+            "value": "Bebida"
+          }
+        }
+      }
+    },
+    "Beverage (g)": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bebida (g)"
+          }
+        }
+      }
+    },
+    "Brew": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Preparación"
+          }
+        }
+      }
+    },
+    "Brew water (g)": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Agua de preparación (g)"
+          }
+        }
+      }
+    },
+    "Brewed": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Preparado"
           }
         }
       }
@@ -71,72 +111,62 @@
         }
       }
     },
-    "Coffee": {
+    "Change photo": {
       "localizations": {
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Café"
+            "value": "Cambiar foto"
           }
         }
       }
     },
-    "Coffee details": {
+    "Choose a method": {
       "localizations": {
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Detalles del café"
+            "value": "Elige un método"
           }
         }
       }
     },
-    "Country": {
+    "Delete brew": {
       "localizations": {
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "País"
+            "value": "Eliminar preparación"
           }
         }
       }
     },
-    "Days since roast": {
+    "Delete this brew?": {
       "localizations": {
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Días desde la tostión"
+            "value": "¿Eliminar esta preparación?"
           }
         }
       }
     },
-    "Decaf": {
+    "Dose": {
       "localizations": {
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Descafeinado"
+            "value": "Dosis"
           }
         }
       }
     },
-    "Delete bean": {
+    "Dose (g)": {
       "localizations": {
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Eliminar grano"
-          }
-        }
-      }
-    },
-    "Delete this bean?": {
-      "localizations": {
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "¿Eliminar este grano?"
+            "value": "Dosis (g)"
           }
         }
       }
@@ -151,122 +181,182 @@
         }
       }
     },
-    "Edit bean": {
+    "Edit brew": {
       "localizations": {
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Editar grano"
+            "value": "Editar preparación"
           }
         }
       }
     },
-    "Farm": {
+    "Every brew uses one of your beans. Add it in the Beans tab.": {
       "localizations": {
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Finca"
+            "value": "Cada preparación usa uno de tus granos. Agrégalo en la pestaña Granos."
           }
         }
       }
     },
-    "Harvest": {
+    "Everyone": {
       "localizations": {
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Cosecha"
+            "value": "Todos"
           }
         }
       }
     },
-    "Harvest year": {
+    "Extraction yield": {
       "localizations": {
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Año de cosecha"
+            "value": "Rendimiento de extracción"
           }
         }
       }
     },
-    "I know the roast date": {
+    "Filter by bean": {
       "localizations": {
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Conozco la fecha de tostión"
+            "value": "Filtrar por grano"
           }
         }
       }
     },
-    "Max. altitude (m)": {
+    "Followers": {
       "localizations": {
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Altitud máx. (m)"
+            "value": "Seguidores"
           }
         }
       }
     },
-    "Min. altitude (m)": {
+    "Grind": {
       "localizations": {
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Altitud mín. (m)"
+            "value": "Molienda"
           }
         }
       }
     },
-    "Move back to my shelf": {
+    "Grind size": {
       "localizations": {
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Volver a mis granos"
+            "value": "Molienda"
           }
         }
       }
     },
-    "My beans": {
+    "Grinder": {
       "localizations": {
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Mis granos"
+            "value": "Molino"
           }
         }
       }
     },
-    "Name": {
+    "Grinder setting": {
       "localizations": {
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Nombre"
+            "value": "Ajuste del molino"
           }
         }
       }
     },
-    "New bean": {
+    "Grinder setting (e.g. 24 clicks)": {
       "localizations": {
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Nuevo grano"
+            "value": "Ajuste del molino (p. ej. 24 clics)"
           }
         }
       }
     },
-    "No beans yet": {
+    "How did it taste? What would you change?": {
       "localizations": {
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Aún no tienes granos"
+            "value": "¿Cómo supo? ¿Qué cambiarías?"
+          }
+        }
+      }
+    },
+    "Its dose goes back to the bean's remaining coffee.": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Su dosis vuelve al café restante del grano."
+          }
+        }
+      }
+    },
+    "Journal": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Diario"
+          }
+        }
+      }
+    },
+    "Log a brew": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Registrar preparación"
+          }
+        }
+      }
+    },
+    "Log every cup you prepare to learn what works best for each bean.": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Registra cada taza que preparas para aprender qué funciona mejor con cada grano."
+          }
+        }
+      }
+    },
+    "Method": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Método"
+          }
+        }
+      }
+    },
+    "No brews yet": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Todavía no hay preparaciones"
           }
         }
       }
@@ -291,112 +381,62 @@
         }
       }
     },
-    "Origin": {
+    "Only me": {
       "localizations": {
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Origen"
+            "value": "Solo yo"
           }
         }
       }
     },
-    "Process": {
+    "Parameters": {
       "localizations": {
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Proceso"
+            "value": "Parámetros"
           }
         }
       }
     },
-    "Producer": {
+    "Rating": {
       "localizations": {
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Productor"
+            "value": "Calificación"
           }
         }
       }
     },
-    "Region": {
+    "Ratio": {
       "localizations": {
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Región"
+            "value": "Proporción"
           }
         }
       }
     },
-    "Remaining": {
+    "Recipe": {
       "localizations": {
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Restante"
+            "value": "Receta"
           }
         }
       }
     },
-    "Remaining (g)": {
+    "Remove photo": {
       "localizations": {
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Restante (g)"
-          }
-        }
-      }
-    },
-    "Roast": {
-      "localizations": {
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Tostión"
-          }
-        }
-      }
-    },
-    "Roast date": {
-      "localizations": {
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Fecha de tostión"
-          }
-        }
-      }
-    },
-    "Roast level": {
-      "localizations": {
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Nivel de tostión"
-          }
-        }
-      }
-    },
-    "Roaster": {
-      "localizations": {
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Tostador"
-          }
-        }
-      }
-    },
-    "SCA score": {
-      "localizations": {
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Puntaje SCA"
+            "value": "Quitar foto"
           }
         }
       }
@@ -411,12 +451,52 @@
         }
       }
     },
-    "Show archived": {
+    "Showing %@. Show all": {
       "localizations": {
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Mostrar archivados"
+            "value": "Mostrando %@. Ver todo"
+          }
+        }
+      }
+    },
+    "TDS": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "TDS"
+          }
+        }
+      }
+    },
+    "TDS (%)": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "TDS (%)"
+          }
+        }
+      }
+    },
+    "Tap a dot to score from 1 to 5; tap it again to clear it.": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Toca un punto para calificar de 1 a 5; tócalo de nuevo para borrarlo."
+          }
+        }
+      }
+    },
+    "Tasting": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cata"
           }
         }
       }
@@ -431,32 +511,62 @@
         }
       }
     },
-    "Varietals": {
+    "Total time": {
       "localizations": {
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Varietales"
+            "value": "Tiempo total"
           }
         }
       }
     },
-    "Visible to": {
+    "Total time (s)": {
       "localizations": {
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Visible para"
+            "value": "Tiempo total (s)"
           }
         }
       }
     },
-    "Weight": {
+    "Water": {
       "localizations": {
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Peso"
+            "value": "Agua"
+          }
+        }
+      }
+    },
+    "Water temperature": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Temperatura del agua"
+          }
+        }
+      }
+    },
+    "Water temperature (°C)": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Temperatura del agua (°C)"
+          }
+        }
+      }
+    },
+    "Who can see it": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Quién puede verla"
           }
         }
       }

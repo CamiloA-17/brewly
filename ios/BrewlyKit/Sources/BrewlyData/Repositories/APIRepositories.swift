@@ -155,6 +155,52 @@ public struct APIBeanRepository: BeanRepository {
     }
 }
 
+public struct APIBrewLogRepository: BrewLogRepository {
+    private let client: APIClient
+
+    public init(client: APIClient) {
+        self.client = client
+    }
+
+    public func myBrews(filter: BrewLogFilter, cursor: String?) async throws -> PagedResult<BrewLog> {
+        try await mappingErrors {
+            let page = try await client.send(Endpoints.myBrews(
+                beanID: filter.beanID, methodSlug: filter.methodSlug, cursor: cursor
+            ))
+            return PagedResult(items: page.items.map(BrewLog.init), nextCursor: page.nextCursor)
+        }
+    }
+
+    public func brew(id: UUID) async throws -> BrewLog {
+        try await mappingErrors { BrewLog(try await client.send(Endpoints.brew(id: id))) }
+    }
+
+    public func save(_ draft: BrewLogDraft, beanID: UUID, methodSlug: String, id: UUID?) async throws -> BrewLog {
+        try await mappingErrors {
+            let photoID: UUID?
+            if let data = draft.newPhotoData {
+                photoID = try await APIPostRepository.upload(data, client: client).id
+            } else {
+                photoID = draft.photoURL.flatMap(Self.mediaID(from:))
+            }
+            let request = UpsertBrewLogRequest(draft, beanID: beanID, methodSlug: methodSlug, photoMediaID: photoID)
+            if let id {
+                return BrewLog(try await client.send(Endpoints.updateBrew(id: id, request)))
+            }
+            return BrewLog(try await client.send(Endpoints.createBrew(request)))
+        }
+    }
+
+    public func delete(id: UUID) async throws {
+        try await mappingErrors { _ = try await client.send(Endpoints.deleteBrew(id: id)) }
+    }
+
+    /// The media id at the end of a `/v1/media/{id}` URL.
+    static func mediaID(from url: URL) -> UUID? {
+        UUID(uuidString: url.lastPathComponent)
+    }
+}
+
 public struct APIEquipmentRepository: EquipmentRepository {
     private let client: APIClient
 

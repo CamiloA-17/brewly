@@ -57,6 +57,7 @@ struct BeanDetailView: View {
                     }
                 }
                 row("Weight", bean.weightG.map { BrewFormat.grams(Double($0)) })
+                row("Remaining", bean.remainingG.map(BrewFormat.grams))
             } header: {
                 Text("Roast", bundle: .module)
             }

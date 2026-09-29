@@ -165,6 +165,9 @@ struct BeanFormView: View {
             TextField(String(localized: "Bag weight (g)", bundle: .module), value: $model.draft.weightG, format: .number)
                 .keyboardType(.numberPad)
             FieldErrorText(model.message(for: "weightG"))
+            TextField(String(localized: "Remaining (g)", bundle: .module), value: $model.draft.remainingG, format: .number)
+                .keyboardType(.decimalPad)
+            FieldErrorText(model.message(for: "remainingG"))
         } header: {
             Text("Roast", bundle: .module)
         }

@@ -200,6 +200,13 @@ public struct ProfileView: View {
                                 Image(systemName: "gearshape.2")
                             }
                         }
+                        NavigationLink(value: AppRoute.methods) {
+                            Label {
+                                Text("My brew methods", bundle: .module)
+                            } icon: {
+                                Image(systemName: "cup.and.saucer")
+                            }
+                        }
                     }
 
                     Section {
