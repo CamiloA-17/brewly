@@ -29,3 +29,8 @@ locally. At this stage the priority is a simple, cheap stack that is easy to run
   for early usage; when it isn't, images can move to object storage behind the same
   `/v1/media/{id}` URL (redirecting to a presigned URL), with no change in the app.
 - Videos are out of scope.
+
+## Update
+
+ADR 0008 removed posts and their photos. The media table now stores uploads used as avatars;
+unused uploads are still deleted after a day.

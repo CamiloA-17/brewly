@@ -1,14 +1,13 @@
 # Brewly
 
-Brewly is a native iOS social network for coffee lovers and baristas. People keep a shelf of
-**their own coffee beans** (farm, altitude, varietal, process, roast…), mark the **brew methods**
-they use from a catalog shared by everyone, and write **recipes** with every parameter a barista
-needs to reproduce a cup: bean, method, dose, ratio, grind, temperature, times, water, steps and
-results (TDS and extraction yield). Recipes, beans and posts are shared with the community.
+Brewly is a native iOS brewing companion. Keep a shelf of coffee beans, create reusable
+recipes, follow each preparation with a step timer, and record the actual cup as a **brew
+session**. Brewly keeps those observations separate from recipes so you can compare attempts
+and make one deliberate adjustment at a time.
 
-> Status: initial architecture and working skeleton. Auth, catalogs, beans and recipes work end
-> to end; the social layer (feed, posts, likes, comments, follows) is modeled in the database and
-> comes next. See [the roadmap](docs/architecture.md#roadmap).
+The home screen starts with your last cup and your private recipes. Existing recipe results are
+copied into brew sessions by a migration. The former social data was development-only and has
+been removed together with recipe discovery, saves and remixes.
 
 ## Stack
 

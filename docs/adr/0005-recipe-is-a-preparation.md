@@ -1,6 +1,6 @@
 # ADR 0005: A recipe is a preparation
 
-- Status: accepted
+- Status: superseded by ADR 0007 and ADR 0008
 - Date: 2026-09-25
 
 ## Context

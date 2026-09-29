@@ -15,7 +15,8 @@ to one backend language.
 - The server uses Fluent only for configuration and pooling and writes **explicit SQL** with
   SQLKit in repositories. There are no Fluent models or migrations.
 - Integrity is enforced in the database: foreign keys (including composite ones for ownership),
-  CHECK constraints, DOMAINs, generated columns and the `can_view_content` function.
+  CHECK constraints, DOMAINs and generated columns. The former `can_view_content` function was
+  removed with the social schema in ADR 0008.
 - Global **catalogs** (brew methods, varietals, processes, countries, grinders, flavor notes) are
   reference data seeded by migrations and keyed by stable slugs.
 
