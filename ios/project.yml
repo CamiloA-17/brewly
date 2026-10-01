@@ -34,8 +34,8 @@ targets:
     sources:
       - path: Brewly
     configFiles:
-      Debug: Config/Brewly.xcconfig
-      Release: Config/Brewly.xcconfig
+      Debug: Config/Debug.xcconfig
+      Release: Config/Release.xcconfig
     dependencies:
       - package: BrewlyKit
         product: AppFeature
@@ -51,10 +51,17 @@ targets:
         UISupportedInterfaceOrientations: [UIInterfaceOrientationPortrait]
         ITSAppUsesNonExemptEncryption: false
         BrewlyAPIBaseURL: $(BREWLY_API_BASE_URL)
+        BrewlyAppleSignInEnabled: $(BREWLY_APPLE_SIGN_IN)
+        GIDClientID: $(GOOGLE_IOS_CLIENT_ID)
+        GIDServerClientID: $(GOOGLE_SERVER_CLIENT_ID)
+        CFBundleURLTypes:
+          - CFBundleTypeRole: Editor
+            CFBundleURLSchemes: [$(GOOGLE_REVERSED_CLIENT_ID)]
         NSAppTransportSecurity:
           NSAllowsLocalNetworking: true
     settings:
       base:
+        CODE_SIGN_ENTITLEMENTS: $(BREWLY_ENTITLEMENTS_$(BREWLY_APPLE_SIGN_IN))
         PRODUCT_BUNDLE_IDENTIFIER: $(BREWLY_BUNDLE_IDENTIFIER)
         ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
         ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME: AccentColor

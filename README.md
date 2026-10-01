@@ -81,6 +81,7 @@ Server integration tests truncate every table, so they only run against `TEST_DA
 
 ## Documentation
 
+- [Apple and Google sign-in](docs/social-sign-in.md): provider setup and device checks.
 - [Architecture](docs/architecture.md): system overview, iOS and server layers, auth flow, roadmap.
 - [Database](docs/database.md): entity-relationship diagram and integrity rules.
 - [API](docs/api.md): endpoints, errors and pagination.

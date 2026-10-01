@@ -810,6 +810,48 @@
           }
         }
       }
+    },
+    "Sign-in cancelled.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sign-in cancelled."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Inicio de sesión cancelado."
+          }
+        }
+      }
+    },
+    "This sign-in method is unavailable. Please try again later.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "This sign-in method is unavailable. Please try again later."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Este método de inicio de sesión no está disponible. Inténtalo más tarde."
+          }
+        }
+      }
+    },
+    "Continue with Google": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Continuar con Google"
+          }
+        }
+      }
     }
   },
   "version": "1.0"

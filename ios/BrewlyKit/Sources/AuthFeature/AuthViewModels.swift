@@ -120,3 +120,33 @@ final class OnboardingViewModel {
         return nil
     }
 }
+
+@MainActor
+@Observable
+final class FederatedSignInViewModel {
+    private(set) var isSubmitting = false
+    private(set) var errorMessage: String?
+    private let signIn: FederatedSignInUseCase
+    init(signIn: FederatedSignInUseCase) { self.signIn = signIn }
+
+    func submit(_ provider: IdentityProvider) async -> UserProfile? {
+        guard !isSubmitting else { return nil }
+        isSubmitting = true
+        errorMessage = nil
+        defer { isSubmitting = false }
+        do {
+            return try await signIn(provider)
+        } catch DomainError.signInCancelled {
+            return nil
+        } catch is CancellationError {
+            return nil
+        } catch DomainError.conflict(code: "email_taken") {
+            errorMessage = String(localized: "An account with this email already exists. Sign in using its original method.", bundle: .module)
+        } catch DomainError.invalidCredentials {
+            errorMessage = String(localized: "We couldn't verify this sign-in. Please try again.", bundle: .module)
+        } catch {
+            errorMessage = error.brewlyMessage
+        }
+        return nil
+    }
+}

@@ -116,7 +116,7 @@ erDiagram
 | Migration | Tables | Purpose |
 |---|---|---|
 | `foundation` | — | `set_updated_at()` trigger function; domains `visibility`, `roast_level`, `grind_size`. |
-| `users_auth` | `users`, `auth_identities`, `refresh_tokens` | Profiles, sign-in methods (`password`, `apple`), hashed rotating refresh tokens. |
+| `users_auth` | `users`, `auth_identities`, `refresh_tokens` | Profiles, identities and hashed rotating refresh tokens. |
 | `catalogs` | `countries`, `varietals`, `processing_methods`, `brew_methods`, `grinders`, `flavor_notes` | Global reference data shared by every user. |
 | `catalog_seed` | — | ~46 countries, ~37 varietals, 20 processes, 18 brew methods, 20 grinders, 51 flavor notes. |
 | `coffee_beans` | `coffee_beans`, `bean_varietals`, `bean_flavor_notes` | The user's beans; blends have several varietals. |
@@ -126,6 +126,25 @@ erDiagram
 | `user_equipment` | `user_equipment`, `equipment_grind_settings` | Members' gear (grinders, brewers, kettles, scales, espresso machines) and each grinder's usual setting per brew method. |
 | `brew_sessions` | `brew_sessions` | Actual cups with measured parameters and taste scores; existing recipe results are backfilled. |
 | `remove_social_data` | — | Removes the former social tables and makes every recipe private. |
+| `federated_auth` | `auth_challenges` (and changes to `auth_identities`) | Google identities and single-use provider nonces. |
+
+## Federated authentication
+
+`auth_identities` accepts `password`, `apple` and `google`. `(provider, subject)` is unique;
+provider subjects are stable and case-sensitive. A user can have at most one identity per
+provider. Email is unique on `users`, but it is never used to attach a new external identity.
+`provider_email` and encrypted `provider_refresh_token` remain Apple-only fields, used for
+private relay addresses and authorization revocation on account deletion. Password hashes
+are forbidden on external identities. An indexed `user_id` supports cascades.
+
+`auth_challenges` stores a SHA-256 nonce hash, provider and expiry, without a user link.
+The API atomically deletes a matching unexpired challenge when signing in and removes expired
+challenges when creating new ones. A five-minute expiry index supports cleanup. New external
+members leave terms and onboarding timestamps unset until onboarding completes.
+
+The `federated_auth` migration adds Google support and challenges. Its rollback refuses to
+remove Google support while Google identities exist, preserving user data. On an empty database
+it reverses normally. See [ADR 0009](adr/0009-federated-authentication.md).
 
 ## Integrity rules
 

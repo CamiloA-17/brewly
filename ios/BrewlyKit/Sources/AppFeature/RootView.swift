@@ -1,5 +1,6 @@
 import AuthFeature
 import BeansFeature
+import BrewlyData
 import BrewlyDesignSystem
 import BrewlyDomain
 import MethodsFeature
@@ -41,6 +42,7 @@ public struct RootView: View {
         }
         .tint(Color.brewlyAccent)
         .brewlyAppearance()
+        .onOpenURL { NativeProviderAuthorizer.handle(url: $0) }
         .task { await model.start() }
     }
 }

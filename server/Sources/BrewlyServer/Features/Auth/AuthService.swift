@@ -66,7 +66,7 @@ struct AuthService: Sendable {
         try await auth.revokeRefreshToken(tokenHash: TokenService.hash(refreshToken: body.refreshToken))
     }
 
-    private func issueTokens(for userID: UUID) async throws -> AuthResponse {
+    func issueTokens(for userID: UUID) async throws -> AuthResponse {
         guard let user = try await users.find(id: userID) else { throw AppError.unauthorized }
         let now = Date()
         let access = try await tokens.makeAccessToken(userID: userID, now: now)

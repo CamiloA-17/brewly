@@ -15,6 +15,7 @@ import SwiftUI
 @MainActor
 public final class AppContainer {
     let session: SessionManager
+    let federatedSignIn: FederatedSignInUseCase
     let auth: any AuthRepository
     let profile: any ProfileRepository
     let catalog: any CatalogRepository
@@ -30,6 +31,8 @@ public final class AppContainer {
         let session = SessionManager(client: publicClient, store: tokenStore)
         let client = APIClient(baseURL: apiBaseURL, tokenProvider: session)
 
+        federatedSignIn = FederatedSignInUseCase(
+            auth: APIFederatedAuthRepository(client: publicClient, session: session), provider: NativeProviderAuthorizer())
         self.session = session
         auth = APIAuthRepository(publicClient: publicClient, session: session)
         profile = APIProfileRepository(client: client, session: session)
@@ -45,9 +48,11 @@ public final class AppContainer {
 
     var authDependencies: AuthDependencies {
         AuthDependencies(
+            federatedSignIn: federatedSignIn,
             signIn: SignInUseCase(auth: auth),
             signUp: SignUpUseCase(auth: auth),
-            completeOnboarding: CompleteOnboardingUseCase(profile: profile)
+            completeOnboarding: CompleteOnboardingUseCase(profile: profile),
+            appleSignInEnabled: Bundle.main.object(forInfoDictionaryKey: "BrewlyAppleSignInEnabled") as? String == "YES"
         )
     }
 

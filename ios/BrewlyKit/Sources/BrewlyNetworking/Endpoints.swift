@@ -13,6 +13,14 @@ public enum Endpoints {
         Endpoint(.post, "v1/auth/login", body: body, requiresAuth: false)
     }
 
+    public static func authChallenge(_ body: AuthChallengeRequest) -> Endpoint<AuthChallengeResponse> {
+        Endpoint(.post, "v1/auth/challenge", body: body, requiresAuth: false)
+    }
+
+    public static func federatedSignIn(provider: IdentityProvider, body: FederatedSignInRequest) -> Endpoint<AuthResponse> {
+        Endpoint(.post, "v1/auth/\(provider.rawValue)", body: body, requiresAuth: false)
+    }
+
     public static func refresh(_ body: RefreshTokenRequest) -> Endpoint<AuthResponse> {
         Endpoint(.post, "v1/auth/refresh", body: body, requiresAuth: false)
     }

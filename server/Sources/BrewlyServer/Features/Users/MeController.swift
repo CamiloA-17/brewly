@@ -67,6 +67,7 @@ struct MeController: RouteCollection {
     /// Deletes the account and everything it owns (App Store Review Guideline 5.1.1(v)).
     @Sendable
     func deleteAccount(req: Request) async throws -> HTTPStatus {
+        try await ProviderIdentityVerifier(request: req).revokeAppleAuthorization(userID: try req.userID)
         try await repository(req).delete(id: try req.userID)
         return .noContent
     }

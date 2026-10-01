@@ -1,186 +1,269 @@
 {
-  "sourceLanguage": "en",
-  "strings": {
-    "About you": {
-      "localizations": {
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Sobre ti"
+  "sourceLanguage" : "en",
+  "strings" : {
+    "A better cup starts here." : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tu mejor café empieza aquí."
           }
         }
       }
     },
-    "Account": {
-      "localizations": {
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Cuenta"
+    "About you" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sobre ti"
           }
         }
       }
     },
-    "Already have an account? Sign in": {
-      "localizations": {
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "¿Ya tienes cuenta? Inicia sesión"
+    "Account" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cuenta"
           }
         }
       }
     },
-    "Complete your profile": {
-      "localizations": {
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Completa tu perfil"
+    "Already have an account? Sign in" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "¿Ya tienes cuenta? Inicia sesión"
           }
         }
       }
     },
-    "Continue": {
-      "localizations": {
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Continuar"
+    "An account with this email already exists. Sign in using its original method." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "An account with this email already exists. Sign in using its original method."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ya existe una cuenta con este correo. Inicia sesión con su método original."
           }
         }
       }
     },
-    "Create account": {
-      "localizations": {
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Crear cuenta"
+    "Complete your profile" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Completa tu perfil"
           }
         }
       }
     },
-    "Email": {
-      "localizations": {
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Correo electrónico"
+    "Continue" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Continuar"
           }
         }
       }
     },
-    "First name": {
-      "localizations": {
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Nombre"
+    "Create account" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Crear cuenta"
           }
         }
       }
     },
-    "I accept the terms of use and the privacy policy": {
-      "localizations": {
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Acepto los términos de uso y la política de privacidad"
+    "Email" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Correo electrónico"
           }
         }
       }
     },
-    "Last name": {
-      "localizations": {
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Apellido"
+    "First name" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nombre"
           }
         }
       }
     },
-    "New to Brewly? Create an account": {
-      "localizations": {
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "¿Eres nuevo en Brewly? Crea una cuenta"
+    "I accept the terms of use and the privacy policy" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Acepto los términos de uso y la política de privacidad"
           }
         }
       }
     },
-    "Password": {
-      "localizations": {
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Contraseña"
+    "Last name" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Apellido"
           }
         }
       }
     },
-    "Share your beans, recipes and brews.": {
-      "localizations": {
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Comparte tus granos, recetas y preparaciones."
+    "New to Brewly? Create an account" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "¿Eres nuevo en Brewly? Crea una cuenta"
           }
         }
       }
     },
-    "Sign in": {
-      "localizations": {
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Iniciar sesión"
+    "or continue with" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "o continúa con"
           }
         }
       }
     },
-    "Sign out": {
-      "localizations": {
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Cerrar sesión"
+    "Password" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Contraseña"
           }
         }
       }
     },
-    "Username": {
-      "localizations": {
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Nombre de usuario"
+    "Share your beans, recipes and brews." : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Comparte tus granos, recetas y preparaciones."
           }
         }
       }
     },
-    "Usernames use lowercase letters, numbers, dots and underscores.": {
-      "localizations": {
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "El nombre de usuario usa minúsculas, números, puntos y guiones bajos."
+    "Sign in" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Iniciar sesión"
           }
         }
       }
     },
-    "Your name and birth date are private. Others see your display name.": {
-      "localizations": {
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Tu nombre y tu fecha de nacimiento son privados. Los demás ven tu nombre visible."
+    "Sign in to your brewing routine." : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Inicia sesión y sigue con tu ritual de café."
+          }
+        }
+      }
+    },
+    "Sign out" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cerrar sesión"
+          }
+        }
+      }
+    },
+    "Username" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nombre de usuario"
+          }
+        }
+      }
+    },
+    "Usernames use lowercase letters, numbers, dots and underscores." : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "El nombre de usuario usa minúsculas, números, puntos y guiones bajos."
+          }
+        }
+      }
+    },
+    "We couldn't verify this sign-in. Please try again." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "We couldn't verify this sign-in. Please try again."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No pudimos verificar este inicio de sesión. Inténtalo de nuevo."
+          }
+        }
+      }
+    },
+    "Welcome back" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Qué bueno verte de nuevo"
+          }
+        }
+      }
+    },
+    "Your beans, your recipes, your daily ritual." : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tus granos, tus recetas, tu ritual diario."
+          }
+        }
+      }
+    },
+    "Your name and birth date are private. Others see your display name." : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tu nombre y tu fecha de nacimiento son privados. Los demás ven tu nombre visible."
           }
         }
       }
     }
   },
-  "version": "1.0"
+  "version" : "1.0"
 }

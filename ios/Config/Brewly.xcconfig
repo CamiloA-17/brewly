@@ -7,5 +7,15 @@ BREWLY_API_BASE_URL = http:/$()/localhost:8080
 
 BREWLY_BUNDLE_IDENTIFIER = app.brewly.ios
 
+// Configure the OAuth clients in Local.xcconfig. These are public identifiers.
+GOOGLE_IOS_CLIENT_ID =
+GOOGLE_SERVER_CLIENT_ID =
+GOOGLE_REVERSED_CLIENT_ID =
+
+// One setting controls the signing entitlement and the visible Apple sign-in button.
+// Debug defaults to NO; Release defaults to YES. Paid teams can override it in Local.xcconfig.
+BREWLY_ENTITLEMENTS_NO =
+BREWLY_ENTITLEMENTS_YES = Brewly/Brewly.entitlements
+
 // Optional: the build still works when Local.xcconfig does not exist.
 #include? "Local.xcconfig"

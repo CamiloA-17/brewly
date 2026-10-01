@@ -1,7 +1,7 @@
 // Local build settings for your Mac. Copy this file to Local.xcconfig,
 // which is ignored by git, and regenerate the project (make ios-project).
 
-// Your Team ID (Xcode → Settings → Accounts, a free Personal Team works).
+// Your Team ID (Xcode → Settings → Accounts). A free Personal Team works in Debug.
 DEVELOPMENT_TEAM =
 
 // For a physical iPhone: your Mac's LAN address (`ipconfig getifaddr en0`),
@@ -10,3 +10,11 @@ DEVELOPMENT_TEAM =
 
 // Only if Xcode says app.brewly.ios is not available for your team:
 // BREWLY_BUNDLE_IDENTIFIER = com.example.brewly
+
+// Google Cloud OAuth client identifiers (public; see docs/social-sign-in.md).
+GOOGLE_IOS_CLIENT_ID =
+GOOGLE_SERVER_CLIENT_ID =
+GOOGLE_REVERSED_CLIENT_ID =
+
+// Paid teams: enable Apple sign-in in Debug after configuring the App ID and server.
+// BREWLY_APPLE_SIGN_IN = YES
