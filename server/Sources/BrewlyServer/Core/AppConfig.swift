@@ -7,6 +7,9 @@ struct AppConfig: Sendable {
     var accessTokenTTL: TimeInterval
     var refreshTokenTTL: TimeInterval
 
+    var apple: AppleAuthConfig? = nil
+    var googleClientID: String? = nil
+
     static func load(from environment: Environment) throws -> AppConfig {
         guard let databaseURL = Environment.get("DATABASE_URL"), !databaseURL.isEmpty else {
             throw ConfigurationError("DATABASE_URL is not set.")
@@ -18,7 +21,9 @@ struct AppConfig: Sendable {
             databaseURL: databaseURL,
             jwtSecret: jwtSecret,
             accessTokenTTL: Environment.get("ACCESS_TOKEN_TTL_SECONDS").flatMap(TimeInterval.init) ?? 15 * 60,
-            refreshTokenTTL: Environment.get("REFRESH_TOKEN_TTL_SECONDS").flatMap(TimeInterval.init) ?? 30 * 24 * 60 * 60
+            refreshTokenTTL: Environment.get("REFRESH_TOKEN_TTL_SECONDS").flatMap(TimeInterval.init) ?? 30 * 24 * 60 * 60,
+            apple: try AppleAuthConfig.load(),
+            googleClientID: Environment.get("GOOGLE_SERVER_CLIENT_ID").flatMap { $0.isEmpty ? nil : $0 }
         )
     }
 }

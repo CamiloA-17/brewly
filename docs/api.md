@@ -22,6 +22,9 @@ and the server always agree on the contract.
 | GET | `/health` | Liveness and database check. |
 | POST | `/v1/auth/register` | Create an account with first and last name, birth date (13 or older) and accepted terms. Returns `AuthResponse` (201). |
 | POST | `/v1/auth/login` | Sign in with email and password. Returns `AuthResponse`. |
+| POST | `/v1/auth/challenge` | Create a five-minute, single-use challenge for `apple` or `google`. Returns `{id, nonce, expiresAt}`. |
+| POST | `/v1/auth/apple` | Verify Apple identity and authorization code, create or sign in to the account. Returns `AuthResponse`. |
+| POST | `/v1/auth/google` | Verify Google identity, create or sign in to the account. Returns `AuthResponse`. |
 | POST | `/v1/auth/refresh` | Exchange a refresh token for a new token pair. |
 | POST | `/v1/auth/logout` | Revoke a refresh token (204). |
 | GET | `/v1/me` | The signed-in user's profile, with the private details (name, birth date). |
@@ -69,7 +72,33 @@ Feed, public profile, follow, post, comment, recipe discovery, save and activity
 routes return 404. Requests containing a `forkedFromId` remix link return 422. Their former
 development data and tables were removed.
 
-### Sign in
+### Sign in with Apple or Google
+
+1. `POST /v1/auth/challenge` with `{ "provider": "apple" }` or `"google"`.
+2. Pass the exact returned `nonce` to the native provider request.
+3. `POST /v1/auth/apple` or `/v1/auth/google` with `challengeId` and `identityToken`.
+   Apple also requires `authorizationCode`; optional `firstName` and `lastName` are profile hints
+   because Apple only supplies the name on the initial authorization. Google name hints come
+   from the verified token. The API does not accept an email from the client.
+
+Signature, issuer, configured audience, expiry and nonce are verified. Challenges are
+consumed atomically, expire after five minutes and cannot cross providers or be reused.
+An invalid token or challenge returns `401 invalid_credentials`. A disabled provider returns
+`503 identity_provider_unavailable`. Existing identities are found by `(provider, subject)`;
+a verified email collision returns `409 email_taken` and never links to the existing account.
+The user must sign in using that account's original method.
+
+New accounts receive a generated username and return `needsOnboarding: true`. Complete
+`PUT /v1/me/onboarding` before entering the app; name, birth date, age and terms rules remain
+unchanged. Returning members receive the same profile and the usual rotating Brewly session.
+Onboarding is a client flow; API authorization continues to enforce ownership as before.
+
+Apple's authorization code is exchanged server-side. Its refresh token is encrypted at rest
+and revoked before `DELETE /v1/me` deletes local data. A failed revocation preserves the account
+for a retry and returns an error (503 for a provider rejection). Provider tokens are never
+returned to the app. See [setup and manual checks](social-sign-in.md).
+
+### Sign in with email
 
 ```http
 POST /v1/auth/login
@@ -167,6 +196,7 @@ Every non-2xx response has the same shape:
 | 415 | `invalid_image` (uploads that are not `image/jpeg`) |
 | 422 | `validation_failed` with `fieldErrors`, `invalid_image` |
 | 500 | `internal_error` |
+| 503 | `identity_provider_unavailable` (provider disabled or Apple revocation rejected) |
 
 Field error codes: `required`, `out_of_range`, `too_long`, `invalid_format`, `not_allowed`,
 `exceeds`, `in_future`, `too_many`, `not_found` (unknown catalog slug or bean).

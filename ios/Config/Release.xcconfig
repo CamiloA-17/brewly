@@ -1,0 +1,3 @@
+// Distribution requires the registered Sign in with Apple capability.
+BREWLY_APPLE_SIGN_IN = YES
+#include "Brewly.xcconfig"

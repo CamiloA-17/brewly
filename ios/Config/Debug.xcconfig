@@ -1,0 +1,3 @@
+// Personal Team builds work without the paid Sign in with Apple capability.
+BREWLY_APPLE_SIGN_IN = NO
+#include "Brewly.xcconfig"

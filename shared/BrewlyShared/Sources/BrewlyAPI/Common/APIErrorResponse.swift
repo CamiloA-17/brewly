@@ -47,5 +47,6 @@ public enum APIErrorCode {
     public static let invalidImage = "invalid_image"
     public static let payloadTooLarge = "payload_too_large"
     public static let badRequest = "bad_request"
+    public static let identityProviderUnavailable = "identity_provider_unavailable"
     public static let internalError = "internal_error"
 }

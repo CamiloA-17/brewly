@@ -14,6 +14,7 @@ let package = Package(
         .library(name: "AppFeature", targets: ["AppFeature"]),
     ],
     dependencies: [
+        .package(url: "https://github.com/google/GoogleSignIn-iOS", from: "9.1.0"),
         .package(path: "../../shared/BrewlyShared"),
     ],
     targets: [
@@ -33,6 +34,7 @@ let package = Package(
             dependencies: [
                 "BrewlyDomain",
                 "BrewlyNetworking",
+                .product(name: "GoogleSignIn", package: "GoogleSignIn-iOS"),
                 .product(name: "BrewlyAPI", package: "BrewlyShared"),
             ]
         ),
@@ -40,7 +42,7 @@ let package = Package(
         // MARK: Presentation
         .target(
             name: "BrewlyDesignSystem",
-            dependencies: ["BrewlyDomain"],
+            dependencies: ["BrewlyDomain", .product(name: "GoogleSignInSwift", package: "GoogleSignIn-iOS")],
             resources: [.process("Resources")]
         ),
         .target(name: "AuthFeature", dependencies: ["BrewlyDomain", "BrewlyDesignSystem"], resources: [.process("Resources")]),
@@ -70,6 +72,7 @@ let package = Package(
         ),
 
         // MARK: Tests
+        .testTarget(name: "AuthFeatureTests", dependencies: ["AuthFeature", "BrewlyDomain"]),
         .testTarget(name: "BrewlyDomainTests", dependencies: ["BrewlyDomain"]),
         .testTarget(name: "BrewlyNetworkingTests", dependencies: ["BrewlyNetworking"]),
         .testTarget(name: "BrewlyDesignSystemTests", dependencies: ["BrewlyDesignSystem"]),

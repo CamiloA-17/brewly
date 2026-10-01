@@ -122,3 +122,9 @@ public enum EquipmentKind: String, Codable, CaseIterable, Hashable, Sendable {
     case espressoMachine = "espresso_machine"
     case other
 }
+
+/// Supported external identity providers. Mirrors the database provider constraints.
+public enum IdentityProvider: String, Codable, CaseIterable, Sendable {
+    case apple
+    case google
+}

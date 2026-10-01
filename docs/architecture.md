@@ -124,11 +124,25 @@ flowchart LR
 
 ### Authentication
 
-Email and password today (Bcrypt), Sign in with Apple next (`auth_identities` already supports
-it, including the Apple refresh token needed to revoke it on account deletion). Sign-up asks for
-first and last name, birth date (13 or older) and acceptance of the terms; accounts without them
-(`needsOnboarding`) see `OnboardingView` before the app. Access tokens are short-lived JWTs; refresh tokens are opaque, stored hashed and rotated on
-every use. Reusing a consumed refresh token revokes all of the user's sessions.
+Email/password (Bcrypt), Sign in with Apple and Sign in with Google are supported.
+The iOS `FederatedSignInUseCase` obtains a server challenge, authorizes through
+`NativeProviderAuthorizer` in BrewlyData and exchanges the credential through
+`APIFederatedAuthRepository`. The feature imports only domain and design system;
+BrewlyDesignSystem renders the official Apple and Google controls. A single build setting
+controls the Apple entitlement and button: Debug disables it by default for free Personal
+Teams; Release enables it. Paid teams can opt in through Local.xcconfig. RootView handles Google's
+callback URL, and SessionManager persists only Brewly tokens.
+
+On the server, FederatedAuthService verifies the token using trusted provider JWKS,
+consumes a single-use nonce challenge, and resolves a provider subject transactionally.
+An advisory transaction lock serializes concurrent first sign-ins. Accounts are never
+linked solely by matching email. Apple code exchange stores an AES-GCM-encrypted refresh
+token for revocation on account deletion. See [ADR 0009](adr/0009-federated-authentication.md)
+and [provider configuration](social-sign-in.md).
+
+Sign-up asks for first and last name, birth date (13 or older) and acceptance of the terms;
+accounts without them (`needsOnboarding`) see `OnboardingView` before the app. Access tokens
+are short-lived JWTs; refresh tokens are opaque, stored hashed and rotated on every use. Reusing a consumed refresh token revokes all of the user's sessions.
 
 ```mermaid
 sequenceDiagram
@@ -166,4 +180,4 @@ See [deployment.md](deployment.md) for the service, backup, domain and iOS relea
 1. **Brewing companion:** recipe plans, guided timer and private brew sessions.
 2. **Next:** inventory that deducts each dose, and offline session capture with
    synchronization. The first side-by-side comparison is available in recipe history.
-3. **Later:** Sign in with Apple, more languages and optional device integrations.
+3. **Later:** More languages and optional device integrations.

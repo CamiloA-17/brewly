@@ -5,6 +5,8 @@ public enum DomainError: Error, Hashable, Sendable {
     case notFound
     /// The operation conflicts with existing data (e.g. `"bean_in_use"`, `"username_taken"`).
     case conflict(code: String)
+    case signInCancelled
+    case authenticationUnavailable
     case invalidCredentials
     /// The session expired or is invalid; the user must sign in again.
     case unauthorized

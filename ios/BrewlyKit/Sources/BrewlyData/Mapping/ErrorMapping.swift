@@ -19,6 +19,8 @@ extension DomainError {
             return .unexpected(message)
         case let .http(status, body):
             switch (status, body?.code) {
+            case (503, APIErrorCode.identityProviderUnavailable):
+                return .authenticationUnavailable
             case (401, APIErrorCode.invalidCredentials):
                 return .invalidCredentials
             case (401, _):

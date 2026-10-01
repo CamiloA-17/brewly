@@ -1,6 +1,8 @@
 @testable import BrewlyServer
 import BrewlyAPI
+import Crypto
 import FluentKit
+import JWT
 import SQLKit
 import XCTVapor
 
@@ -26,11 +28,215 @@ final class IntegrationTests: XCTestCase {
         try await configure(app)
         app.passwords.use(.plaintext)
         try await app.db.sql.raw("TRUNCATE users CASCADE").run()
+        try await app.db.sql.raw("TRUNCATE auth_challenges").run()
     }
 
     override func tearDown() async throws {
         try await app?.asyncShutdown()
         app = nil
+    }
+
+    func testUnconfiguredProvidersReturnServiceUnavailable() async throws {
+        app.appConfig.apple = nil
+        app.appConfig.googleClientID = nil
+        for provider in IdentityProvider.allCases {
+            try await expectError(.POST, "v1/auth/challenge", body: AuthChallengeRequest(provider: provider),
+                status: .serviceUnavailable, code: APIErrorCode.identityProviderUnavailable)
+        }
+    }
+
+    func testGoogleHTTPFlowVerifiesProviderTokenAndRejectsReplay() async throws {
+        app.appConfig.googleClientID = "google-client"
+        let key = ES256PrivateKey()
+        let keys = await JWTKeyCollection().add(ecdsa: key, kid: "provider-key")
+        let jwks = try Self.providerJWKS(key)
+        app.clients.use { app in
+            StubProviderClient(eventLoop: app.eventLoopGroup.next()) { request in
+                XCTAssertEqual(request.url.string, "https://www.googleapis.com/oauth2/v3/certs")
+                return jwks
+            }
+        }
+        let challenge: AuthChallengeResponse = try await send(.POST, "v1/auth/challenge",
+            body: AuthChallengeRequest(provider: .google))
+        let claims = GoogleIdentityToken(issuer: "https://accounts.google.com", subject: "http-google-subject",
+            audience: "google-client", authorizedPresenter: "ios-client", issuedAt: .init(value: Date()),
+            expires: .init(value: Date().addingTimeInterval(300)), email: "google@example.com",
+            emailVerified: true, nonce: challenge.nonce)
+        let token = try await keys.sign(claims, kid: "provider-key")
+        let body = FederatedSignInRequest(challengeId: challenge.id, identityToken: token)
+        let response: AuthResponse = try await send(.POST, "v1/auth/google", body: body)
+        XCTAssertTrue(response.user.needsOnboarding)
+        try await expectError(.POST, "v1/auth/google", body: body, status: .unauthorized,
+            code: APIErrorCode.invalidCredentials)
+    }
+
+    func testAppleHTTPFlowExchangesCodeAndRevokesBeforeAccountDeletion() async throws {
+        let key = ES256PrivateKey()
+        let config = AppleAuthConfig(clientID: "app.brewly.ios", teamID: "TESTTEAM", keyID: "client-key",
+            privateKey: ES256PrivateKey(), encryptionKey: SymmetricKey(size: .bits256))
+        app.appConfig.apple = config
+        let keys = await JWTKeyCollection().add(ecdsa: key, kid: "provider-key")
+        let jwks = try Self.providerJWKS(key)
+        let challenge: AuthChallengeResponse = try await send(.POST, "v1/auth/challenge",
+            body: AuthChallengeRequest(provider: .apple))
+        let claims = AppleIdentityToken(issuer: "https://appleid.apple.com", audience: "app.brewly.ios",
+            expires: .init(value: Date().addingTimeInterval(300)), issuedAt: .init(value: Date()),
+            subject: "http-apple-subject", nonce: challenge.nonce, email: "relay@example.com", emailVerified: true)
+        let token = try await keys.sign(claims, kid: "provider-key")
+        app.clients.use { app in
+            StubProviderClient(eventLoop: app.eventLoopGroup.next()) { request in
+                if request.url.path == "/auth/keys" { return jwks }
+                let form = try request.content.decode([String: String].self)
+                XCTAssertEqual(request.headers.contentType, .urlEncodedForm)
+                XCTAssertEqual(form["client_id"], "app.brewly.ios")
+                XCTAssertNotNil(form["client_secret"])
+                if request.url.path == "/auth/token" {
+                    XCTAssertEqual(form["grant_type"], "authorization_code")
+                    XCTAssertEqual(form["code"], "native-code")
+                    var response = ClientResponse()
+                    try response.content.encode(["id_token": token, "refresh_token": "apple-refresh"], as: .json)
+                    return response
+                }
+                XCTAssertEqual(request.url.path, "/auth/revoke")
+                XCTAssertEqual(form["token"], "apple-refresh")
+                XCTAssertEqual(form["token_type_hint"], "refresh_token")
+                return ClientResponse(status: .ok)
+            }
+        }
+        let response: AuthResponse = try await send(.POST, "v1/auth/apple", body: FederatedSignInRequest(
+            challengeId: challenge.id, identityToken: token, authorizationCode: "native-code", firstName: "Ana"))
+        let encrypted = try await PostgresFederatedAuthRepository(database: app.db).appleRefreshToken(userID: response.user.id)
+        XCTAssertNotEqual(encrypted, "apple-refresh")
+        XCTAssertEqual(try ProviderTokenCipher(key: config.encryptionKey).decrypt(encrypted!), "apple-refresh")
+        try await expectStatus(.DELETE, "v1/me", token: response.accessToken, status: .noContent)
+        let deleted = try await PostgresUserRepository(database: app.db).find(id: response.user.id)
+        XCTAssertNil(deleted)
+    }
+
+    func testFailedAppleRevocationPreservesAccount() async throws {
+        let password = try await register("ana.barista")
+        let config = AppleAuthConfig(clientID: "app.brewly.ios", teamID: "TESTTEAM", keyID: "client-key",
+            privateKey: ES256PrivateKey(), encryptionKey: SymmetricKey(size: .bits256))
+        app.appConfig.apple = config
+        let encrypted = try ProviderTokenCipher(key: config.encryptionKey).encrypt("apple-refresh")
+        try await app.db.sql.raw("""
+            INSERT INTO auth_identities (user_id, provider, subject, provider_refresh_token)
+            VALUES (\(bind: password.user.id), 'apple', 'revocation-test', \(bind: encrypted))
+            """).run()
+        app.clients.use { app in
+            StubProviderClient(eventLoop: app.eventLoopGroup.next()) { _ in ClientResponse(status: .internalServerError) }
+        }
+        try await expectError(.DELETE, "v1/me", token: password.accessToken,
+            status: .serviceUnavailable, code: APIErrorCode.identityProviderUnavailable)
+        let preserved = try await PostgresUserRepository(database: app.db).find(id: password.user.id)
+        XCTAssertNotNil(preserved)
+    }
+
+    private static func providerJWKS(_ key: ES256PrivateKey) throws -> ClientResponse {
+        let parameters = key.publicKey.parameters!
+        let jwk = JWK.ecdsa(.es256, identifier: "provider-key", x: parameters.x, y: parameters.y, curve: .p256)
+        var response = ClientResponse(headers: ["Cache-Control": "max-age=300"])
+        try response.content.encode(JWKS(keys: [jwk]), as: .json)
+        return response
+    }
+
+    func testFederatedSignInCreatesOnboardingAndReusesIdentity() async throws {
+        let identity = VerifiedIdentity(provider: .google, subject: "google-subject", email: "google@example.com",
+            nonce: "server-nonce", firstName: "Ana", lastName: "Rojas")
+        let service = federatedService(identity)
+        let first = try await service.signIn(federatedRequest(identity), provider: .google)
+        XCTAssertTrue(first.user.needsOnboarding)
+        XCTAssertEqual(first.user.firstName, "Ana")
+        XCTAssertEqual(first.user.email, "google@example.com")
+        let second = try await service.signIn(federatedRequest(identity), provider: .google)
+        XCTAssertEqual(first.user.id, second.user.id)
+        XCTAssertNotEqual(first.refreshToken, second.refreshToken)
+        let refreshed: AuthResponse = try await send(.POST, "v1/auth/refresh",
+            body: RefreshTokenRequest(refreshToken: second.refreshToken))
+        XCTAssertEqual(refreshed.user.id, first.user.id)
+        let onboarded: CurrentUserDTO = try await send(.PUT, "v1/me/onboarding", token: first.accessToken,
+            body: CompleteOnboardingRequest(firstName: "Ana", lastName: "Rojas",
+                birthDate: CalendarDate(year: 1995, month: 4, day: 12), acceptedTerms: true))
+        XCTAssertFalse(onboarded.needsOnboarding)
+        try await app.db.sql.raw("DELETE FROM users WHERE id = \(bind: first.user.id)").run()
+        let remaining = try await app.db.sql.raw("SELECT count(*) AS count FROM auth_identities").first()!
+        XCTAssertEqual(try remaining.decode(column: "count", as: Int.self), 0)
+    }
+
+    func testFederatedEmailCollisionDoesNotLinkAccounts() async throws {
+        let password = try await register("ana.barista")
+        let identity = VerifiedIdentity(provider: .google, subject: "different-subject", email: password.user.email,
+            nonce: "server-nonce")
+        do {
+            _ = try await federatedService(identity).signIn(federatedRequest(identity), provider: .google)
+            XCTFail("An email collision must not sign in to the password account")
+        } catch { XCTAssertEqual((error as? AppError)?.code, APIErrorCode.emailTaken) }
+        let remaining = try await app.db.sql.raw("SELECT count(*) AS count FROM auth_identities WHERE provider = 'google'").first()!
+        XCTAssertEqual(try remaining.decode(column: "count", as: Int.self), 0)
+    }
+
+    func testFederatedChallengesRejectReplayExpiredWrongProviderAndNonce() async throws {
+        let identity = VerifiedIdentity(provider: .google, subject: "google-subject", email: "google@example.com", nonce: "server-nonce")
+        let repository = PostgresFederatedAuthRepository(database: app.db)
+        let service = federatedService(identity)
+        let body = try await federatedRequest(identity)
+        _ = try await service.signIn(body, provider: .google)
+        do {
+            _ = try await service.signIn(body, provider: .google)
+            XCTFail("A consumed challenge must not issue a second session")
+        } catch { XCTAssertEqual((error as? AppError)?.code, APIErrorCode.invalidCredentials) }
+        let hash = TokenService.hash(refreshToken: identity.nonce)
+        let expired = try await repository.createChallenge(provider: .google, nonceHash: hash, expiresAt: Date().addingTimeInterval(-1))
+        let wrongProvider = try await repository.createChallenge(provider: .apple, nonceHash: hash, expiresAt: Date().addingTimeInterval(300))
+        let wrongNonce = try await repository.createChallenge(provider: .google, nonceHash: TokenService.hash(refreshToken: "other"), expiresAt: Date().addingTimeInterval(300))
+        for id in [expired, wrongProvider, wrongNonce] {
+            do {
+                _ = try await service.signIn(FederatedSignInRequest(challengeId: id, identityToken: "test-token"), provider: .google)
+                XCTFail("Invalid challenge must fail")
+            } catch { XCTAssertEqual((error as? AppError)?.code, APIErrorCode.invalidCredentials) }
+        }
+    }
+
+    func testConcurrentFirstSignInsResolveOneUser() async throws {
+        let identity = VerifiedIdentity(provider: .google, subject: "concurrent-subject", email: "concurrent@example.com", nonce: "server-nonce")
+        let repository = PostgresFederatedAuthRepository(database: app.db)
+        async let first = repository.resolveUser(identity)
+        async let second = repository.resolveUser(identity)
+        let ids = try await [first, second]
+        XCTAssertEqual(ids[0], ids[1])
+    }
+
+    func testAppleSignInStoresRevocableTokenAndPrivateNameHints() async throws {
+        let identity = VerifiedIdentity(provider: .apple, subject: "apple-subject", email: "relay@example.com", nonce: "server-nonce")
+        var body = try await federatedRequest(identity)
+        body.authorizationCode = "test-code"
+        body.firstName = "Ana"; body.lastName = "Rojas"
+        let response = try await federatedService(identity).signIn(body, provider: .apple)
+        XCTAssertTrue(response.user.needsOnboarding)
+        XCTAssertEqual(response.user.firstName, "Ana")
+        let token = try await PostgresFederatedAuthRepository(database: app.db).appleRefreshToken(userID: response.user.id)
+        XCTAssertEqual(token, "encrypted-test-token")
+        body = try await federatedRequest(identity)
+        body.authorizationCode = "second-code"
+        let second = try await federatedService(identity).signIn(body, provider: .apple)
+        XCTAssertEqual(second.user.id, response.user.id)
+        XCTAssertEqual(second.user.firstName, "Ana")
+    }
+
+    private func federatedRequest(_ identity: VerifiedIdentity) async throws -> FederatedSignInRequest {
+        let id = try await PostgresFederatedAuthRepository(database: app.db).createChallenge(provider: identity.provider,
+            nonceHash: TokenService.hash(refreshToken: identity.nonce), expiresAt: Date().addingTimeInterval(300))
+        return FederatedSignInRequest(challengeId: id, identityToken: "test-token")
+    }
+
+    private func federatedService(_ identity: VerifiedIdentity) -> FederatedAuthService {
+        let request = Request(application: app, on: app.eventLoopGroup.next())
+        let config = app.appConfig
+        return FederatedAuthService(repository: PostgresFederatedAuthRepository(database: app.db),
+            verifier: StubIdentityVerifier(identity: identity),
+            auth: AuthService(auth: PostgresAuthRepository(database: app.db), users: PostgresUserRepository(database: app.db),
+                passwords: RequestPasswordHashing(request: request),
+                tokens: TokenService(keys: app.jwt.keys, accessTokenTTL: config.accessTokenTTL, refreshTokenTTL: config.refreshTokenTTL)))
     }
 
     // MARK: - Auth
@@ -517,5 +723,22 @@ final class IntegrationTests: XCTestCase {
         if let body {
             try req.content.encode(body, using: BrewlyJSON.makeEncoder())
         }
+    }
+}
+
+private struct StubIdentityVerifier: IdentityTokenVerifying {
+    let identity: VerifiedIdentity
+    func requireConfiguration(provider: IdentityProvider) throws {}
+    func verify(_ token: String, provider: IdentityProvider) async throws -> VerifiedIdentity { identity }
+    func exchangeAppleCode(_ code: String, identity: VerifiedIdentity) async throws -> String { "encrypted-test-token" }
+}
+
+private struct StubProviderClient: Client {
+    let eventLoop: EventLoop
+    let respond: @Sendable (ClientRequest) throws -> ClientResponse
+    func delegating(to eventLoop: EventLoop) -> Client { StubProviderClient(eventLoop: eventLoop, respond: respond) }
+    func send(_ request: ClientRequest) -> EventLoopFuture<ClientResponse> {
+        do { return eventLoop.makeSucceededFuture(try respond(request)) }
+        catch { return eventLoop.makeFailedFuture(error) }
     }
 }

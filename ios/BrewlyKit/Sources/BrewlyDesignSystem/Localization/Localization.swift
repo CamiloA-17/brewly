@@ -224,6 +224,10 @@ public extension DomainError {
             String(localized: "An account with that email already exists.", bundle: .module)
         case .conflict:
             String(localized: "This action conflicts with existing data.", bundle: .module)
+        case .signInCancelled:
+            String(localized: "Sign-in cancelled.", bundle: .module)
+        case .authenticationUnavailable:
+            String(localized: "This sign-in method is unavailable. Please try again later.", bundle: .module)
         case .invalidCredentials:
             String(localized: "Invalid email or password.", bundle: .module)
         case .unauthorized:
